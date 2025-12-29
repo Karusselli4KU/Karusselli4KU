@@ -1,583 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KÜ Portal — концепт (логин + меню)</title>
+  <meta charset="UTF-8" />
+  <title>Karusselli 4 KÜ — портал</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root{
-      --bg:#0b0f19;
-      --panel:#121a2a;
-      --text:#eaf0ff;
-      --muted:#9aa7bd;
-      --border:rgba(255,255,255,.10);
-      --shadow: 0 12px 30px rgba(0,0,0,.28);
-      --radius:18px;
-      --ok:#22c55e;
-      --bad:#ef4444;
-      --warn:#f59e0b;
-      --accent2: rgba(99,102,241,.18);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; }
+    header { padding:20px; background:#020617; }
+    h1 { margin:0; font-size:22px; }
+    main { padding:20px; max-width:900px; margin:auto; }
+    .card { background:#020617; padding:20px; border-radius:10px; margin-bottom:20px; }
+    input, button {
+      width:100%; padding:10px; margin-top:8px;
+      border-radius:6px; border:1px solid #334155;
+      background:#020617; color:#e5e7eb;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: var(--sans);
-      color: var(--text);
-      background:
-        radial-gradient(1200px 800px at 15% 5%, rgba(67,56,202,.25), transparent 60%),
-        radial-gradient(900px 650px at 90% 20%, rgba(34,197,94,.12), transparent 62%),
-        var(--bg);
-    }
-    .wrap{max-width:1100px;margin:0 auto;padding:22px 16px 46px}
-    .top{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-      margin-bottom:14px;
-    }
-    .brand{display:flex;flex-direction:column;gap:4px}
-    .brand .t{font-weight:800;font-size:18px;letter-spacing:.2px}
-    .brand .s{font-size:12px;color:var(--muted);line-height:1.35}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border:1px solid var(--border);
-      border-radius:999px;background:rgba(255,255,255,.03);
-      font-size:12px;color:var(--muted);
-    }
-    .dot{width:8px;height:8px;border-radius:50%}
-    .dot.ok{background:var(--ok)}
-    .dot.bad{background:var(--bad)}
-    .card{
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
-      box-shadow: var(--shadow);
-      padding:16px;
-    }
-    .grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:12px}
-    @media (max-width: 920px){.grid{grid-template-columns:1fr}}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tab{
-      padding:10px 12px;border-radius:999px;border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
-      font-size:13px;color:var(--muted);
-      cursor:pointer; user-select:none;
-    }
-    .tab.active{
-      color: var(--text);
-      border-color: rgba(99,102,241,.45);
-      background: var(--accent2);
-    }
-    h2{margin:0 0 10px;font-size:15px}
-    h3{margin:0 0 10px;font-size:14px}
-    .muted{color:var(--muted);font-size:13px;line-height:1.55}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input, select{
-      width:100%;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      padding:10px 12px;border-radius:12px;
-      font-size:13px; outline:none;
-    }
-    .btn{
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      color:var(--text);
-      padding:10px 12px;border-radius:12px;
-      cursor:pointer;font-weight:800;font-size:13px;
-      display:inline-flex;align-items:center;gap:8px;
-    }
-    .btn.secondary{background:rgba(255,255,255,.03); color:var(--muted); font-weight:800}
-    .btn:active{transform: translateY(1px)}
-    .note{
-      margin-top:10px;
-      border:1px dashed rgba(255,255,255,.16);
-      border-radius: 14px;
-      padding:10px 12px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-    .hidden{display:none!important}
-    table{
-      width:100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      overflow:hidden;
-      border-radius: 14px;
-      border:1px solid rgba(255,255,255,.07);
-      background: rgba(0,0,0,.12);
-    }
-    th,td{
-      padding:10px 10px;
-      border-bottom:1px solid rgba(255,255,255,.07);
-      text-align:left;
-      vertical-align:middle;
-    }
-    th{color:var(--muted);font-weight:800;font-size:12px}
-    tr:hover td{background: rgba(255,255,255,.03)}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;border:1px solid var(--border);
-      font-size:12px;
-    }
-    .badge.ok{border-color:rgba(34,197,94,.35); background: rgba(34,197,94,.10)}
-    .badge.bad{border-color:rgba(239,68,68,.35); background: rgba(239,68,68,.10)}
-    .badge .d{width:8px;height:8px;border-radius:50%}
-    .badge.ok .d{background:var(--ok)}
-    .badge.bad .d{background:var(--bad)}
-    .right{display:flex;justify-content:flex-end}
-    .footer{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.45}
-    .house{
-      width:100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.10);
-      overflow:hidden;
-      background: rgba(0,0,0,.18);
-      display:flex;align-items:center;justify-content:center;
-      margin-bottom: 12px;
-    }
-    .house svg{width:100%;height:100%}
-    .kpiRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .kpi{
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(255,255,255,.03);
-      padding:10px 12px;
-      min-width: 160px;
-      flex:1;
-    }
-    .kpi .v{font-weight:950;font-size:20px}
-    .kpi .l{font-size:12px;color:var(--muted)}
-    .toast{
-      position: fixed; right: 16px; bottom: 16px;
-      border:1px solid var(--border);
-      background: rgba(18,26,42,.92);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      border-radius: 14px;
-      padding: 12px 14px;
-      max-width: 360px;
-      display:none;
-    }
-    .toast .t{font-weight:900;font-size:13px}
-    .toast .d{color:var(--muted);font-size:12px;margin-top:2px;line-height:1.4}
-    .mono{font-family:var(--mono)}
+    button { background:#2563eb; border:none; cursor:pointer; margin-top:12px; }
+    button:hover { background:#1d4ed8; }
+    .hidden { display:none; }
+    .msg { margin-top:10px; }
+    .ok { color:#22c55e; }
+    .err { color:#ef4444; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <div class="t">Karusselli 4 KÜ — портал (концепт)</div>
-        <div class="s">Меню и контент доступны только после входа. Демо: пользователи в браузере.</div>
-      </div>
-      <div class="row">
-        <span class="chip" id="authChip"><span class="dot bad"></span><span id="authChipText">Не выполнен вход</span></span>
-        <button class="btn secondary hidden" id="btnLogout">Выйти</button>
-      </div>
-    </div>
+<header>
+  <h1>Karusselli 4 KÜ — портал</h1>
+</header>
 
-    <!-- ДО ВХОДА -->
-    <div class="grid" id="preAuth">
-      <div class="card">
-        <h2>Войти</h2>
-        <div class="muted">Введите имя пользователя и пароль.</div>
-        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
-          <div>
-            <label>Имя пользователя</label>
-            <input id="loginUser" autocomplete="username" placeholder="например: board1" />
-          </div>
-          <div>
-            <label>Пароль</label>
-            <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" />
-          </div>
-        </div>
-        <div class="row" style="margin-top:12px">
-          <button class="btn" id="btnLogin">Войти</button>
-          <button class="btn secondary" id="btnToRegister">Создать аккаунт</button>
-        </div>
-        <div class="note">
-          Демо: логин/пароль хранятся локально в браузере (LocalStorage). Это только для концепции.
-        </div>
-      </div>
+<main>
+  <div id="auth" class="card">
+    <h2>Регистрация</h2>
+    <input id="reg_user" placeholder="Имя пользователя" />
+    <input id="reg_pass" type="password" placeholder="Пароль (минимум 6)" />
+    <input id="reg_apt" placeholder="Квартира" />
+    <button onclick="register()">Создать аккаунт</button>
+    <div id="reg_msg" class="msg"></div>
 
-      <div class="card">
-        <h2>Создать аккаунт</h2>
-        <div class="muted">Создайте имя пользователя и пароль.</div>
-        <div class="grid" style="grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
-          <div>
-            <label>Имя пользователя</label>
-            <input id="regUser" autocomplete="username" placeholder="например: member12" />
-          </div>
-          <div>
-            <label>Пароль</label>
-            <input id="regPass" type="password" autocomplete="new-password" placeholder="минимум 6 символов" />
-          </div>
-        </div>
-        <div class="row" style="margin-top:12px">
-          <button class="btn" id="btnRegister">Создать</button>
-          <button class="btn secondary" id="btnToLogin">У меня уже есть аккаунт</button>
-        </div>
-        <div class="note">
-          На следующем этапе заменим на реальную безопасную аутентификацию и роли (жильцы/правление).
-        </div>
-      </div>
-    </div>
+    <hr style="margin:20px 0">
 
-    <!-- ПОСЛЕ ВХОДА -->
-    <div class="card hidden" id="postAuth">
-      <div class="row" style="justify-content:space-between;align-items:flex-start">
-        <div>
-          <h2 style="margin-bottom:6px">Меню</h2>
-          <div class="muted">Вы вошли как: <span class="mono" id="whoami"></span></div>
-        </div>
-        <div class="tabs">
-          <div class="tab active" data-view="home">Главная</div>
-          <div class="tab" data-view="readings">Показания</div>
-          <div class="tab" data-view="invoices">Счета</div>
-        </div>
-      </div>
-
-      <div id="view-home" style="margin-top:14px">
-        <h3>Главная</h3>
-
-        <div class="house">
-          <svg viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Дом">
-            <defs>
-              <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="rgba(99,102,241,0.35)"/>
-                <stop offset="1" stop-color="rgba(0,0,0,0.10)"/>
-              </linearGradient>
-              <linearGradient id="houseg" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stop-color="rgba(255,255,255,0.10)"/>
-                <stop offset="1" stop-color="rgba(255,255,255,0.02)"/>
-              </linearGradient>
-            </defs>
-            <rect width="1200" height="675" fill="url(#sky)"/>
-            <circle cx="1030" cy="130" r="60" fill="rgba(255,255,255,0.10)"/>
-            <rect x="240" y="200" width="720" height="380" rx="22" fill="url(#houseg)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
-            <polygon points="220,220 600,80 980,220" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
-            <g fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.16)" stroke-width="2">
-              <rect x="310" y="260" width="120" height="90" rx="10"/>
-              <rect x="470" y="260" width="120" height="90" rx="10"/>
-              <rect x="630" y="260" width="120" height="90" rx="10"/>
-              <rect x="790" y="260" width="120" height="90" rx="10"/>
-              <rect x="310" y="370" width="120" height="90" rx="10"/>
-              <rect x="470" y="370" width="120" height="90" rx="10"/>
-              <rect x="630" y="370" width="120" height="90" rx="10"/>
-              <rect x="790" y="370" width="120" height="90" rx="10"/>
-            </g>
-            <rect x="560" y="470" width="80" height="110" rx="12" fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
-            <circle cx="628" cy="525" r="6" fill="rgba(255,255,255,0.25)"/>
-            <text x="600" y="640" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="22" fill="rgba(234,240,255,0.8)">Karusselli 4</text>
-          </svg>
-        </div>
-
-        <div class="grid" style="grid-template-columns:1fr 1fr">
-          <div class="card" style="padding:14px">
-            <h3 style="margin-bottom:8px">Контактная информация</h3>
-            <div class="muted">
-              <b>Члены правления</b>
-              <ul>
-                <li>Председатель: <span class="mono">[Имя Фамилия]</span> — <span class="mono">[email/телефон]</span></li>
-                <li>Член правления: <span class="mono">[Имя Фамилия]</span> — <span class="mono">[email/телефон]</span></li>
-              </ul>
-              <b>Адрес</b>
-              <div class="mono">Karusselli 4, [город], Estonia</div>
-              <div style="height:10px"></div>
-              <b>Банковские реквизиты</b>
-              <div class="mono">IBAN: [EE.. ..]</div>
-              <div class="mono">Банк: [Swedbank / SEB / ...]</div>
-              <div class="mono">Получатель: Karusselli 4 KÜ</div>
-            </div>
-          </div>
-
-          <div class="card" style="padding:14px">
-            <h3 style="margin-bottom:8px">Быстрый статус</h3>
-            <div class="muted">Сводка по прошлому месяцу (демо-данные):</div>
-            <div class="kpiRow">
-              <div class="kpi"><div class="v" id="kpiApts">—</div><div class="l">квартир всего</div></div>
-              <div class="kpi"><div class="v" id="kpiOk">—</div><div class="l">сдали показания</div></div>
-              <div class="kpi"><div class="v" id="kpiBad">—</div><div class="l">не сдали</div></div>
-            </div>
-            <div class="note">
-              Дальше подключим реальные данные: статусы можно показывать жильцу только по его квартире.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="view-readings" class="hidden" style="margin-top:14px">
-        <div class="row" style="justify-content:space-between;align-items:center">
-          <h3 style="margin:0">Показания — статус по квартирам за <span id="lastMonthLabel" class="mono"></span></h3>
-          <div class="row">
-            <span class="chip"><span class="dot ok"></span>Сдано</span>
-            <span class="chip"><span class="dot bad"></span>Не сдано</span>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;overflow:auto">
-          <table id="readingsTable">
-            <thead>
-              <tr>
-                <th>Квартира</th>
-                <th>Статус</th>
-                <th>Дата сдачи</th>
-                <th>Комментарий</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="footer">Демо: данные сгенерированы. В реальности подключим Google Sheets.</div>
-      </div>
-
-      <div id="view-invoices" class="hidden" style="margin-top:14px">
-        <div class="row" style="justify-content:space-between;align-items:flex-end">
-          <div>
-            <h3 style="margin:0">Счета — выставленные счета за весь период</h3>
-            <div class="muted">Демо: фильтрация по квартире.</div>
-          </div>
-          <div style="min-width:240px">
-            <label>Фильтр по квартире</label>
-            <select id="invoiceFilter"></select>
-          </div>
-        </div>
-
-        <div style="margin-top:12px;overflow:auto">
-          <table id="invoiceTable">
-            <thead>
-              <tr>
-                <th>Квартира</th>
-                <th>Период</th>
-                <th>Сумма (€)</th>
-                <th>Статус</th>
-                <th>Примечание</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="footer">Демо: данные сгенерированы. В реальности — из учетной таблицы.</div>
-      </div>
-    </div>
+    <h2>Вход</h2>
+    <input id="log_user" placeholder="Имя пользователя" />
+    <input id="log_pass" type="password" placeholder="Пароль" />
+    <button onclick="login()">Войти</button>
+    <div id="log_msg" class="msg"></div>
   </div>
 
-  <div class="toast" id="toast">
-    <div class="t" id="toastT">Готово</div>
-    <div class="d" id="toastD">—</div>
+  <div id="app" class="card hidden">
+    <h2>Добро пожаловать</h2>
+    <p id="user_info"></p>
+    <button onclick="logout()">Выйти</button>
   </div>
+</main>
 
-  <script>
-    const LS_USERS = "ku_users_v1";
-    const LS_SESSION = "ku_session_v1";
+<script>
+  const API_BASE = "https://withered-lake-3ad8.andrei-voronenko836.workers.dev";
 
-    const $ = (s) => document.querySelector(s);
-    const $$ = (s) => Array.from(document.querySelectorAll(s));
-
-    function toast(t, d){
-      $("#toastT").textContent = t;
-      $("#toastD").textContent = d || "";
-      const el = $("#toast");
-      el.style.display = "block";
-      clearTimeout(window.__toast);
-      window.__toast = setTimeout(()=> el.style.display = "none", 2600);
-    }
-
-    function loadUsers(){
-      const raw = localStorage.getItem(LS_USERS);
-      if(raw) return JSON.parse(raw);
-      const init = [{u:"admin", p:"admin123"}];
-      localStorage.setItem(LS_USERS, JSON.stringify(init));
-      return init;
-    }
-    function saveUsers(users){
-      localStorage.setItem(LS_USERS, JSON.stringify(users));
-    }
-    function setSession(user){
-      localStorage.setItem(LS_SESSION, JSON.stringify({u:user, ts: Date.now()}));
-    }
-    function getSession(){
-      const raw = localStorage.getItem(LS_SESSION);
-      return raw ? JSON.parse(raw) : null;
-    }
-    function clearSession(){ localStorage.removeItem(LS_SESSION); }
-
-    function monthLabelRu(year, monthIndex){
-      const d = new Date(year, monthIndex, 1);
-      const m = d.toLocaleString("ru-RU", { month:"long" });
-      const cap = m.charAt(0).toUpperCase() + m.slice(1);
-      return `${cap} ${year}`;
-    }
-    function getLastMonthLabel(){
-      const now = new Date();
-      const last = new Date(now.getFullYear(), now.getMonth()-1, 1);
-      return monthLabelRu(last.getFullYear(), last.getMonth());
-    }
-
-    function demoReadings(){
-      const lastMonth = getLastMonthLabel();
-      const apts = Array.from({length: 24}, (_,i)=> String(i+1));
-      const seed = new Date().getFullYear()*100 + (new Date().getMonth());
-      function rnd(n){
-        let x = (seed + n*9301 + 49297) % 233280;
-        return x / 233280;
-      }
-      const rows = apts.map((apt, i) => {
-        const r = rnd(i+1);
-        const ok = r > 0.22;
-        const yyyy = new Date().getFullYear();
-        const mm = String(new Date().getMonth()).padStart(2,"0");
-        const date = ok ? `${yyyy}-${mm}-${String(20 + Math.floor(r*8)).padStart(2,"0")}` : "—";
-        return { apt, status: ok ? "ok" : "bad", date, comment: ok ? "Получено" : "Нет данных" };
-      });
-      return {lastMonth, rows};
-    }
-
-    function demoInvoices(){
-      const apts = Array.from({length: 24}, (_,i)=> String(i+1));
-      const periods = [];
-      const now = new Date();
-      for(let k=0;k<12;k++){
-        const d = new Date(now.getFullYear(), now.getMonth()-k, 1);
-        periods.push(monthLabelRu(d.getFullYear(), d.getMonth()));
-      }
-      const rows = [];
-      for(const apt of apts){
-        const count = 6 + (parseInt(apt,10) % 5);
-        for(let i=0;i<count;i++){
-          const p = periods[i % periods.length];
-          const amt = (85 + (parseInt(apt,10)*3) + (i*7)) % 220 + 40;
-          const paid = (i % 4) !== 0;
-          rows.push({ apt, period: p, amount: (amt + 0.25).toFixed(2), status: paid ? "Оплачен" : "Не оплачен", note: paid ? "" : "Проверьте оплату" });
-        }
-      }
-      rows.sort((a,b)=> (parseInt(a.apt)-parseInt(b.apt)) || (a.period < b.period ? 1 : -1));
-      return rows;
-    }
-
-    function badge(status){
-      if(status === "ok") return `<span class="badge ok"><span class="d"></span>Сдано</span>`;
-      return `<span class="badge bad"><span class="d"></span>Не сдано</span>`;
-    }
-
-    function switchView(view){
-      ["home","readings","invoices"].forEach(v=>{
-        const el = document.getElementById(`view-${v}`);
-        if(el) el.classList.toggle("hidden", v !== view);
-      });
-      $$(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view === view));
-    }
-
-    function renderData(){
-      const {lastMonth, rows} = demoReadings();
-      $("#lastMonthLabel").textContent = lastMonth;
-
-      const tbody = $("#readingsTable tbody");
-      tbody.innerHTML = "";
-      rows.forEach(r=>{
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td class="mono">${r.apt}</td><td>${badge(r.status)}</td><td class="mono">${r.date}</td><td>${r.comment}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      const total = rows.length;
-      const ok = rows.filter(x=>x.status==="ok").length;
-      const bad = total - ok;
-      $("#kpiApts").textContent = total;
-      $("#kpiOk").textContent = ok;
-      $("#kpiBad").textContent = bad;
-
-      const inv = demoInvoices();
-      const filter = $("#invoiceFilter");
-      const apts = ["Все", ...Array.from(new Set(inv.map(x=>x.apt)))];
-      filter.innerHTML = "";
-      apts.forEach(a=>{
-        const opt = document.createElement("option");
-        opt.value = a;
-        opt.textContent = a === "Все" ? "Все квартиры" : `Квартира ${a}`;
-        filter.appendChild(opt);
-      });
-
-      function renderInv(){
-        const selected = filter.value;
-        const t = $("#invoiceTable tbody");
-        t.innerHTML = "";
-        inv.filter(x => selected === "Все" ? true : x.apt === selected)
-           .forEach(x=>{
-             const st = x.status === "Оплачен"
-               ? `<span class="badge ok"><span class="d"></span>Оплачен</span>`
-               : `<span class="badge bad"><span class="d"></span>Не оплачен</span>`;
-             const tr = document.createElement("tr");
-             tr.innerHTML = `<td class="mono">${x.apt}</td><td>${x.period}</td><td class="mono">${x.amount}</td><td>${st}</td><td>${x.note || ""}</td>`;
-             t.appendChild(tr);
-           });
-      }
-      filter.onchange = renderInv;
-      renderInv();
-    }
-
-    function setAuthed(user){
-      $("#preAuth").classList.add("hidden");
-      $("#postAuth").classList.remove("hidden");
-      $("#btnLogout").classList.remove("hidden");
-      $("#whoami").textContent = user;
-      $("#authChip").innerHTML = `<span class="dot ok"></span><span>Вход выполнен</span>`;
-      switchView("home");
-      renderData();
-    }
-    function setPre(){
-      $("#preAuth").classList.remove("hidden");
-      $("#postAuth").classList.add("hidden");
-      $("#btnLogout").classList.add("hidden");
-      $("#authChip").innerHTML = `<span class="dot bad"></span><span>Не выполнен вход</span>`;
-    }
-
-    $("#btnLogin").addEventListener("click", ()=>{
-      const u = ($("#loginUser").value || "").trim();
-      const p = ($("#loginPass").value || "");
-      if(!u || !p){ toast("Не хватает данных", "Введите имя пользователя и пароль."); return; }
-      const users = loadUsers();
-      const found = users.find(x=>x.u===u && x.p===p);
-      if(!found){ toast("Ошибка входа", "Неверный логин или пароль."); return; }
-      setSession(u);
-      toast("Вход выполнен", `Здравствуйте, ${u}.`);
-      setAuthed(u);
+  function register() {
+    fetch(API_BASE + "/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: reg_user.value,
+        password: reg_pass.value,
+        apartment: reg_apt.value
+      })
+    })
+    .then(r => r.json())
+    .then(d => {
+      reg_msg.textContent = d.ok ? "Регистрация успешна" : d.error;
+      reg_msg.className = "msg " + (d.ok ? "ok" : "err");
     });
+  }
 
-    $("#btnRegister").addEventListener("click", ()=>{
-      const u = ($("#regUser").value || "").trim();
-      const p = ($("#regPass").value || "");
-      if(!u || u.length < 3){ toast("Ошибка", "Имя пользователя: минимум 3 символа."); return; }
-      if(!p || p.length < 6){ toast("Ошибка", "Пароль: минимум 6 символов."); return; }
-      const users = loadUsers();
-      if(users.some(x=>x.u===u)){ toast("Ошибка", "Такой пользователь уже существует."); return; }
-      users.push({u, p});
-      saveUsers(users);
-      toast("Аккаунт создан", "Теперь войдите через «Войти».");
-      $("#loginUser").value = u;
-      $("#loginPass").value = "";
+  function login() {
+    fetch(API_BASE + "/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: log_user.value,
+        password: log_pass.value
+      })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (!d.ok) {
+        log_msg.textContent = d.error;
+        log_msg.className = "msg err";
+        return;
+      }
+      localStorage.setItem("token", d.token);
+      showApp(log_user.value, d.apartment, d.role);
     });
+  }
 
-    $("#btnToRegister").addEventListener("click", ()=>{ $("#regUser").focus(); });
-    $("#btnToLogin").addEventListener("click", ()=>{ $("#loginUser").focus(); });
+  function showApp(user, apt, role) {
+    auth.classList.add("hidden");
+    app.classList.remove("hidden");
+    user_info.textContent = `Пользователь: ${user}, квартира: ${apt}, роль: ${role}`;
+  }
 
-    $("#btnLogout").addEventListener("click", ()=>{
-      clearSession();
-      toast("Вы вышли", "Сессия завершена.");
-      setPre();
-    });
-
-    $$(".tab").forEach(t=>t.addEventListener("click", ()=>switchView(t.dataset.view)));
-
-    // bootstrap
-    loadUsers();
-    const sess = getSession();
-    if(sess && sess.u) setAuthed(sess.u); else setPre();
-  </script>
+  function logout() {
+    localStorage.clear();
+    location.reload();
+  }
+</script>
 </body>
 </html>
