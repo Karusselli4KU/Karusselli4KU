@@ -6,23 +6,25 @@
   <title>Karusselli 4 KÜ — портал (концепт)</title>
   <style>
     :root{
-      --bg0:#05070e;
-      --bg1:#070a14;
-      --bg2:#0b1220;
-      --card:rgba(18,26,40,.72);
-      --card2:rgba(18,26,40,.60);
-      --stroke:rgba(255,255,255,.10);
-      --stroke2:rgba(255,255,255,.14);
-      --text:#e9eefc;
-      --muted:#aeb7cb;
-      --accent:#6b7cff;
-      --accent2:#4f65ff;
-      --good:#35d07f;
-      --warn:#ffd34d;
-      --shadow: 0 18px 55px rgba(0,0,0,.55);
-      --radius:18px;
-      --pill:rgba(255,255,255,.06);
-      --pill2:rgba(255,255,255,.10);
+      /* Palette D — Warm Light (v1.8) */
+      --bg0:#FAFAF9;
+      --bg1:#F5F5F4;
+      --bg2:#F5F5F4;
+
+      --card:#FFFFFF;
+      --stroke:#E7E5E4;
+
+      --text:#1C1917;
+      --muted:#57534E;
+
+      --good:#16A34A;
+      --warn:#CA8A04;
+
+      --shadow: 0 4px 16px rgba(0,0,0,.06);
+      --radius:14px;
+
+      --pill:rgba(0,0,0,.03);
+      --pill2:rgba(0,0,0,.05);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -31,30 +33,27 @@
       font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;
       color:var(--text);
       background:
-        radial-gradient(900px 520px at 16% 12%, rgba(107,124,255,.20), transparent 62%),
-        radial-gradient(900px 520px at 84% 20%, rgba(107,124,255,.13), transparent 62%),
-        radial-gradient(900px 520px at 55% 85%, rgba(255,211,77,.08), transparent 62%),
-        linear-gradient(160deg, var(--bg0), var(--bg2));
+        radial-gradient(900px 500px at 20% 0%, rgba(37,99,235,.025), transparent 70%),
+        radial-gradient(900px 500px at 80% 10%, rgba(37,99,235,.02), transparent 70%),
+
+        linear-gradient(180deg, var(--bg0), var(--bg2));
       overflow-x:hidden;
     }
-
-    /* subtle dotted grid like v1 */
     body:before{
       content:"";
       position:fixed; inset:0;
-      background-image:
-        radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-image: radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
       background-size: 26px 26px;
-      opacity:.28;
+      opacity:.10;
       pointer-events:none;
       mask-image: radial-gradient(900px 600px at 50% 30%, black 45%, transparent 70%);
     }
 
     .topbar{
       position:sticky; top:0; z-index:50;
-      background: linear-gradient(180deg, rgba(7,10,20,.88), rgba(7,10,20,.55));
+      background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(250,250,249,.78));
       backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid var(--stroke);
     }
     .topbar-inner{
       max-width:1020px;
@@ -67,14 +66,16 @@
     }
     .brand h1{margin:0; font-size:18px; font-weight:900; letter-spacing:.2px}
     .brand small{display:block; margin-top:4px; color:var(--muted); font-size:12px}
+
     .right-actions{display:flex; gap:10px; align-items:center; justify-content:flex-end}
     .status{
       display:flex; align-items:center; gap:10px;
       padding:8px 12px;
       border-radius:999px;
       background:var(--pill);
+      color:var(--muted);
       border:1px solid var(--stroke);
-      box-shadow: 0 12px 28px rgba(0,0,0,.35);
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
       font-size:12px; color:var(--muted);
       white-space:nowrap;
     }
@@ -84,6 +85,7 @@
     .btn{
       border:1px solid var(--stroke);
       background:var(--pill);
+      color:var(--muted);
       color:var(--text);
       padding:8px 12px;
       border-radius:12px;
@@ -96,10 +98,13 @@
       border-color: rgba(107,124,255,.35);
     }
     .btn.primary:hover{filter:brightness(1.05)}
+    .btn.active{
+      background: rgba(107,124,255,.22);
+      border-color: rgba(107,124,255,.38);
+    }
 
     .wrap{max-width:1020px; margin:0 auto; padding:18px 16px 28px}
 
-    /* AUTH view (kept simple; you can style later) */
     .auth-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
     @media (max-width:900px){ .auth-grid{grid-template-columns:1fr} }
     .card{
@@ -118,7 +123,7 @@
       padding:12px 12px;
       border-radius:12px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(5,7,14,.55);
+      background: #ffffff;
       color:var(--text);
       outline:none;
     }
@@ -144,63 +149,29 @@
     }
     .hidden{display:none !important}
 
-    /* APP (v1 layout) */
-    .app-shell{display:grid; grid-template-columns: 230px 1fr; gap:16px}
-    @media (max-width:900px){ .app-shell{grid-template-columns:1fr} }
-
-    .sidebar{
-      padding:14px;
-      background: rgba(18,26,40,.62);
-    }
-    .sidebar h3{margin:0 0 10px; font-size:14px; font-weight:900}
-    .sidebar .who{color:var(--muted); font-size:12px; margin:0 0 12px}
-    .side-link{
-      display:block;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      text-decoration:none;
-      color:var(--text);
-      font-weight:800;
-      margin-top:10px;
-    }
-    .side-link.active{
-      background: rgba(107,124,255,.16);
-      border-color: rgba(107,124,255,.30);
-    }
-
-    .main{
-      padding:14px;
-      background: rgba(18,26,40,.62);
-    }
-    .tabs{
-      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
-      margin-bottom:12px;
-    }
+    /* APP */
+    .app-shell{display:grid; grid-template-columns: 1fr; gap:16px}
+    .main{padding:14px; background: var(--card)}
+    .tabs{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-bottom:12px}
     .tab{
       border:1px solid var(--stroke);
-      background: rgba(255,255,255,.05);
+      background: var(--pill);
       color:var(--text);
       padding:8px 12px;
       border-radius:999px;
       font-weight:900;
       cursor:pointer;
     }
-    .tab.active{
-      background: rgba(107,124,255,.20);
-      border-color: rgba(107,124,255,.35);
-    }
+    .tab.active{background: rgba(37,99,235,.14); border-color: rgba(37,99,235,.25)}
 
     .page-title{margin:0 0 10px; font-weight:900; font-size:14px; color:var(--text)}
     .hero{
       background:
-        radial-gradient(700px 380px at 25% 20%, rgba(107,124,255,.22), transparent 55%),
-        radial-gradient(700px 380px at 80% 35%, rgba(107,124,255,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+        radial-gradient(900px 520px at 20% 10%, rgba(37,99,235,.06), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.35));
       border:1px solid var(--stroke);
       border-radius:18px;
-      padding:18px;
+      padding:12px;
       min-height:340px;
       position:relative;
       overflow:hidden;
@@ -212,7 +183,7 @@
       font-weight:800;
       font-size:12px;
       letter-spacing:.2px;
-      text-shadow: 0 8px 20px rgba(0,0,0,.55);
+      text-shadow: 0 8px 20px rgba(0,0,0,.12);
     }
     .hero:after{
       content:"";
@@ -222,15 +193,9 @@
       border-radius:999px;
       background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), rgba(255,255,255,.04) 55%, transparent 70%);
       border:1px solid rgba(255,255,255,.10);
-      filter: blur(.2px);
       opacity:.45;
     }
-    .house-svg{
-      width:100%;
-      height:100%;
-      display:block;
-      opacity:.55;
-    }
+    .house-svg{width:100%; height:100%; display:block; opacity:.55}
     .house-wrap{
       position:absolute;
       left:50%;
@@ -243,7 +208,7 @@
     .bottom-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:14px}
     @media (max-width:900px){ .bottom-grid{grid-template-columns:1fr} }
     .mini{
-      background: rgba(18,26,40,.58);
+      background: var(--card);
       border:1px solid var(--stroke);
       border-radius:18px;
       padding:14px;
@@ -254,21 +219,20 @@
     ul{margin:10px 0 0 16px; color:var(--muted); font-size:12px; line-height:1.6}
     .status-cards{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px}
     .stat{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.015);
       border-radius:14px;
       padding:10px;
-      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
     }
     .stat .num{font-size:18px; font-weight:1000; color:var(--text); line-height:1}
     .stat .lbl{font-size:11px; color:var(--muted); margin-top:3px}
 
-    /* Tables for pages */
     table{width:100%; border-collapse:separate; border-spacing:0 10px}
     th{font-size:12px; color:var(--muted); text-align:left; font-weight:800; padding:0 10px}
     td{
-      background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.015);
+      border:1px solid var(--stroke);
       padding:10px;
       font-size:13px;
     }
@@ -282,14 +246,22 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1>Karusselli 4 KÜ — портал (концепт)</h1>
-        <small>Меню и контент доступны только после входа. Демо: пользователи в Google Sheets.</small>
+        <h1 id="brandTitle">Karusselli 4 KÜ — портал (концепт)</h1>
+        <small id="brandSub">Меню и контент доступны только после входа. Демо: пользователи в Google Sheets.</small>
       </div>
+
       <div class="right-actions">
+        <div class="lang" id="langSwitch" style="display:flex; gap:8px; align-items:center;">
+          <button class="btn" id="lang_ru" type="button" title="Русский">RU</button>
+          <button class="btn" id="lang_et" type="button" title="Eesti">EST</button>
+          <button class="btn" id="lang_en" type="button" title="English">EN</button>
+        </div>
+
         <div class="status" id="statusPill">
           <span id="statusDot" class="dot bad"></span>
           <span id="statusText">Вход не выполнен</span>
         </div>
+
         <button class="btn" id="btnTopLogout" style="display:none">Выйти</button>
       </div>
     </div>
@@ -299,16 +271,16 @@
     <!-- AUTH -->
     <section id="authSection" class="auth-grid">
       <div class="card card-pad">
-        <h2>Войти</h2>
-        <p class="sub">Введите имя пользователя и пароль.</p>
+        <h2 id="loginTitle">Войти</h2>
+        <p class="sub" id="loginSub">Введите имя пользователя и пароль.</p>
 
         <div class="row">
           <div>
-            <label>Имя пользователя</label>
+            <label id="loginUserLabel">Имя пользователя</label>
             <input id="log_user" placeholder="например: member12" autocomplete="username"/>
           </div>
           <div>
-            <label>Пароль</label>
+            <label id="loginPassLabel">Пароль</label>
             <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
           </div>
         </div>
@@ -317,7 +289,7 @@
           <button class="btn primary" id="btnLogin">Войти</button>
         </div>
 
-        <div class="hint">
+        <div class="hint" id="authHint">
           Аккаунты сохраняются в листе <b>Users</b>. Пароли хранятся как <i>salt + hash</i>.
         </div>
 
@@ -325,21 +297,21 @@
       </div>
 
       <div class="card card-pad">
-        <h2>Создать аккаунт</h2>
-        <p class="sub">Создайте имя пользователя и пароль.</p>
+        <h2 id="registerTitle">Создать аккаунт</h2>
+        <p class="sub" id="registerSub">Создайте имя пользователя и пароль.</p>
 
         <div class="row">
           <div>
-            <label>Имя пользователя</label>
+            <label id="regUserLabel">Имя пользователя</label>
             <input id="reg_user" placeholder="например: test1" autocomplete="username"/>
           </div>
           <div>
-            <label>Пароль</label>
+            <label id="regPassLabel">Пароль</label>
             <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password"/>
           </div>
         </div>
 
-        <label>Квартира</label>
+        <label id="aptLabel">Квартира</label>
         <input id="reg_apt" placeholder="например: 5" inputmode="numeric"/>
 
         <div class="actions">
@@ -350,31 +322,28 @@
       </div>
     </section>
 
-    <!-- APP (v1 визуализация) -->
+    <!-- APP -->
     <section id="appSection" class="app-shell hidden">
-      <aside class="card sidebar">
-        <h3>Меню</h3>
-        <p class="who" id="whoLine">Вы вошли как: —</p>
-
-        <a class="side-link active" href="#home" data-page="home">Главная</a>
-        <a class="side-link" href="#readings" data-page="readings">Показания</a>
-        <a class="side-link" href="#bills" data-page="bills">Счета</a>
-      </aside>
-
       <section class="card main">
         <div class="tabs">
-          <button class="tab active" data-page="home">Главная</button>
-          <button class="tab" data-page="readings">Показания</button>
-          <button class="tab" data-page="bills">Счета</button>
+          <button class="tab active" id="tab_home" data-page="home">Главная</button>
+          <button class="tab" id="tab_readings" data-page="readings">Показания</button>
+          <button class="tab" id="tab_bills" data-page="bills">Счета</button>
         </div>
+
+        <div class="who" id="whoLine" style="margin:0 0 12px; color:var(--muted); font-size:12px">Вы вошли как: —</div>
 
         <!-- HOME -->
         <div id="page_home">
-          <div class="page-title">Главная</div>
+          <div class="page-title" id="homeTitle">Главная</div>
 
           <div class="hero">
-            <div class="house-wrap">
-              <!-- simple line-art house like v1 -->
+            
+<div class="house-wrap">
+  <img src="197c2921-703f-422f-835d-02840e15c0ca.png"
+       alt="Karusselli 4"
+       style="width:100%;height:100%;object-fit:cover;border-radius:14px;"/>
+
               <svg class="house-svg" viewBox="0 0 900 420" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <defs>
                   <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
@@ -382,68 +351,63 @@
                     <stop offset="1" stop-color="white" stop-opacity=".05"/>
                   </linearGradient>
                 </defs>
-
-                <!-- roof -->
                 <path d="M140 165 L450 35 L760 165" stroke="url(#g1)" stroke-width="3" opacity=".85"/>
                 <path d="M170 165 H730" stroke="url(#g1)" stroke-width="3" opacity=".85"/>
-
-                <!-- house body -->
                 <rect x="210" y="165" width="480" height="210" rx="22" stroke="url(#g1)" stroke-width="3" opacity=".85"/>
                 <rect x="225" y="180" width="450" height="180" rx="18" stroke="white" stroke-opacity=".08" stroke-width="2"/>
-
-                <!-- windows (8) -->
                 <g opacity=".9">
                   <rect x="270" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                   <rect x="398" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                   <rect x="526" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                   <rect x="654" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
-
                   <rect x="270" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                   <rect x="398" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                   <rect x="526" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                   <rect x="654" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
                 </g>
-
-                <!-- door -->
                 <rect x="438" y="295" width="78" height="118" rx="10" stroke="url(#g1)" stroke-width="3"/>
                 <circle cx="502" cy="355" r="6" fill="white" fill-opacity=".18"/>
               </svg>
             </div>
-            <div class="caption">Karusselli 4</div>
+            <div class="caption" id="heroCaption">Karusselli 4</div>
           </div>
 
           <div class="bottom-grid">
             <div class="mini">
-              <h4>Контактная информация</h4>
-              <div class="muted"><b>Члены правления</b></div>
+              <h4 id="contactTitle">Контактная информация</h4>
+              <div class="muted"><b id="boardMembersTitle">Члены правления</b></div>
               <ul>
-                <li>Председатель: [имя фамилия] — [email]/телефон</li>
-                <li>Член правления: [имя фамилия] — [email]/телефон</li>
+                <li><span id="chairmanTitle">Председатель</span>: <span id="phName1">[имя фамилия]</span> — <span id="phEmailPhone1">[email]/телефон</span></li>
+                <li><span id="boardMemberTitle">Член правления</span>: <span id="phName2">[имя фамилия]</span> — <span id="phEmailPhone2">[email]/телефон</span></li>
               </ul>
-              <div class="muted" style="margin-top:10px"><b>Адрес</b><br/>Karusselli 4, [город], Estonia</div>
-              <div class="muted" style="margin-top:10px"><b>Банковские реквизиты</b><br/>IBAN: [EE.. ..]<br/>Банк: [Swedbank / SEB / ..]<br/>Получатель: Karusselli 4 KÜ</div>
+              <div class="muted" style="margin-top:10px"><b id="addressTitle">Адрес</b><br/><span id="addrLine">Karusselli 4, [город], Estonia</span></div>
+              <div class="muted" style="margin-top:10px"><b id="bankDetailsTitle">Банковские реквизиты</b><br/>
+                IBAN: <span id="phIban">[EE.. ..]</span><br/>
+                <span id="bankTitle">Банк</span>: <span id="phBank">[Swedbank / SEB / ..]</span><br/>
+                <span id="recipientTitle">Получатель</span>: Karusselli 4 KÜ
+              </div>
             </div>
 
             <div class="mini">
-              <h4>Быстрый статус</h4>
-              <div class="muted">Сводка по прошлому месяцу (демо-данные):</div>
+              <h4 id="quickTitle">Быстрый статус</h4>
+              <div class="muted" id="quickSub">Сводка по прошлому месяцу (демо-данные):</div>
 
               <div class="status-cards">
                 <div class="stat">
                   <div class="num" id="stat_total">24</div>
-                  <div class="lbl">квартир всего</div>
+                  <div class="lbl" id="lbl_total">квартир всего</div>
                 </div>
                 <div class="stat">
                   <div class="num" id="stat_done">20</div>
-                  <div class="lbl">сдали показания</div>
+                  <div class="lbl" id="lbl_done">сдали показания</div>
                 </div>
                 <div class="stat" style="grid-column:1 / span 2">
                   <div class="num" id="stat_missing">4</div>
-                  <div class="lbl">не сдали</div>
+                  <div class="lbl" id="lbl_missing">не сдали</div>
                 </div>
               </div>
 
-              <div class="muted" style="margin-top:10px">
+              <div class="muted" style="margin-top:10px" id="quickNote">
                 Дальше подключим реальные данные: статусы можно показывать жильцу только по его квартире.
               </div>
             </div>
@@ -452,35 +416,44 @@
 
         <!-- READINGS -->
         <div id="page_readings" class="hidden">
-          <div class="page-title">Показания</div>
-          <div class="muted" style="font-size:12px">Статус показаний по каждой квартире за прошлый месяц (пока демо).</div>
+          <div class="page-title" id="readingsTitle">Показания</div>
+          <div class="muted" id="readingsDesc" style="font-size:12px">Статус показаний по каждой квартире за прошлый месяц (пока демо).</div>
 
           <table style="margin-top:10px">
             <thead>
-              <tr><th>Квартира</th><th>Статус</th><th>Комментарий</th></tr>
+              <tr>
+                <th id="thApartment">Квартира</th>
+                <th id="thStatus">Статус</th>
+                <th id="thComment">Комментарий</th>
+              </tr>
             </thead>
             <tbody id="readingsBody"></tbody>
           </table>
 
           <div class="muted" style="font-size:12px; margin-top:8px">
-            Следующий шаг: читать данные из листа <b>Reminder</b> и фильтровать по квартире/роли.
+            <span id="nextReadings1">Следующий шаг: читать данные из листа</span> <b>Reminder</b> <span id="nextReadings2">и фильтровать по квартире/роли.</span>
           </div>
         </div>
 
         <!-- BILLS -->
         <div id="page_bills" class="hidden">
-          <div class="page-title">Счета</div>
-          <div class="muted" style="font-size:12px">Выставленные счета за весь период (пока демо).</div>
+          <div class="page-title" id="billsTitle">Счета</div>
+          <div class="muted" id="billsDesc" style="font-size:12px">Выставленные счета за весь период (пока демо).</div>
 
           <table style="margin-top:10px">
             <thead>
-              <tr><th>Период</th><th>Квартира</th><th>Сумма</th><th>Статус</th></tr>
+              <tr>
+                <th id="thPeriod">Период</th>
+                <th id="thApartment2">Квартира</th>
+                <th id="thSum">Сумма</th>
+                <th id="thStatus2">Статус</th>
+              </tr>
             </thead>
             <tbody id="billsBody"></tbody>
           </table>
 
           <div class="muted" style="font-size:12px; margin-top:8px">
-            Следующий шаг: подключим лист “Invoices” и покажем счета только по квартире жильца.
+            <span id="nextBills1">Следующий шаг: подключим лист</span> “Invoices” <span id="nextBills2">и покажем счета только по квартире жильца.</span>
           </div>
         </div>
 
@@ -489,51 +462,414 @@
   </main>
 
   <script>
-    // ВАЖНО: ничего “не меняю каждый раз” — API_BASE остаётся фиксированным.
-    // Если у тебя другой URL воркера — просто скажи, я выпущу новый index.html с ним.
+    // API (Cloudflare Worker proxy)
     const API_BASE = "https://withered-lake-3ad8.andrei-voronenko836.workers.dev";
 
+    // i18n packs (full coverage for UI + demo strings)
+    const I18N = {
+      ru: {
+        brandTitle: "Karusselli 4 KÜ — портал (концепт)",
+        brandSub: "Меню и контент доступны только после входа. Демо: пользователи в Google Sheets.",
+        statusOut: "Вход не выполнен",
+        statusIn: (u)=> `Вход выполнен: ${u}`,
+        logout: "Выйти",
+
+        loginTitle: "Войти",
+        loginSub: "Введите имя пользователя и пароль.",
+        userLabel: "Имя пользователя",
+        passLabel: "Пароль",
+        loginBtn: "Войти",
+
+        regTitle: "Создать аккаунт",
+        regSub: "Создайте имя пользователя и пароль.",
+        aptLabel: "Квартира",
+        regBtn: "Создать аккаунт",
+
+        ph_user: "например: member12",
+        ph_reg_user: "например: test1",
+        ph_pass_login: "••••••••",
+        ph_pass_reg: "минимум 6 символов",
+        ph_apt: "например: 5",
+
+        authHint: 'Аккаунты сохраняются в листе <b>Users</b>. Пароли хранятся как <i>salt + hash</i>.',
+        regOk: "Регистрация успешна. Теперь можно войти.",
+        errReg: "Ошибка регистрации",
+        errLogin: "Ошибка входа",
+
+        whoPrefix: "Вы вошли как",
+
+        tabHome: "Главная",
+        tabReadings: "Показания",
+        tabBills: "Счета",
+
+        contactTitle: "Контактная информация",
+        boardMembersTitle: "Члены правления",
+        chairmanTitle: "Председатель",
+        boardMemberTitle: "Член правления",
+        phName: "[имя фамилия]",
+        phEmailPhone: "[email]/телефон",
+        addressTitle: "Адрес",
+        bankDetailsTitle: "Банковские реквизиты",
+        bankTitle: "Банк",
+        recipientTitle: "Получатель",
+        phIban: "[EE.. ..]",
+        phBank: "[Swedbank / SEB / ..]",
+
+        quickTitle: "Быстрый статус",
+        quickSub: "Сводка по прошлому месяцу (демо-данные):",
+        lblTotal: "квартир всего",
+        lblDone: "сдали показания",
+        lblMissing: "не сдали",
+        quickNote: "Дальше подключим реальные данные: статусы можно показывать жильцу только по его квартире.",
+
+        readingsDesc: "Статус показаний по каждой квартире за прошлый месяц (пока демо).",
+        billsDesc: "Выставленные счета за весь период (пока демо).",
+        thApartment: "Квартира",
+        thStatus: "Статус",
+        thComment: "Комментарий",
+        thPeriod: "Период",
+        thSum: "Сумма",
+
+        nextReadings1: "Следующий шаг: читать данные из листа",
+        nextReadings2: "и фильтровать по квартире/роли.",
+        nextBills1: "Следующий шаг: подключим лист",
+        nextBills2: "и покажем счета только по квартире жильца.",
+
+        stSubmitted: "✅ Сдано",
+        stWaiting: "⏳ Ожидается",
+        commentDash: "—",
+        commentReminder: "Напоминание: последний день месяца",
+        billPaid: "Оплачено",
+        billPending: "Ожидает оплаты"
+      },
+
+      et: {
+        brandTitle: "Karusselli 4 KÜ — portaal (kontseptsioon)",
+        brandSub: "Menüü ja sisu on saadaval ainult pärast sisselogimist. Demo: kasutajad Google Sheets-is.",
+        statusOut: "Pole sisse logitud",
+        statusIn: (u)=> `Sisselogitud: ${u}`,
+        logout: "Logi välja",
+
+        loginTitle: "Logi sisse",
+        loginSub: "Sisesta kasutajanimi ja parool.",
+        userLabel: "Kasutajanimi",
+        passLabel: "Parool",
+        loginBtn: "Logi sisse",
+
+        regTitle: "Loo konto",
+        regSub: "Loo kasutajanimi ja parool.",
+        aptLabel: "Korter",
+        regBtn: "Loo konto",
+
+        ph_user: "nt: member12",
+        ph_reg_user: "nt: test1",
+        ph_pass_login: "••••••••",
+        ph_pass_reg: "vähemalt 6 märki",
+        ph_apt: "nt: 5",
+
+        authHint: 'Kontod salvestatakse lehele <b>Users</b>. Paroolid on <i>salt + hash</i> kujul.',
+        regOk: "Registreerimine õnnestus. Nüüd saad sisse logida.",
+        errReg: "Registreerimise viga",
+        errLogin: "Sisselogimise viga",
+
+        whoPrefix: "Olete sisse logitud kui",
+
+        tabHome: "Avaleht",
+        tabReadings: "Näidud",
+        tabBills: "Arved",
+
+        contactTitle: "Kontaktinfo",
+        boardMembersTitle: "Juhatuse liikmed",
+        chairmanTitle: "Esimees",
+        boardMemberTitle: "Juhatuse liige",
+        phName: "[ees- ja perekonnanimi]",
+        phEmailPhone: "[e-post]/telefon",
+        addressTitle: "Aadress",
+        bankDetailsTitle: "Pangaandmed",
+        bankTitle: "Pank",
+        recipientTitle: "Saaja",
+        phIban: "[EE.. ..]",
+        phBank: "[Swedbank / SEB / ..]",
+
+        quickTitle: "Kiire ülevaade",
+        quickSub: "Eelmise kuu kokkuvõte (demo):",
+        lblTotal: "kortereid kokku",
+        lblDone: "esitasid näidud",
+        lblMissing: "ei esitanud",
+        quickNote: "Järgmisena ühendame pärisandmed: elanik näeb staatust ainult oma korteri kohta.",
+
+        readingsDesc: "Näitude staatus iga korteri kohta eelmise kuu eest (demo).",
+        billsDesc: "Esitatud arved kogu perioodi kohta (demo).",
+        thApartment: "Korter",
+        thStatus: "Staatus",
+        thComment: "Kommentaar",
+        thPeriod: "Periood",
+        thSum: "Summa",
+
+        nextReadings1: "Järgmine samm: loeme andmed lehelt",
+        nextReadings2: "ja filtreerime korteri/rolli järgi.",
+        nextBills1: "Järgmine samm: ühendame lehe",
+        nextBills2: "ja näitame arveid ainult elaniku korteri kohta.",
+
+        stSubmitted: "✅ Esitatud",
+        stWaiting: "⏳ Ootel",
+        commentDash: "—",
+        commentReminder: "Meeldetuletus: kuu viimane päev",
+        billPaid: "Makstud",
+        billPending: "Ootab makset"
+      },
+
+      en: {
+        brandTitle: "Karusselli 4 HOA — portal (concept)",
+        brandSub: "Menu and content are available only after login. Demo: users stored in Google Sheets.",
+        statusOut: "Not logged in",
+        statusIn: (u)=> `Logged in: ${u}`,
+        logout: "Log out",
+
+        loginTitle: "Sign in",
+        loginSub: "Enter your username and password.",
+        userLabel: "Username",
+        passLabel: "Password",
+        loginBtn: "Sign in",
+
+        regTitle: "Create account",
+        regSub: "Create a username and password.",
+        aptLabel: "Apartment",
+        regBtn: "Create account",
+
+        ph_user: "e.g.: member12",
+        ph_reg_user: "e.g.: test1",
+        ph_pass_login: "••••••••",
+        ph_pass_reg: "min 6 characters",
+        ph_apt: "e.g.: 5",
+
+        authHint: 'Accounts are stored in the <b>Users</b> sheet. Passwords are stored as <i>salt + hash</i>.',
+        regOk: "Registration successful. You can now sign in.",
+        errReg: "Registration error",
+        errLogin: "Sign-in error",
+
+        whoPrefix: "Logged in as",
+
+        tabHome: "Home",
+        tabReadings: "Readings",
+        tabBills: "Invoices",
+
+        contactTitle: "Contact info",
+        boardMembersTitle: "Board members",
+        chairmanTitle: "Chairman",
+        boardMemberTitle: "Board member",
+        phName: "[name surname]",
+        phEmailPhone: "[email]/phone",
+        addressTitle: "Address",
+        bankDetailsTitle: "Bank details",
+        bankTitle: "Bank",
+        recipientTitle: "Recipient",
+        phIban: "[EE.. ..]",
+        phBank: "[Swedbank / SEB / ..]",
+
+        quickTitle: "Quick status",
+        quickSub: "Summary for last month (demo data):",
+        lblTotal: "apartments total",
+        lblDone: "submitted readings",
+        lblMissing: "missing",
+        quickNote: "Next we’ll connect real data: residents should see status only for their apartment.",
+
+        readingsDesc: "Reading status per apartment for last month (demo).",
+        billsDesc: "Issued invoices for the whole period (demo).",
+        thApartment: "Apartment",
+        thStatus: "Status",
+        thComment: "Comment",
+        thPeriod: "Period",
+        thSum: "Amount",
+
+        nextReadings1: "Next step: read data from sheet",
+        nextReadings2: "and filter by apartment/role.",
+        nextBills1: "Next step: connect sheet",
+        nextBills2: "and show invoices only for resident’s apartment.",
+
+        stSubmitted: "✅ Submitted",
+        stWaiting: "⏳ Pending",
+        commentDash: "—",
+        commentReminder: "Reminder: last day of month",
+        billPaid: "Paid",
+        billPending: "Payment pending"
+      }
+    };
+
+    function getLang(){
+      const saved = localStorage.getItem("ku_lang");
+      if (saved && I18N[saved]) return saved;
+      return "ru";
+    }
+    function setLang(lang){
+      if (!I18N[lang]) return;
+      localStorage.setItem("ku_lang", lang);
+      applyLang();
+      // if logged in — refresh table texts in current language
+      const saved = localStorage.getItem("ku_user");
+      if (saved){
+        try { renderDemoTables(JSON.parse(saved)); } catch(_){}
+      }
+    }
+    function tr(key){
+      const lang = getLang();
+      const pack = I18N[lang] || I18N.ru;
+      return pack[key];
+    }
     function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    function setStatus(isIn){
+    function setStatus(isIn, username){
       const dot = document.getElementById("statusDot");
       const text = document.getElementById("statusText");
+      const pack = I18N[getLang()] || I18N.ru;
+
       dot.classList.toggle("good", !!isIn);
       dot.classList.toggle("bad", !isIn);
-      text.textContent = isIn ? "Вход выполнен" : "Вход не выполнен";
+
+      text.textContent = isIn ? pack.statusIn(username || "") : pack.statusOut;
       document.getElementById("btnTopLogout").style.display = isIn ? "inline-block" : "none";
+    }
+
+    function applyLang(){
+      const lang = getLang();
+      const t = I18N[lang] || I18N.ru;
+
+      document.documentElement.lang = (lang === "et" ? "et" : lang);
+
+      // top
+      document.getElementById("brandTitle").textContent = t.brandTitle;
+      document.getElementById("brandSub").textContent = t.brandSub;
+      document.getElementById("btnTopLogout").textContent = t.logout;
+
+      // auth texts
+      document.getElementById("loginTitle").textContent = t.loginTitle;
+      document.getElementById("loginSub").textContent = t.loginSub;
+      document.getElementById("loginUserLabel").textContent = t.userLabel;
+      document.getElementById("loginPassLabel").textContent = t.passLabel;
+      document.getElementById("btnLogin").textContent = t.loginBtn;
+
+      document.getElementById("registerTitle").textContent = t.regTitle;
+      document.getElementById("registerSub").textContent = t.regSub;
+      document.getElementById("regUserLabel").textContent = t.userLabel;
+      document.getElementById("regPassLabel").textContent = t.passLabel;
+      document.getElementById("aptLabel").textContent = t.aptLabel;
+      document.getElementById("btnRegister").textContent = t.regBtn;
+
+      document.getElementById("log_user").placeholder = t.ph_user;
+      document.getElementById("reg_user").placeholder = t.ph_reg_user;
+      document.getElementById("log_pass").placeholder = t.ph_pass_login;
+      document.getElementById("reg_pass").placeholder = t.ph_pass_reg;
+      document.getElementById("reg_apt").placeholder = t.ph_apt;
+
+      document.getElementById("authHint").innerHTML = t.authHint;
+
+      // app nav
+      document.getElementById("tab_home").textContent = t.tabHome;
+      document.getElementById("tab_readings").textContent = t.tabReadings;
+      document.getElementById("tab_bills").textContent = t.tabBills;
+
+      // page titles + blocks
+      document.getElementById("homeTitle").textContent = t.tabHome;
+      document.getElementById("readingsTitle").textContent = t.tabReadings;
+      document.getElementById("billsTitle").textContent = t.tabBills;
+
+      document.getElementById("contactTitle").textContent = t.contactTitle;
+      document.getElementById("boardMembersTitle").textContent = t.boardMembersTitle;
+      document.getElementById("chairmanTitle").textContent = t.chairmanTitle;
+      document.getElementById("boardMemberTitle").textContent = t.boardMemberTitle;
+
+      document.getElementById("phName1").textContent = t.phName;
+      document.getElementById("phName2").textContent = t.phName;
+      document.getElementById("phEmailPhone1").textContent = t.phEmailPhone;
+      document.getElementById("phEmailPhone2").textContent = t.phEmailPhone;
+
+      document.getElementById("addressTitle").textContent = t.addressTitle;
+      document.getElementById("bankDetailsTitle").textContent = t.bankDetailsTitle;
+      document.getElementById("bankTitle").textContent = t.bankTitle;
+      document.getElementById("recipientTitle").textContent = t.recipientTitle;
+      document.getElementById("phIban").textContent = t.phIban;
+      document.getElementById("phBank").textContent = t.phBank;
+
+      document.getElementById("quickTitle").textContent = t.quickTitle;
+      document.getElementById("quickSub").textContent = t.quickSub;
+      document.getElementById("lbl_total").textContent = t.lblTotal;
+      document.getElementById("lbl_done").textContent = t.lblDone;
+      document.getElementById("lbl_missing").textContent = t.lblMissing;
+      document.getElementById("quickNote").textContent = t.quickNote;
+
+      document.getElementById("readingsDesc").textContent = t.readingsDesc;
+      document.getElementById("billsDesc").textContent = t.billsDesc;
+
+      document.getElementById("thApartment").textContent = t.thApartment;
+      document.getElementById("thApartment2").textContent = t.thApartment;
+      document.getElementById("thStatus").textContent = t.thStatus;
+      document.getElementById("thStatus2").textContent = t.thStatus;
+      document.getElementById("thComment").textContent = t.thComment;
+      document.getElementById("thPeriod").textContent = t.thPeriod;
+      document.getElementById("thSum").textContent = t.thSum;
+
+      document.getElementById("nextReadings1").textContent = t.nextReadings1;
+      document.getElementById("nextReadings2").textContent = t.nextReadings2;
+      document.getElementById("nextBills1").textContent = t.nextBills1;
+      document.getElementById("nextBills2").textContent = t.nextBills2;
+
+      // status + who
+      const saved = localStorage.getItem("ku_user");
+      if (saved){
+        try{
+          const u = JSON.parse(saved);
+          document.getElementById("whoLine").textContent = `${t.whoPrefix}: ${u.username}`;
+          setStatus(true, u.username);
+        }catch(_){
+          document.getElementById("whoLine").textContent = `${t.whoPrefix}: —`;
+          setStatus(false);
+        }
+      }else{
+        document.getElementById("whoLine").textContent = `${t.whoPrefix}: —`;
+        setStatus(false);
+      }
+
+      // active lang button
+      document.getElementById("lang_ru").classList.toggle("active", lang==="ru");
+      document.getElementById("lang_et").classList.toggle("active", lang==="et");
+      document.getElementById("lang_en").classList.toggle("active", lang==="en");
     }
 
     function showAuth(){
       document.getElementById("authSection").classList.remove("hidden");
       document.getElementById("appSection").classList.add("hidden");
       setStatus(false);
+      applyLang();
     }
+
     function showApp(user){
       document.getElementById("authSection").classList.add("hidden");
       document.getElementById("appSection").classList.remove("hidden");
-      document.getElementById("whoLine").textContent = `Вы вошли как: ${user.username}`;
-      setStatus(true);
-      // demo stats: if board -> total 24 else show totals anyway (v1 look)
+
+      const t = I18N[getLang()] || I18N.ru;
+      document.getElementById("whoLine").textContent = `${t.whoPrefix}: ${user.username}`;
+      setStatus(true, user.username);
+
       renderDemoTables(user);
       navigate("home");
     }
 
     function markActive(page){
       document.querySelectorAll("[data-page]").forEach(el=>{
-        const p = el.getAttribute("data-page");
-        el.classList.toggle("active", p === page);
+        el.classList.toggle("active", el.getAttribute("data-page") === page);
       });
       ["home","readings","bills"].forEach(p=>{
         document.getElementById("page_"+p).classList.toggle("hidden", p !== page);
       });
     }
+
     function navigate(page){
       markActive(page);
       history.replaceState(null,"", "#"+page);
     }
 
     function renderDemoTables(user){
+      const t = I18N[getLang()] || I18N.ru;
       const role = user.role || "member";
       const apt = String(user.apartment || "");
       const apartments = (role === "board") ? Array.from({length:24}, (_,i)=>String(i+1)) : [apt];
@@ -546,8 +882,8 @@
         rb.insertAdjacentHTML("beforeend", `
           <tr>
             <td><b>${esc(a)}</b></td>
-            <td class="${ok ? "ok":"warn"}">${ok ? "✅ Сдано":"⏳ Ожидается"}</td>
-            <td>${ok ? "—":"Напоминание: последний день месяца"}</td>
+            <td class="${ok ? "ok":"warn"}">${ok ? esc(t.stSubmitted) : esc(t.stWaiting)}</td>
+            <td>${ok ? esc(t.commentDash) : esc(t.commentReminder)}</td>
           </tr>
         `);
       });
@@ -556,8 +892,8 @@
       const bb = document.getElementById("billsBody");
       bb.innerHTML = "";
       const demo = [
-        {period:"2025-11", apt:apt || "—", sum:"123.45 €", st:"Оплачено"},
-        {period:"2025-12", apt:apt || "—", sum:"98.10 €", st:"Ожидает оплаты"},
+        {period:"2025-11", apt:apt || "—", sum:"123.45 €", st: t.billPaid, ok:true},
+        {period:"2025-12", apt:apt || "—", sum:"98.10 €", st: t.billPending, ok:false},
       ];
       demo.forEach(x=>{
         bb.insertAdjacentHTML("beforeend", `
@@ -565,7 +901,7 @@
             <td><b>${esc(x.period)}</b></td>
             <td>${esc(x.apt)}</td>
             <td>${esc(x.sum)}</td>
-            <td class="${x.st==="Оплачено" ? "ok":"warn"}">${esc(x.st)}</td>
+            <td class="${x.ok ? "ok":"warn"}">${esc(x.st)}</td>
           </tr>
         `);
       });
@@ -587,13 +923,16 @@
       const a = document.getElementById("reg_apt").value.trim();
       const msg = document.getElementById("reg_msg");
       msg.className="msg"; msg.textContent="";
+
       const d = await apiPost("/register", {username:u,password:p,apartment:a});
+      const t = I18N[getLang()] || I18N.ru;
+
       if(d.ok){
         msg.className="msg ok";
-        msg.textContent="Регистрация успешна. Теперь можно войти.";
+        msg.textContent = t.regOk;
       }else{
         msg.className="msg err";
-        msg.textContent=d.error || "Ошибка регистрации";
+        msg.textContent = d.error || t.errReg;
       }
     }
 
@@ -602,12 +941,16 @@
       const p = document.getElementById("log_pass").value;
       const msg = document.getElementById("log_msg");
       msg.className="msg"; msg.textContent="";
+
       const d = await apiPost("/login", {username:u,password:p});
+      const t = I18N[getLang()] || I18N.ru;
+
       if(!d.ok){
         msg.className="msg err";
-        msg.textContent=d.error || "Ошибка входа";
+        msg.textContent = d.error || t.errLogin;
         return;
       }
+
       const user = { username:u, apartment:d.apartment, role:d.role || "member" };
       localStorage.setItem("ku_user", JSON.stringify(user));
       localStorage.setItem("ku_token", d.token || "");
@@ -625,23 +968,28 @@
     document.getElementById("btnLogin").addEventListener("click", login);
     document.getElementById("btnTopLogout").addEventListener("click", logout);
 
-    // sidebar + tabs
-    document.querySelectorAll(".side-link").forEach(a=>{
-      a.addEventListener("click",(e)=>{ e.preventDefault(); navigate(a.getAttribute("data-page")); });
-    });
+    // tabs
     document.querySelectorAll(".tab").forEach(b=>{
-      b.addEventListener("click",()=> navigate(b.getAttribute("data-page")));
+      b.addEventListener("click", ()=> navigate(b.getAttribute("data-page")));
     });
 
+    // language switch
+    document.getElementById("lang_ru").addEventListener("click", ()=> setLang("ru"));
+    document.getElementById("lang_et").addEventListener("click", ()=> setLang("et"));
+    document.getElementById("lang_en").addEventListener("click", ()=> setLang("en"));
+
     // restore
-    (function(){
+    (function init(){
+      applyLang();
       const saved = localStorage.getItem("ku_user");
       if(!saved){ showAuth(); return; }
       try{
         const user = JSON.parse(saved);
         if(user && user.username){ showApp(user); }
         else showAuth();
-      }catch(_){ showAuth(); }
+      }catch(_){
+        showAuth();
+      }
     })();
   </script>
 </body>
