@@ -20,7 +20,7 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ v1.24 v1.24</title>
+  <title>Karusselli 4 KÜ</title>
   <style>
     :root{
       /* Palette D — Warm Light (v1.8) */
@@ -262,7 +262,16 @@
     td:last-child{border-radius:0 12px 12px 0}
     .ok{color:var(--good); font-weight:900}
     .warn{color:var(--warn); font-weight:900}
-  </style>
+  
+    .modal{position:fixed; inset:0; z-index:2000}
+    .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.35)}
+    .modal-card{position:relative; width:min(720px, 92vw); margin:8vh auto 0; background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow: var(--shadow); overflow:hidden}
+    .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
+    .modal-body{padding:14px}
+    .iconbtn{border:1px solid var(--stroke); background:var(--pill); border-radius:10px; padding:8px 10px; cursor:pointer}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    @media (max-width:720px){.grid2{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
   <header class="topbar">
@@ -304,7 +313,11 @@
           <div>
             <label id="loginPassLabel">Пароль</label>
             <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
-          </div>
+          
+            <div class="muted" style="margin-top:6px">
+              <a href="#" id="forgotLink" style="text-decoration:none" data-i18n="forgot">Forgot password?</a>
+            </div>
+        </div>
         </div>
 
         <div class="actions">
@@ -321,7 +334,10 @@
           <div>
             <label id="regUserLabel">Имя пользователя</label>
             <input id="reg_user" placeholder="например: test1" autocomplete="username"/>
-          </div>
+          
+          <label id="regEmailLabel">Email</label>
+          <input id="reg_email" type="email" placeholder="name@example.com" autocomplete="email"/>
+        </div>
           <div>
             <label id="regPassLabel">Пароль</label>
             <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password"/>
@@ -526,8 +542,13 @@
         commentDash: "—",
         commentReminder: "Напоминание: последний день месяца",
         billPaid: "Оплачено",
-        billPending: "Ожидает оплаты"
-      },
+        billPending: "Ожидает оплаты",
+        forgotPrompt: "Введите email или имя пользователя:",
+        forgotSent: "Мы отправили код для сброса на ваш email. Проверьте входящие/спам.",
+        resetCodePrompt: "Введите код из письма:",
+        resetNewPassPrompt: "Введите НОВЫЙ пароль (мин 6):",
+        resetDone: "Пароль обновлён. Теперь можно войти.",
+        forgotError: "Ошибка сброса пароля: "},
 
       et: {
         brandTitle: "Karusselli 4 KÜ",
@@ -599,8 +620,13 @@
         commentDash: "—",
         commentReminder: "Meeldetuletus: kuu viimane päev",
         billPaid: "Makstud",
-        billPending: "Ootab makset"
-      },
+        billPending: "Ootab makset",
+        forgotPrompt: "Sisesta email või kasutajanimi:",
+        forgotSent: "Saatsime parooli lähtestamise koodi sinu e-postile. Kontrolli ka spam-kausta.",
+        resetCodePrompt: "Sisesta e-kirjas olev kood:",
+        resetNewPassPrompt: "Sisesta UUS parool (min 6):",
+        resetDone: "Parool uuendatud. Nüüd saad sisse logida.",
+        forgotError: "Parooli lähtestamise viga: "},
 
       en: {
         brandTitle: "Karusselli 4 KÜ",
@@ -672,8 +698,13 @@
         commentDash: "—",
         commentReminder: "Reminder: last day of month",
         billPaid: "Paid",
-        billPending: "Payment pending"
-      }
+        billPending: "Payment pending",
+        forgotPrompt: "Enter email or username:",
+        forgotSent: "We sent a reset code to your email. Check inbox/spam.",
+        resetCodePrompt: "Enter the code from the email:",
+        resetNewPassPrompt: "Enter a NEW password (min 6):",
+        resetDone: "Password updated. You can sign in now.",
+        forgotError: "Password reset error: "}
     };
 
     function getLang(){
@@ -896,10 +927,11 @@
       const u = document.getElementById("reg_user").value.trim();
       const p = document.getElementById("reg_pass").value;
       const a = document.getElementById("reg_apt").value.trim();
+      const e = document.getElementById("reg_email").value.trim();
       const msg = document.getElementById("reg_msg");
       msg.className="msg"; msg.textContent="";
 
-      const d = await apiPost("/register", {username:u,password:p,apartment:a});
+      const d = await apiPost("/register", {username:u,password:p,apartment:a,email:e});
       const t = I18N[getLang()] || I18N.ru;
 
       if(d.ok){
@@ -966,6 +998,119 @@
         showAuth();
       }
     })();
-  </script>
+  
+    // --- Forgot password (email-based reset) ---
+    const resetModal = byId("resetModal");
+    const openReset = (ev)=>{ ev && ev.preventDefault(); if(resetModal){ resetModal.style.display="block"; byId("resetMsg").textContent=""; byId("resetMsg2").textContent=""; byId("resetStep2").style.display="none"; } };
+    const closeReset = ()=>{ if(resetModal) resetModal.style.display="none"; };
+
+    const forgotLink = byId("forgotLink");
+    if (forgotLink) forgotLink.addEventListener("click", async (ev) => {
+      ev.preventDefault();
+
+      // 1) Ask identifier (email or username)
+      const ident = prompt(t("forgotPrompt") || "Enter your email or username:", "");
+      if (!ident) return;
+
+      try {
+        const res = await apiForgot({ identifier: ident });
+        if (!res || !res.ok) throw new Error(res?.error || "Request failed");
+        alert(t("forgotSent") || "We sent a reset code to your email. Check inbox/spam.");
+
+        // 2) Ask reset code + new password (simple flow, no extra UI)
+        const code = prompt(t("resetCodePrompt") || "Enter the reset code from email:", "");
+        if (!code) return;
+        const newPass = prompt(t("resetNewPassPrompt") || "Enter a NEW password (min 6):", "");
+        if (!newPass) return;
+
+        const r2 = await apiReset({ identifier: ident, code, new_password: newPass });
+        if (!r2 || !r2.ok) throw new Error(r2?.error || "Reset failed");
+        alert(t("resetDone") || "Password updated. Now you can sign in.");
+      } catch (e) {
+        alert((t("forgotError") || "Password reset error: ") + String(e.message || e));
+      }
+    });
+    const resetClose = byId("resetClose"); if (resetClose) resetClose.addEventListener("click", closeReset);
+    const resetX = byId("resetX"); if (resetX) resetX.addEventListener("click", closeReset);
+
+    async function apiForgot(payload){
+      return apiCall("/forgot", payload);
+    }
+    async function apiReset(payload){
+      return apiCall("/reset", payload);
+    }
+
+    const resetSendBtn = byId("resetSendBtn");
+    if (resetSendBtn) resetSendBtn.addEventListener("click", async ()=>{
+      const email = (byId("resetEmail")?.value || "").trim();
+      if(!email){ byId("resetMsg").textContent = t("email_required"); return; }
+      byId("resetMsg").textContent = "…";
+      try{
+        await apiForgot(email);
+        byId("resetMsg").textContent = t("reset_sent");
+        byId("resetStep2").style.display = "block";
+      }catch(e){
+        byId("resetMsg").textContent = (e && e.message) ? e.message : "Error";
+        byId("resetStep2").style.display = "block";
+      }
+    });
+
+    const resetDoBtn = byId("resetDoBtn");
+    if (resetDoBtn) resetDoBtn.addEventListener("click", async ()=>{
+      const email = (byId("resetEmail")?.value || "").trim();
+      const code = (byId("resetCode")?.value || "").trim();
+      const np = (byId("resetNewPass")?.value || "");
+      if(!email){ byId("resetMsg2").textContent = t("email_required"); return; }
+      byId("resetMsg2").textContent = "…";
+      try{
+        await apiReset(email, code, np);
+        byId("resetMsg2").textContent = t("reset_ok");
+      }catch(e){
+        byId("resetMsg2").textContent = (e && e.message) ? e.message : "Error";
+      }
+    });
+
+</script>
+
+  <div id="resetModal" class="modal" style="display:none">
+    <div class="modal-backdrop" id="resetClose"></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="h2" data-i18n="forgot_title">Password reset</div>
+        <button class="iconbtn" id="resetX" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted" data-i18n="forgot_hint">Enter the email used during registration. We will send a reset code.</p>
+
+        <div class="field">
+          <label><span data-i18n="email">Email</span></label>
+          <input id="resetEmail" type="email" autocomplete="email" placeholder="name@example.com" data-i18n-ph="email_ph"/>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
+          <button class="btn primary" id="resetSendBtn" data-i18n="send">Send</button>
+          <div class="muted" id="resetMsg" style="flex:1"></div>
+        </div>
+
+        <div id="resetStep2" style="display:none; margin-top:14px">
+          <div class="grid2">
+            <div class="field">
+              <label><span data-i18n="code">Code</span></label>
+              <input id="resetCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"/>
+            </div>
+            <div class="field">
+              <label><span data-i18n="new_password">New password</span></label>
+              <input id="resetNewPass" type="password" autocomplete="new-password" placeholder="••••••••"/>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
+            <button class="btn primary" id="resetDoBtn" data-i18n="reset">Reset password</button>
+            <div class="muted" id="resetMsg2" style="flex:1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
