@@ -3,7 +3,21 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Karusselli 4 KÜ — портал (концепт) v1.12</title>
+  <script>
+    // GitHub Pages hardening: ensure trailing slash for directory URLs.
+    // Prevents broken relative assets when opening .../<repo> (without ending "/").
+    (function(){
+      try{
+        var p = location.pathname || "";
+        var last = p.split("/").filter(Boolean).pop() || "";
+        var looksLikeFile = last.indexOf(".") !== -1;
+        if (!p.endsWith("/") && !looksLikeFile){
+          location.replace(p + "/" + location.search + location.hash);
+        }
+      }catch(e){}
+    })();
+  </script>
+  <title>Karusselli 4 KÜ — портал (концепт) v1.13</title>
   <style>
     :root{
       /* Palette D — Warm Light (v1.8) */
