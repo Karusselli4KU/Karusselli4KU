@@ -2,108 +2,555 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Karusselli 4 KÜ — портал</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; }
-    header { padding:20px; background:#020617; }
-    h1 { margin:0; font-size:22px; }
-    main { padding:20px; max-width:900px; margin:auto; }
-    .card { background:#020617; padding:20px; border-radius:10px; margin-bottom:20px; }
-    input, button {
-      width:100%; padding:10px; margin-top:8px;
-      border-radius:6px; border:1px solid #334155;
-      background:#020617; color:#e5e7eb;
+    :root{
+      --bg1:#0a0f1e;
+      --bg2:#0b1f2a;
+      --card:#0b1220cc;
+      --card2:#0b1220f2;
+      --stroke:#243043;
+      --text:#e7eefc;
+      --muted:#a9b6cf;
+      --blue:#2f6bff;
+      --blue2:#1f57e6;
+      --green:#2bd576;
+      --red:#ff4d4d;
+      --shadow: 0 10px 35px rgba(0,0,0,.45);
+      --radius:18px;
     }
-    button { background:#2563eb; border:none; cursor:pointer; margin-top:12px; }
-    button:hover { background:#1d4ed8; }
-    .hidden { display:none; }
-    .msg { margin-top:10px; }
-    .ok { color:#22c55e; }
-    .err { color:#ef4444; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 20% 20%, rgba(47,107,255,.22), transparent 60%),
+        radial-gradient(800px 450px at 80% 35%, rgba(43,213,118,.14), transparent 55%),
+        radial-gradient(900px 500px at 60% 85%, rgba(255,77,77,.12), transparent 60%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+    }
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      padding:18px 22px;
+      background: linear-gradient(180deg, rgba(3,7,18,.85), rgba(3,7,18,.55));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .brand{display:flex; flex-direction:column; line-height:1.1;}
+    .brand h1{margin:0; font-size:20px; font-weight:800; letter-spacing:.2px;}
+    .brand small{color:var(--muted); font-size:12px; margin-top:4px;}
+    .status-pill{
+      display:flex; align-items:center; gap:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 8px 26px rgba(0,0,0,.25);
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:8px; height:8px; border-radius:50%}
+    .dot.red{background:var(--red); box-shadow:0 0 0 3px rgba(255,77,77,.18)}
+    .dot.green{background:var(--green); box-shadow:0 0 0 3px rgba(43,213,118,.18)}
+    .wrap{max-width:1100px; margin:0 auto; padding:22px;}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:18px;}
+    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    .card h2{margin:0 0 10px; font-size:16px; font-weight:800;}
+    .sub{margin:0 0 14px; color:var(--muted); font-size:12px;}
+    label{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+    }
+    input{
+      width:100%;
+      margin-top:6px;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(2,6,23,.55);
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{
+      border-color: rgba(47,107,255,.55);
+      box-shadow: 0 0 0 4px rgba(47,107,255,.16);
+    }
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
+    @media (max-width: 520px){ .row{grid-template-columns:1fr} }
+    .actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+    .btn{
+      appearance:none;
+      border:0;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      cursor:pointer;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .btn.primary{
+      background: linear-gradient(180deg, var(--blue), var(--blue2));
+      border-color: rgba(47,107,255,.45);
+    }
+    .btn.primary:hover{filter:brightness(1.05)}
+    .btn.ghost:hover{background: rgba(255,255,255,.10)}
+    .hint{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      background: rgba(255,255,255,.06);
+      border: 1px dashed rgba(255,255,255,.12);
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .msg{margin-top:10px; font-size:13px}
+    .msg.ok{color:var(--green)}
+    .msg.err{color:var(--red)}
+    .hidden{display:none !important;}
+    .shell{display:grid; grid-template-columns: 260px 1fr; gap:18px;}
+    @media (max-width: 920px){ .shell{grid-template-columns:1fr} }
+    .nav{background: var(--card2);}
+    .nav h3{margin:0 0 10px; font-size:14px; font-weight:900; letter-spacing:.2px;}
+    .nav .userline{font-size:12px; color:var(--muted); margin:0 0 12px; line-height:1.4;}
+    .nav a{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      text-decoration:none;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.05);
+      margin-top:10px;
+    }
+    .nav a.active{background: rgba(47,107,255,.18); border-color: rgba(47,107,255,.35);}
+    .badge{
+      font-size:11px;
+      color:var(--muted);
+      padding:3px 8px;
+      border-radius:999px;
+      background: rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.08);
+      white-space:nowrap;
+    }
+    .page{background: var(--card2); min-height:360px;}
+    .hero{
+      display:flex; gap:14px; align-items:center;
+      padding:14px;
+      border-radius:16px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      margin-top:10px;
+    }
+    .house{
+      width:120px; height:90px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),
+        radial-gradient(80px 60px at 30% 30%, rgba(47,107,255,.25), transparent 60%),
+        radial-gradient(80px 60px at 70% 60%, rgba(43,213,118,.18), transparent 60%),
+        #0b1220;
+      display:flex; align-items:center; justify-content:center;
+      color:rgba(255,255,255,.7);
+      font-weight:900;
+      letter-spacing:.6px;
+    }
+    .kv{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;}
+    @media (max-width: 600px){ .kv{grid-template-columns:1fr} }
+    .kv .box{
+      padding:12px;
+      border-radius:14px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+    .k{color:var(--text); font-weight:800}
+    .smallnote{color:var(--muted); font-size:12px; margin-top:10px}
+    table{width:100%; border-collapse:separate; border-spacing:0 10px; margin-top:10px;}
+    th{font-size:12px; color:var(--muted); text-align:left; font-weight:700; padding:0 10px;}
+    td{
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      padding:10px;
+      font-size:13px;
+    }
+    td:first-child{border-radius:12px 0 0 12px}
+    td:last-child{border-radius:0 12px 12px 0}
+    .status-ok{color:var(--green); font-weight:800}
+    .status-warn{color:#ffd34d; font-weight:800}
   </style>
 </head>
 <body>
-<header>
-  <h1>Karusselli 4 KÜ — портал</h1>
-</header>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1>Karusselli 4 KÜ — портал</h1>
+        <small>Меню и контент доступны только после входа. Демо: пользователи в Google Sheets.</small>
+      </div>
+      <div id="topStatus" class="status-pill" title="Статус сессии">
+        <span id="statusDot" class="dot red"></span>
+        <span id="statusText">Не выполнен вход</span>
+      </div>
+    </div>
+  </header>
 
-<main>
-  <div id="auth" class="card">
-    <h2>Регистрация</h2>
-    <input id="reg_user" placeholder="Имя пользователя" />
-    <input id="reg_pass" type="password" placeholder="Пароль (минимум 6)" />
-    <input id="reg_apt" placeholder="Квартира" />
-    <button onclick="register()">Создать аккаунт</button>
-    <div id="reg_msg" class="msg"></div>
+  <main class="wrap">
+    <section id="authSection" class="grid">
+      <div class="card">
+        <h2>Войти</h2>
+        <p class="sub">Введите имя пользователя и пароль.</p>
 
-    <hr style="margin:20px 0">
+        <div class="row">
+          <div>
+            <label>Имя пользователя</label>
+            <input id="log_user" placeholder="например: member12" autocomplete="username" />
+          </div>
+          <div>
+            <label>Пароль</label>
+            <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+        </div>
 
-    <h2>Вход</h2>
-    <input id="log_user" placeholder="Имя пользователя" />
-    <input id="log_pass" type="password" placeholder="Пароль" />
-    <button onclick="login()">Войти</button>
-    <div id="log_msg" class="msg"></div>
-  </div>
+        <div class="actions">
+          <button class="btn primary" id="btnLogin">Войти</button>
+          <button class="btn ghost" id="btnToRegister">Создать аккаунт</button>
+        </div>
 
-  <div id="app" class="card hidden">
-    <h2>Добро пожаловать</h2>
-    <p id="user_info"></p>
-    <button onclick="logout()">Выйти</button>
-  </div>
-</main>
+        <div class="hint">
+          Аккаунты сохраняются в листе <b>Users</b> вашей Google-таблицы. Пароли хранятся как <i>salt + hash</i>.
+        </div>
 
-<script>
-  const API_BASE = "https://withered-lake-3ad8.andrei-voronenko836.workers.dev";
+        <div id="log_msg" class="msg"></div>
+      </div>
 
-  function register() {
-    fetch(API_BASE + "/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: reg_user.value,
-        password: reg_pass.value,
-        apartment: reg_apt.value
-      })
-    })
-    .then(r => r.json())
-    .then(d => {
-      reg_msg.textContent = d.ok ? "Регистрация успешна" : d.error;
-      reg_msg.className = "msg " + (d.ok ? "ok" : "err");
-    });
-  }
+      <div class="card">
+        <h2>Создать аккаунт</h2>
+        <p class="sub">Создайте имя пользователя и пароль.</p>
 
-  function login() {
-    fetch(API_BASE + "/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: log_user.value,
-        password: log_pass.value
-      })
-    })
-    .then(r => r.json())
-    .then(d => {
-      if (!d.ok) {
-        log_msg.textContent = d.error;
-        log_msg.className = "msg err";
+        <div class="row">
+          <div>
+            <label>Имя пользователя</label>
+            <input id="reg_user" placeholder="например: test1" autocomplete="username" />
+          </div>
+          <div>
+            <label>Пароль</label>
+            <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <label>Квартира</label>
+        <input id="reg_apt" placeholder="например: 5" inputmode="numeric" />
+
+        <div class="actions">
+          <button class="btn primary" id="btnRegister">Создать</button>
+          <button class="btn ghost" id="btnToLogin">У меня уже есть аккаунт</button>
+        </div>
+
+        <div class="hint">
+          Далее добавим реальные роли (житель/правление) и доступ к данным по квартире.
+        </div>
+
+        <div id="reg_msg" class="msg"></div>
+      </div>
+    </section>
+
+    <section id="appSection" class="shell hidden">
+      <aside class="card nav">
+        <h3>Меню</h3>
+        <p id="userline" class="userline">—</p>
+
+        <a href="#home" data-page="home" class="active">
+          <span>Главная</span>
+          <span class="badge">Контакты</span>
+        </a>
+
+        <a href="#readings" data-page="readings">
+          <span>Показания</span>
+          <span class="badge">Статус</span>
+        </a>
+
+        <a href="#bills" data-page="bills">
+          <span>Счета</span>
+          <span class="badge">Архив</span>
+        </a>
+
+        <div class="actions" style="margin-top:14px">
+          <button class="btn primary" id="btnLogout" style="width:100%">Выйти</button>
+        </div>
+
+        <div class="smallnote">
+          Роль <b>board</b> получит доступ ко всем квартирам. Сейчас роль читается из листа <b>Users</b>.
+        </div>
+      </aside>
+
+      <section class="card page">
+        <div id="page_home" class="page-inner">
+          <h2 style="margin:0 0 6px">Главная</h2>
+          <p class="sub">Информация о товариществе и контакты.</p>
+
+          <div class="hero">
+            <div class="house">K4</div>
+            <div style="flex:1">
+              <div style="font-weight:900; font-size:14px">Karusselli 4 KÜ</div>
+              <div class="sub" style="margin:6px 0 0">Стилизация как в прототипе v1, но с рабочей авторизацией.</div>
+            </div>
+          </div>
+
+          <div class="kv">
+            <div class="box">
+              <div class="k">Члены правления</div>
+              • Имя Фамилия — председатель<br/>
+              • Имя Фамилия — член правления
+            </div>
+            <div class="box">
+              <div class="k">Адрес</div>
+              Karusselli 4, Eesti<br/>
+              <span class="k">Email:</span> karusselli4ku@gmail.com
+            </div>
+            <div class="box">
+              <div class="k">Банковские реквизиты</div>
+              IBAN: EE00 0000 0000 0000 000<br/>
+              Получатель: Karusselli 4 KÜ
+            </div>
+            <div class="box">
+              <div class="k">Примечание</div>
+              Этот контент позже вынесем в отдельный лист “Settings”.
+            </div>
+          </div>
+        </div>
+
+        <div id="page_readings" class="page-inner hidden">
+          <h2 style="margin:0 0 6px">Показания</h2>
+          <p class="sub">Статус показаний по каждой квартире за прошлый месяц (пока демо).</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Квартира</th>
+                <th>Статус (прошлый месяц)</th>
+                <th>Последнее напоминание</th>
+              </tr>
+            </thead>
+            <tbody id="readingsTable"></tbody>
+          </table>
+
+          <div class="smallnote">
+            Следующий шаг: подключим реальные данные из листа <b>Reminder</b> и ограничим видимость: житель видит только свою квартиру.
+          </div>
+        </div>
+
+        <div id="page_bills" class="page-inner hidden">
+          <h2 style="margin:0 0 6px">Счета</h2>
+          <p class="sub">Выставленные счета за весь период (пока демо).</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Период</th>
+                <th>Квартира</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody id="billsTable"></tbody>
+          </table>
+
+          <div class="smallnote">
+            Следующий шаг: подключим лист “Invoices” и фильтрацию по квартире/роли.
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Worker URL — оставляем как есть (у тебя уже настроено)
+    const API_BASE = "https://withered-lake-3ad8.andrei-voronenko836.workers.dev";
+
+    function setStatus(isAuthed, text){
+      const dot = document.getElementById("statusDot");
+      const label = document.getElementById("statusText");
+      dot.classList.toggle("green", !!isAuthed);
+      dot.classList.toggle("red", !isAuthed);
+      label.textContent = text || (isAuthed ? "Выполнен вход" : "Не выполнен вход");
+    }
+
+    function showAuth(){
+      document.getElementById("authSection").classList.remove("hidden");
+      document.getElementById("appSection").classList.add("hidden");
+      setStatus(false, "Не выполнен вход");
+    }
+
+    function showApp(user){
+      document.getElementById("authSection").classList.add("hidden");
+      document.getElementById("appSection").classList.remove("hidden");
+      const { username, apartment, role } = user;
+      document.getElementById("userline").innerHTML =
+        `Пользователь: <b>${escapeHtml(username)}</b><br/>Квартира: <b>${escapeHtml(apartment)}</b> • Роль: <b>${escapeHtml(role)}</b>`;
+      setStatus(true, `Вход: ${username}`);
+      renderDemoTables(apartment, role);
+      navigateTo("home");
+    }
+
+    function navigateTo(page){
+      ["home","readings","bills"].forEach(p => {
+        document.getElementById("page_"+p).classList.toggle("hidden", p !== page);
+      });
+      document.querySelectorAll(".nav a[data-page]").forEach(a => {
+        a.classList.toggle("active", a.getAttribute("data-page") === page);
+      });
+    }
+
+    function renderDemoTables(apartment, role){
+      const apts = (role === "board") ? ["1","2","3", String(apartment)] : [String(apartment)];
+
+      const readingsTbody = document.getElementById("readingsTable");
+      readingsTbody.innerHTML = "";
+      apts.forEach((apt, idx) => {
+        const status = (idx % 2 === 0) ? "✅ Сдано" : "⏳ Ожидается";
+        const cls = (status.includes("✅")) ? "status-ok" : "status-warn";
+        const last = (status.includes("✅")) ? "—" : "Напоминание: последний день месяца";
+        readingsTbody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td><b>${escapeHtml(apt)}</b></td>
+            <td class="${cls}">${status}</td>
+            <td>${escapeHtml(last)}</td>
+          </tr>
+        `);
+      });
+
+      const billsTbody = document.getElementById("billsTable");
+      billsTbody.innerHTML = "";
+      const demoBills = [
+        { period:"2025-11", apt:String(apartment), sum:"123.45 €", st:"Оплачено" },
+        { period:"2025-12", apt:String(apartment), sum:"98.10 €",  st:"Ожидает оплаты" }
+      ];
+      demoBills.forEach(b => {
+        const cls = (b.st === "Оплачено") ? "status-ok" : "status-warn";
+        billsTbody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td><b>${escapeHtml(b.period)}</b></td>
+            <td>${escapeHtml(b.apt)}</td>
+            <td>${escapeHtml(b.sum)}</td>
+            <td class="${cls}">${escapeHtml(b.st)}</td>
+          </tr>
+        `);
+      });
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    async function apiPost(path, payload){
+      const res = await fetch(API_BASE + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {})
+      });
+      const data = await res.json().catch(() => ({ ok:false, error:"Bad JSON response" }));
+      return data;
+    }
+
+    async function register(){
+      const u = document.getElementById("reg_user").value.trim();
+      const p = document.getElementById("reg_pass").value;
+      const a = document.getElementById("reg_apt").value.trim();
+      const box = document.getElementById("reg_msg");
+      box.className = "msg";
+      box.textContent = "";
+
+      const d = await apiPost("/register", { username:u, password:p, apartment:a });
+      if (d.ok){
+        box.className = "msg ok";
+        box.textContent = "Регистрация успешна. Теперь можно войти.";
+      } else {
+        box.className = "msg err";
+        box.textContent = d.error || "Ошибка регистрации";
+      }
+    }
+
+    async function login(){
+      const u = document.getElementById("log_user").value.trim();
+      const p = document.getElementById("log_pass").value;
+      const box = document.getElementById("log_msg");
+      box.className = "msg";
+      box.textContent = "";
+
+      const d = await apiPost("/login", { username:u, password:p });
+      if (!d.ok){
+        box.className = "msg err";
+        box.textContent = d.error || "Ошибка входа";
         return;
       }
-      localStorage.setItem("token", d.token);
-      showApp(log_user.value, d.apartment, d.role);
+      localStorage.setItem("ku_token", d.token || "");
+      localStorage.setItem("ku_user", JSON.stringify({ username:u, apartment:d.apartment, role:d.role || "member" }));
+      showApp({ username:u, apartment:d.apartment, role:d.role || "member" });
+    }
+
+    function logout(){
+      localStorage.removeItem("ku_token");
+      localStorage.removeItem("ku_user");
+      showAuth();
+    }
+
+    document.getElementById("btnRegister").addEventListener("click", register);
+    document.getElementById("btnLogin").addEventListener("click", login);
+    document.getElementById("btnLogout").addEventListener("click", logout);
+
+    document.querySelectorAll(".nav a[data-page]").forEach(a => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigateTo(a.getAttribute("data-page"));
+      });
     });
-  }
 
-  function showApp(user, apt, role) {
-    auth.classList.add("hidden");
-    app.classList.remove("hidden");
-    user_info.textContent = `Пользователь: ${user}, квартира: ${apt}, роль: ${role}`;
-  }
+    document.getElementById("btnToRegister").addEventListener("click", () => {
+      document.getElementById("reg_user").focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    document.getElementById("btnToLogin").addEventListener("click", () => {
+      document.getElementById("log_user").focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
 
-  function logout() {
-    localStorage.clear();
-    location.reload();
-  }
-</script>
+    (function restore(){
+      const saved = localStorage.getItem("ku_user");
+      if (!saved) { showAuth(); return; }
+      try{
+        const user = JSON.parse(saved);
+        if (user && user.username && user.apartment){
+          showApp({ username:user.username, apartment:user.apartment, role:user.role || "member" });
+        } else { showAuth(); }
+      } catch(_){ showAuth(); }
+    })();
+  </script>
 </body>
 </html>
