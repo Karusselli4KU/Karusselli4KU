@@ -20,7 +20,7 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ v1.20</title>
+  <title>Karusselli 4 KÜ v1.24 v1.24</title>
   <style>
     :root{
       /* Palette D — Warm Light (v1.8) */
@@ -310,12 +310,7 @@
         <div class="actions">
           <button class="btn primary" id="btnLogin">Войти</button>
         </div>
-
-        <div class="hint" id="authHint">
-          Аккаунты сохраняются в листе <b>Users</b>. Пароли хранятся как <i>salt + hash</i>.
-        </div>
-
-        <div id="log_msg" class="msg"></div>
+<div id="log_msg" class="msg"></div>
       </div>
 
       <div class="card card-pad">
@@ -352,10 +347,7 @@
           <button class="tab" id="tab_readings" data-page="readings">Показания</button>
           <button class="tab" id="tab_bills" data-page="bills">Счета</button>
         </div>
-
-        <div class="who" id="whoLine" style="margin:0 0 12px; color:var(--muted); font-size:12px"></div>
-
-        <!-- HOME -->
+<!-- HOME -->
         <div id="page_home">
           <div class="page-title" id="homeTitle">Главная</div>
 
@@ -488,12 +480,9 @@
         ph_pass_reg: "минимум 6 символов",
         ph_apt: "например: 5",
 
-        authHint: 'Аккаунты сохраняются в листе <b>Users</b>. Пароли хранятся как <i>salt + hash</i>.',
         regOk: "Регистрация успешна. Теперь можно войти.",
         errReg: "Ошибка регистрации",
         errLogin: "Ошибка входа",
-
-        whoPrefix: "Вы вошли как",
 
         tabHome: "Главная",
         tabReadings: "Показания",
@@ -564,12 +553,9 @@
         ph_pass_reg: "vähemalt 6 märki",
         ph_apt: "nt: 5",
 
-        authHint: 'Kontod salvestatakse lehele <b>Users</b>. Paroolid on <i>salt + hash</i> kujul.',
         regOk: "Registreerimine õnnestus. Nüüd saad sisse logida.",
         errReg: "Registreerimise viga",
         errLogin: "Sisselogimise viga",
-
-        whoPrefix: "Olete sisse logitud kui",
 
         tabHome: "Avaleht",
         tabReadings: "Näidud",
@@ -640,12 +626,9 @@
         ph_pass_reg: "min 6 characters",
         ph_apt: "e.g.: 5",
 
-        authHint: 'Accounts are stored in the <b>Users</b> sheet. Passwords are stored as <i>salt + hash</i>.',
         regOk: "Registration successful. You can now sign in.",
         errReg: "Registration error",
         errLogin: "Sign-in error",
-
-        whoPrefix: "Logged in as",
 
         tabHome: "Home",
         tabReadings: "Readings",
@@ -758,8 +741,6 @@
       document.getElementById("reg_pass").placeholder = t.ph_pass_reg;
       document.getElementById("reg_apt").placeholder = t.ph_apt;
 
-      document.getElementById("authHint").innerHTML = t.authHint;
-
       // app nav
       document.getElementById("tab_home").textContent = t.tabHome;
       document.getElementById("tab_readings").textContent = t.tabReadings;
@@ -809,24 +790,21 @@
       document.getElementById("nextReadings2").textContent = t.nextReadings2;
       document.getElementById("nextBills1").textContent = t.nextBills1;
       document.getElementById("nextBills2").textContent = t.nextBills2;
-
-      // status + who
+      // status (header only)
       const saved = localStorage.getItem("ku_user");
       if (saved){
         try{
           const u = JSON.parse(saved);
-          document.getElementById("whoLine").textContent = `${t.whoPrefix}: ${u.username}`;
           setStatus(true, u.username);
         }catch(_){
-          document.getElementById("whoLine").textContent = `${t.whoPrefix}: —`;
           setStatus(false);
         }
       }else{
-        document.getElementById("whoLine").textContent = `${t.whoPrefix}: —`;
         setStatus(false);
       }
 
       // active lang button
+
       document.getElementById("lang_ru").classList.toggle("active", lang==="ru");
       document.getElementById("lang_et").classList.toggle("active", lang==="et");
       document.getElementById("lang_en").classList.toggle("active", lang==="en");
@@ -844,7 +822,7 @@
       document.getElementById("appSection").classList.remove("hidden");
 
       const t = I18N[getLang()] || I18N.ru;
-      document.getElementById("whoLine").textContent = `${t.whoPrefix}: ${user.username}`;
+
       setStatus(true, user.username);
 
       renderDemoTables(user);
