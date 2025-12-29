@@ -1,481 +1,583 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Karusselli 4 KÜ — портал</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Karusselli 4 KÜ — портал (концепт)</title>
   <style>
     :root{
-      --bg1:#0a0f1e;
-      --bg2:#0b1f2a;
-      --card:#0b1220cc;
-      --card2:#0b1220f2;
-      --stroke:#243043;
-      --text:#e7eefc;
-      --muted:#a9b6cf;
-      --blue:#2f6bff;
-      --blue2:#1f57e6;
-      --green:#2bd576;
-      --red:#ff4d4d;
-      --shadow: 0 10px 35px rgba(0,0,0,.45);
+      --bg0:#05070e;
+      --bg1:#070a14;
+      --bg2:#0b1220;
+      --card:rgba(18,26,40,.72);
+      --card2:rgba(18,26,40,.60);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+      --text:#e9eefc;
+      --muted:#aeb7cb;
+      --accent:#6b7cff;
+      --accent2:#4f65ff;
+      --good:#35d07f;
+      --warn:#ffd34d;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
       --radius:18px;
+      --pill:rgba(255,255,255,.06);
+      --pill2:rgba(255,255,255,.10);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans","Helvetica Neue",sans-serif;
       color:var(--text);
       background:
-        radial-gradient(900px 500px at 20% 20%, rgba(47,107,255,.22), transparent 60%),
-        radial-gradient(800px 450px at 80% 35%, rgba(43,213,118,.14), transparent 55%),
-        radial-gradient(900px 500px at 60% 85%, rgba(255,77,77,.12), transparent 60%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
+        radial-gradient(900px 520px at 16% 12%, rgba(107,124,255,.20), transparent 62%),
+        radial-gradient(900px 520px at 84% 20%, rgba(107,124,255,.13), transparent 62%),
+        radial-gradient(900px 520px at 55% 85%, rgba(255,211,77,.08), transparent 62%),
+        linear-gradient(160deg, var(--bg0), var(--bg2));
+      overflow-x:hidden;
     }
+
+    /* subtle dotted grid like v1 */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background-image:
+        radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity:.28;
+      pointer-events:none;
+      mask-image: radial-gradient(900px 600px at 50% 30%, black 45%, transparent 70%);
+    }
+
     .topbar{
       position:sticky; top:0; z-index:50;
-      padding:18px 22px;
-      background: linear-gradient(180deg, rgba(3,7,18,.85), rgba(3,7,18,.55));
+      background: linear-gradient(180deg, rgba(7,10,20,.88), rgba(7,10,20,.55));
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255,255,255,.06);
     }
     .topbar-inner{
-      max-width:1100px;
+      max-width:1020px;
       margin:0 auto;
+      padding:14px 16px;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
-      gap:16px;
+      gap:14px;
     }
-    .brand{display:flex; flex-direction:column; line-height:1.1;}
-    .brand h1{margin:0; font-size:20px; font-weight:800; letter-spacing:.2px;}
-    .brand small{color:var(--muted); font-size:12px; margin-top:4px;}
-    .status-pill{
+    .brand h1{margin:0; font-size:18px; font-weight:900; letter-spacing:.2px}
+    .brand small{display:block; margin-top:4px; color:var(--muted); font-size:12px}
+    .right-actions{display:flex; gap:10px; align-items:center; justify-content:flex-end}
+    .status{
       display:flex; align-items:center; gap:10px;
       padding:8px 12px;
       border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow: 0 8px 26px rgba(0,0,0,.25);
-      color:var(--muted);
-      font-size:12px;
+      background:var(--pill);
+      border:1px solid var(--stroke);
+      box-shadow: 0 12px 28px rgba(0,0,0,.35);
+      font-size:12px; color:var(--muted);
       white-space:nowrap;
     }
-    .dot{width:8px; height:8px; border-radius:50%}
-    .dot.red{background:var(--red); box-shadow:0 0 0 3px rgba(255,77,77,.18)}
-    .dot.green{background:var(--green); box-shadow:0 0 0 3px rgba(43,213,118,.18)}
-    .wrap{max-width:1100px; margin:0 auto; padding:22px;}
-    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:18px;}
-    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
+    .dot{width:8px;height:8px;border-radius:50%}
+    .dot.good{background:var(--good); box-shadow:0 0 0 3px rgba(53,208,127,.16)}
+    .dot.bad{background:#ff4d4d; box-shadow:0 0 0 3px rgba(255,77,77,.14)}
+    .btn{
+      border:1px solid var(--stroke);
+      background:var(--pill);
+      color:var(--text);
+      padding:8px 12px;
+      border-radius:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .btn:hover{background:var(--pill2)}
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(107,124,255,.95), rgba(79,101,255,.85));
+      border-color: rgba(107,124,255,.35);
+    }
+    .btn.primary:hover{filter:brightness(1.05)}
+
+    .wrap{max-width:1020px; margin:0 auto; padding:18px 16px 28px}
+
+    /* AUTH view (kept simple; you can style later) */
+    .auth-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
+    @media (max-width:900px){ .auth-grid{grid-template-columns:1fr} }
     .card{
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:18px;
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
     }
-    .card h2{margin:0 0 10px; font-size:16px; font-weight:800;}
-    .sub{margin:0 0 14px; color:var(--muted); font-size:12px;}
-    label{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-      font-size:12px;
-      color:var(--muted);
-      margin-top:10px;
-    }
+    .card-pad{padding:16px}
+    .card h2{margin:0 0 8px; font-size:16px; font-weight:900}
+    .sub{margin:0 0 10px; color:var(--muted); font-size:12px}
+    label{display:block; color:var(--muted); font-size:12px; margin-top:10px}
     input{
       width:100%;
       margin-top:6px;
       padding:12px 12px;
       border-radius:12px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(2,6,23,.55);
+      background: rgba(5,7,14,.55);
       color:var(--text);
       outline:none;
     }
     input:focus{
-      border-color: rgba(47,107,255,.55);
-      box-shadow: 0 0 0 4px rgba(47,107,255,.16);
+      border-color: rgba(107,124,255,.55);
+      box-shadow: 0 0 0 4px rgba(107,124,255,.16);
     }
-    .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
-    @media (max-width: 520px){ .row{grid-template-columns:1fr} }
-    .actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
-    .btn{
-      appearance:none;
-      border:0;
-      border-radius:12px;
-      padding:10px 14px;
-      font-weight:700;
-      cursor:pointer;
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .btn.primary{
-      background: linear-gradient(180deg, var(--blue), var(--blue2));
-      border-color: rgba(47,107,255,.45);
-    }
-    .btn.primary:hover{filter:brightness(1.05)}
-    .btn.ghost:hover{background: rgba(255,255,255,.10)}
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+    @media (max-width:520px){ .row{grid-template-columns:1fr} }
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .msg{margin-top:10px; font-size:13px}
+    .msg.ok{color:var(--good)}
+    .msg.err{color:#ff4d4d}
     .hint{
-      margin-top:12px;
+      margin-top:10px;
       padding:10px 12px;
       border-radius:12px;
-      background: rgba(255,255,255,.06);
-      border: 1px dashed rgba(255,255,255,.12);
-      color: var(--muted);
+      border:1px dashed rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color:var(--muted);
       font-size:12px;
       line-height:1.45;
     }
-    .msg{margin-top:10px; font-size:13px}
-    .msg.ok{color:var(--green)}
-    .msg.err{color:var(--red)}
-    .hidden{display:none !important;}
-    .shell{display:grid; grid-template-columns: 260px 1fr; gap:18px;}
-    @media (max-width: 920px){ .shell{grid-template-columns:1fr} }
-    .nav{background: var(--card2);}
-    .nav h3{margin:0 0 10px; font-size:14px; font-weight:900; letter-spacing:.2px;}
-    .nav .userline{font-size:12px; color:var(--muted); margin:0 0 12px; line-height:1.4;}
-    .nav a{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px;
+    .hidden{display:none !important}
+
+    /* APP (v1 layout) */
+    .app-shell{display:grid; grid-template-columns: 230px 1fr; gap:16px}
+    @media (max-width:900px){ .app-shell{grid-template-columns:1fr} }
+
+    .sidebar{
+      padding:14px;
+      background: rgba(18,26,40,.62);
+    }
+    .sidebar h3{margin:0 0 10px; font-size:14px; font-weight:900}
+    .sidebar .who{color:var(--muted); font-size:12px; margin:0 0 12px}
+    .side-link{
+      display:block;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
       text-decoration:none;
       color:var(--text);
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.05);
+      font-weight:800;
       margin-top:10px;
     }
-    .nav a.active{background: rgba(47,107,255,.18); border-color: rgba(47,107,255,.35);}
-    .badge{
-      font-size:11px;
-      color:var(--muted);
-      padding:3px 8px;
-      border-radius:999px;
-      background: rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.08);
-      white-space:nowrap;
+    .side-link.active{
+      background: rgba(107,124,255,.16);
+      border-color: rgba(107,124,255,.30);
     }
-    .page{background: var(--card2); min-height:360px;}
-    .hero{
-      display:flex; gap:14px; align-items:center;
+
+    .main{
       padding:14px;
-      border-radius:16px;
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      margin-top:10px;
+      background: rgba(18,26,40,.62);
     }
-    .house{
-      width:120px; height:90px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),
-        radial-gradient(80px 60px at 30% 30%, rgba(47,107,255,.25), transparent 60%),
-        radial-gradient(80px 60px at 70% 60%, rgba(43,213,118,.18), transparent 60%),
-        #0b1220;
-      display:flex; align-items:center; justify-content:center;
-      color:rgba(255,255,255,.7);
+    .tabs{
+      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .tab{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      color:var(--text);
+      padding:8px 12px;
+      border-radius:999px;
       font-weight:900;
-      letter-spacing:.6px;
+      cursor:pointer;
     }
-    .kv{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;}
-    @media (max-width: 600px){ .kv{grid-template-columns:1fr} }
-    .kv .box{
-      padding:12px;
+    .tab.active{
+      background: rgba(107,124,255,.20);
+      border-color: rgba(107,124,255,.35);
+    }
+
+    .page-title{margin:0 0 10px; font-weight:900; font-size:14px; color:var(--text)}
+    .hero{
+      background:
+        radial-gradient(700px 380px at 25% 20%, rgba(107,124,255,.22), transparent 55%),
+        radial-gradient(700px 380px at 80% 35%, rgba(107,124,255,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:18px;
+      min-height:340px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero .caption{
+      position:absolute; left:0; right:0; bottom:12px;
+      text-align:center;
+      color:rgba(233,238,252,.9);
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:.2px;
+      text-shadow: 0 8px 20px rgba(0,0,0,.55);
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      width:160px;height:160px;
+      right:48px; top:30px;
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), rgba(255,255,255,.04) 55%, transparent 70%);
+      border:1px solid rgba(255,255,255,.10);
+      filter: blur(.2px);
+      opacity:.45;
+    }
+    .house-svg{
+      width:100%;
+      height:100%;
+      display:block;
+      opacity:.55;
+    }
+    .house-wrap{
+      position:absolute;
+      left:50%;
+      top:52%;
+      transform:translate(-50%,-50%);
+      width:min(720px, 96%);
+      max-height:290px;
+    }
+
+    .bottom-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:14px}
+    @media (max-width:900px){ .bottom-grid{grid-template-columns:1fr} }
+    .mini{
+      background: rgba(18,26,40,.58);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:14px;
+      min-height:150px;
+    }
+    .mini h4{margin:0 0 8px; font-size:13px; font-weight:900}
+    .mini .muted{color:var(--muted); font-size:12px; line-height:1.45}
+    ul{margin:10px 0 0 16px; color:var(--muted); font-size:12px; line-height:1.6}
+    .status-cards{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px}
+    .stat{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
       border-radius:14px;
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
+      padding:10px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
     }
-    .k{color:var(--text); font-weight:800}
-    .smallnote{color:var(--muted); font-size:12px; margin-top:10px}
-    table{width:100%; border-collapse:separate; border-spacing:0 10px; margin-top:10px;}
-    th{font-size:12px; color:var(--muted); text-align:left; font-weight:700; padding:0 10px;}
+    .stat .num{font-size:18px; font-weight:1000; color:var(--text); line-height:1}
+    .stat .lbl{font-size:11px; color:var(--muted); margin-top:3px}
+
+    /* Tables for pages */
+    table{width:100%; border-collapse:separate; border-spacing:0 10px}
+    th{font-size:12px; color:var(--muted); text-align:left; font-weight:800; padding:0 10px}
     td{
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
       padding:10px;
       font-size:13px;
     }
     td:first-child{border-radius:12px 0 0 12px}
     td:last-child{border-radius:0 12px 12px 0}
-    .status-ok{color:var(--green); font-weight:800}
-    .status-warn{color:#ffd34d; font-weight:800}
+    .ok{color:var(--good); font-weight:900}
+    .warn{color:var(--warn); font-weight:900}
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1>Karusselli 4 KÜ — портал</h1>
+        <h1>Karusselli 4 KÜ — портал (концепт)</h1>
         <small>Меню и контент доступны только после входа. Демо: пользователи в Google Sheets.</small>
       </div>
-      <div id="topStatus" class="status-pill" title="Статус сессии">
-        <span id="statusDot" class="dot red"></span>
-        <span id="statusText">Не выполнен вход</span>
+      <div class="right-actions">
+        <div class="status" id="statusPill">
+          <span id="statusDot" class="dot bad"></span>
+          <span id="statusText">Вход не выполнен</span>
+        </div>
+        <button class="btn" id="btnTopLogout" style="display:none">Выйти</button>
       </div>
     </div>
   </header>
 
   <main class="wrap">
-    <section id="authSection" class="grid">
-      <div class="card">
+    <!-- AUTH -->
+    <section id="authSection" class="auth-grid">
+      <div class="card card-pad">
         <h2>Войти</h2>
         <p class="sub">Введите имя пользователя и пароль.</p>
 
         <div class="row">
           <div>
             <label>Имя пользователя</label>
-            <input id="log_user" placeholder="например: member12" autocomplete="username" />
+            <input id="log_user" placeholder="например: member12" autocomplete="username"/>
           </div>
           <div>
             <label>Пароль</label>
-            <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
           </div>
         </div>
 
         <div class="actions">
           <button class="btn primary" id="btnLogin">Войти</button>
-          <button class="btn ghost" id="btnToRegister">Создать аккаунт</button>
         </div>
 
         <div class="hint">
-          Аккаунты сохраняются в листе <b>Users</b> вашей Google-таблицы. Пароли хранятся как <i>salt + hash</i>.
+          Аккаунты сохраняются в листе <b>Users</b>. Пароли хранятся как <i>salt + hash</i>.
         </div>
 
         <div id="log_msg" class="msg"></div>
       </div>
 
-      <div class="card">
+      <div class="card card-pad">
         <h2>Создать аккаунт</h2>
         <p class="sub">Создайте имя пользователя и пароль.</p>
 
         <div class="row">
           <div>
             <label>Имя пользователя</label>
-            <input id="reg_user" placeholder="например: test1" autocomplete="username" />
+            <input id="reg_user" placeholder="например: test1" autocomplete="username"/>
           </div>
           <div>
             <label>Пароль</label>
-            <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password" />
+            <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password"/>
           </div>
         </div>
 
         <label>Квартира</label>
-        <input id="reg_apt" placeholder="например: 5" inputmode="numeric" />
+        <input id="reg_apt" placeholder="например: 5" inputmode="numeric"/>
 
         <div class="actions">
-          <button class="btn primary" id="btnRegister">Создать</button>
-          <button class="btn ghost" id="btnToLogin">У меня уже есть аккаунт</button>
-        </div>
-
-        <div class="hint">
-          Далее добавим реальные роли (житель/правление) и доступ к данным по квартире.
+          <button class="btn primary" id="btnRegister">Создать аккаунт</button>
         </div>
 
         <div id="reg_msg" class="msg"></div>
       </div>
     </section>
 
-    <section id="appSection" class="shell hidden">
-      <aside class="card nav">
+    <!-- APP (v1 визуализация) -->
+    <section id="appSection" class="app-shell hidden">
+      <aside class="card sidebar">
         <h3>Меню</h3>
-        <p id="userline" class="userline">—</p>
+        <p class="who" id="whoLine">Вы вошли как: —</p>
 
-        <a href="#home" data-page="home" class="active">
-          <span>Главная</span>
-          <span class="badge">Контакты</span>
-        </a>
-
-        <a href="#readings" data-page="readings">
-          <span>Показания</span>
-          <span class="badge">Статус</span>
-        </a>
-
-        <a href="#bills" data-page="bills">
-          <span>Счета</span>
-          <span class="badge">Архив</span>
-        </a>
-
-        <div class="actions" style="margin-top:14px">
-          <button class="btn primary" id="btnLogout" style="width:100%">Выйти</button>
-        </div>
-
-        <div class="smallnote">
-          Роль <b>board</b> получит доступ ко всем квартирам. Сейчас роль читается из листа <b>Users</b>.
-        </div>
+        <a class="side-link active" href="#home" data-page="home">Главная</a>
+        <a class="side-link" href="#readings" data-page="readings">Показания</a>
+        <a class="side-link" href="#bills" data-page="bills">Счета</a>
       </aside>
 
-      <section class="card page">
-        <div id="page_home" class="page-inner">
-          <h2 style="margin:0 0 6px">Главная</h2>
-          <p class="sub">Информация о товариществе и контакты.</p>
+      <section class="card main">
+        <div class="tabs">
+          <button class="tab active" data-page="home">Главная</button>
+          <button class="tab" data-page="readings">Показания</button>
+          <button class="tab" data-page="bills">Счета</button>
+        </div>
+
+        <!-- HOME -->
+        <div id="page_home">
+          <div class="page-title">Главная</div>
 
           <div class="hero">
-            <div class="house">K4</div>
-            <div style="flex:1">
-              <div style="font-weight:900; font-size:14px">Karusselli 4 KÜ</div>
-              <div class="sub" style="margin:6px 0 0">Стилизация как в прототипе v1, но с рабочей авторизацией.</div>
+            <div class="house-wrap">
+              <!-- simple line-art house like v1 -->
+              <svg class="house-svg" viewBox="0 0 900 420" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="white" stop-opacity=".18"/>
+                    <stop offset="1" stop-color="white" stop-opacity=".05"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- roof -->
+                <path d="M140 165 L450 35 L760 165" stroke="url(#g1)" stroke-width="3" opacity=".85"/>
+                <path d="M170 165 H730" stroke="url(#g1)" stroke-width="3" opacity=".85"/>
+
+                <!-- house body -->
+                <rect x="210" y="165" width="480" height="210" rx="22" stroke="url(#g1)" stroke-width="3" opacity=".85"/>
+                <rect x="225" y="180" width="450" height="180" rx="18" stroke="white" stroke-opacity=".08" stroke-width="2"/>
+
+                <!-- windows (8) -->
+                <g opacity=".9">
+                  <rect x="270" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                  <rect x="398" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                  <rect x="526" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                  <rect x="654" y="215" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+
+                  <rect x="270" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                  <rect x="398" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                  <rect x="526" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                  <rect x="654" y="300" width="105" height="70" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                </g>
+
+                <!-- door -->
+                <rect x="438" y="295" width="78" height="118" rx="10" stroke="url(#g1)" stroke-width="3"/>
+                <circle cx="502" cy="355" r="6" fill="white" fill-opacity=".18"/>
+              </svg>
             </div>
+            <div class="caption">Karusselli 4</div>
           </div>
 
-          <div class="kv">
-            <div class="box">
-              <div class="k">Члены правления</div>
-              • Имя Фамилия — председатель<br/>
-              • Имя Фамилия — член правления
+          <div class="bottom-grid">
+            <div class="mini">
+              <h4>Контактная информация</h4>
+              <div class="muted"><b>Члены правления</b></div>
+              <ul>
+                <li>Председатель: [имя фамилия] — [email]/телефон</li>
+                <li>Член правления: [имя фамилия] — [email]/телефон</li>
+              </ul>
+              <div class="muted" style="margin-top:10px"><b>Адрес</b><br/>Karusselli 4, [город], Estonia</div>
+              <div class="muted" style="margin-top:10px"><b>Банковские реквизиты</b><br/>IBAN: [EE.. ..]<br/>Банк: [Swedbank / SEB / ..]<br/>Получатель: Karusselli 4 KÜ</div>
             </div>
-            <div class="box">
-              <div class="k">Адрес</div>
-              Karusselli 4, Eesti<br/>
-              <span class="k">Email:</span> karusselli4ku@gmail.com
-            </div>
-            <div class="box">
-              <div class="k">Банковские реквизиты</div>
-              IBAN: EE00 0000 0000 0000 000<br/>
-              Получатель: Karusselli 4 KÜ
-            </div>
-            <div class="box">
-              <div class="k">Примечание</div>
-              Этот контент позже вынесем в отдельный лист “Settings”.
+
+            <div class="mini">
+              <h4>Быстрый статус</h4>
+              <div class="muted">Сводка по прошлому месяцу (демо-данные):</div>
+
+              <div class="status-cards">
+                <div class="stat">
+                  <div class="num" id="stat_total">24</div>
+                  <div class="lbl">квартир всего</div>
+                </div>
+                <div class="stat">
+                  <div class="num" id="stat_done">20</div>
+                  <div class="lbl">сдали показания</div>
+                </div>
+                <div class="stat" style="grid-column:1 / span 2">
+                  <div class="num" id="stat_missing">4</div>
+                  <div class="lbl">не сдали</div>
+                </div>
+              </div>
+
+              <div class="muted" style="margin-top:10px">
+                Дальше подключим реальные данные: статусы можно показывать жильцу только по его квартире.
+              </div>
             </div>
           </div>
         </div>
 
-        <div id="page_readings" class="page-inner hidden">
-          <h2 style="margin:0 0 6px">Показания</h2>
-          <p class="sub">Статус показаний по каждой квартире за прошлый месяц (пока демо).</p>
+        <!-- READINGS -->
+        <div id="page_readings" class="hidden">
+          <div class="page-title">Показания</div>
+          <div class="muted" style="font-size:12px">Статус показаний по каждой квартире за прошлый месяц (пока демо).</div>
 
-          <table>
+          <table style="margin-top:10px">
             <thead>
-              <tr>
-                <th>Квартира</th>
-                <th>Статус (прошлый месяц)</th>
-                <th>Последнее напоминание</th>
-              </tr>
+              <tr><th>Квартира</th><th>Статус</th><th>Комментарий</th></tr>
             </thead>
-            <tbody id="readingsTable"></tbody>
+            <tbody id="readingsBody"></tbody>
           </table>
 
-          <div class="smallnote">
-            Следующий шаг: подключим реальные данные из листа <b>Reminder</b> и ограничим видимость: житель видит только свою квартиру.
+          <div class="muted" style="font-size:12px; margin-top:8px">
+            Следующий шаг: читать данные из листа <b>Reminder</b> и фильтровать по квартире/роли.
           </div>
         </div>
 
-        <div id="page_bills" class="page-inner hidden">
-          <h2 style="margin:0 0 6px">Счета</h2>
-          <p class="sub">Выставленные счета за весь период (пока демо).</p>
+        <!-- BILLS -->
+        <div id="page_bills" class="hidden">
+          <div class="page-title">Счета</div>
+          <div class="muted" style="font-size:12px">Выставленные счета за весь период (пока демо).</div>
 
-          <table>
+          <table style="margin-top:10px">
             <thead>
-              <tr>
-                <th>Период</th>
-                <th>Квартира</th>
-                <th>Сумма</th>
-                <th>Статус</th>
-              </tr>
+              <tr><th>Период</th><th>Квартира</th><th>Сумма</th><th>Статус</th></tr>
             </thead>
-            <tbody id="billsTable"></tbody>
+            <tbody id="billsBody"></tbody>
           </table>
 
-          <div class="smallnote">
-            Следующий шаг: подключим лист “Invoices” и фильтрацию по квартире/роли.
+          <div class="muted" style="font-size:12px; margin-top:8px">
+            Следующий шаг: подключим лист “Invoices” и покажем счета только по квартире жильца.
           </div>
         </div>
+
       </section>
     </section>
   </main>
 
   <script>
-    // Worker URL — оставляем как есть (у тебя уже настроено)
+    // ВАЖНО: ничего “не меняю каждый раз” — API_BASE остаётся фиксированным.
+    // Если у тебя другой URL воркера — просто скажи, я выпущу новый index.html с ним.
     const API_BASE = "https://withered-lake-3ad8.andrei-voronenko836.workers.dev";
 
-    function setStatus(isAuthed, text){
+    function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    function setStatus(isIn){
       const dot = document.getElementById("statusDot");
-      const label = document.getElementById("statusText");
-      dot.classList.toggle("green", !!isAuthed);
-      dot.classList.toggle("red", !isAuthed);
-      label.textContent = text || (isAuthed ? "Выполнен вход" : "Не выполнен вход");
+      const text = document.getElementById("statusText");
+      dot.classList.toggle("good", !!isIn);
+      dot.classList.toggle("bad", !isIn);
+      text.textContent = isIn ? "Вход выполнен" : "Вход не выполнен";
+      document.getElementById("btnTopLogout").style.display = isIn ? "inline-block" : "none";
     }
 
     function showAuth(){
       document.getElementById("authSection").classList.remove("hidden");
       document.getElementById("appSection").classList.add("hidden");
-      setStatus(false, "Не выполнен вход");
+      setStatus(false);
     }
-
     function showApp(user){
       document.getElementById("authSection").classList.add("hidden");
       document.getElementById("appSection").classList.remove("hidden");
-      const { username, apartment, role } = user;
-      document.getElementById("userline").innerHTML =
-        `Пользователь: <b>${escapeHtml(username)}</b><br/>Квартира: <b>${escapeHtml(apartment)}</b> • Роль: <b>${escapeHtml(role)}</b>`;
-      setStatus(true, `Вход: ${username}`);
-      renderDemoTables(apartment, role);
-      navigateTo("home");
+      document.getElementById("whoLine").textContent = `Вы вошли как: ${user.username}`;
+      setStatus(true);
+      // demo stats: if board -> total 24 else show totals anyway (v1 look)
+      renderDemoTables(user);
+      navigate("home");
     }
 
-    function navigateTo(page){
-      ["home","readings","bills"].forEach(p => {
+    function markActive(page){
+      document.querySelectorAll("[data-page]").forEach(el=>{
+        const p = el.getAttribute("data-page");
+        el.classList.toggle("active", p === page);
+      });
+      ["home","readings","bills"].forEach(p=>{
         document.getElementById("page_"+p).classList.toggle("hidden", p !== page);
       });
-      document.querySelectorAll(".nav a[data-page]").forEach(a => {
-        a.classList.toggle("active", a.getAttribute("data-page") === page);
-      });
+    }
+    function navigate(page){
+      markActive(page);
+      history.replaceState(null,"", "#"+page);
     }
 
-    function renderDemoTables(apartment, role){
-      const apts = (role === "board") ? ["1","2","3", String(apartment)] : [String(apartment)];
+    function renderDemoTables(user){
+      const role = user.role || "member";
+      const apt = String(user.apartment || "");
+      const apartments = (role === "board") ? Array.from({length:24}, (_,i)=>String(i+1)) : [apt];
 
-      const readingsTbody = document.getElementById("readingsTable");
-      readingsTbody.innerHTML = "";
-      apts.forEach((apt, idx) => {
-        const status = (idx % 2 === 0) ? "✅ Сдано" : "⏳ Ожидается";
-        const cls = (status.includes("✅")) ? "status-ok" : "status-warn";
-        const last = (status.includes("✅")) ? "—" : "Напоминание: последний день месяца";
-        readingsTbody.insertAdjacentHTML("beforeend", `
+      // readings demo
+      const rb = document.getElementById("readingsBody");
+      rb.innerHTML = "";
+      apartments.slice(0, role==="board" ? 10 : 1).forEach((a,i)=>{
+        const ok = (i % 3 !== 0);
+        rb.insertAdjacentHTML("beforeend", `
           <tr>
-            <td><b>${escapeHtml(apt)}</b></td>
-            <td class="${cls}">${status}</td>
-            <td>${escapeHtml(last)}</td>
+            <td><b>${esc(a)}</b></td>
+            <td class="${ok ? "ok":"warn"}">${ok ? "✅ Сдано":"⏳ Ожидается"}</td>
+            <td>${ok ? "—":"Напоминание: последний день месяца"}</td>
           </tr>
         `);
       });
 
-      const billsTbody = document.getElementById("billsTable");
-      billsTbody.innerHTML = "";
-      const demoBills = [
-        { period:"2025-11", apt:String(apartment), sum:"123.45 €", st:"Оплачено" },
-        { period:"2025-12", apt:String(apartment), sum:"98.10 €",  st:"Ожидает оплаты" }
+      // bills demo
+      const bb = document.getElementById("billsBody");
+      bb.innerHTML = "";
+      const demo = [
+        {period:"2025-11", apt:apt || "—", sum:"123.45 €", st:"Оплачено"},
+        {period:"2025-12", apt:apt || "—", sum:"98.10 €", st:"Ожидает оплаты"},
       ];
-      demoBills.forEach(b => {
-        const cls = (b.st === "Оплачено") ? "status-ok" : "status-warn";
-        billsTbody.insertAdjacentHTML("beforeend", `
+      demo.forEach(x=>{
+        bb.insertAdjacentHTML("beforeend", `
           <tr>
-            <td><b>${escapeHtml(b.period)}</b></td>
-            <td>${escapeHtml(b.apt)}</td>
-            <td>${escapeHtml(b.sum)}</td>
-            <td class="${cls}">${escapeHtml(b.st)}</td>
+            <td><b>${esc(x.period)}</b></td>
+            <td>${esc(x.apt)}</td>
+            <td>${esc(x.sum)}</td>
+            <td class="${x.st==="Оплачено" ? "ok":"warn"}">${esc(x.st)}</td>
           </tr>
         `);
       });
-    }
-
-    function escapeHtml(s){
-      return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
     async function apiPost(path, payload){
       const res = await fetch(API_BASE + path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
         body: JSON.stringify(payload || {})
       });
-      const data = await res.json().catch(() => ({ ok:false, error:"Bad JSON response" }));
+      const data = await res.json().catch(()=>({ok:false,error:"Bad JSON"}));
       return data;
     }
 
@@ -483,73 +585,63 @@
       const u = document.getElementById("reg_user").value.trim();
       const p = document.getElementById("reg_pass").value;
       const a = document.getElementById("reg_apt").value.trim();
-      const box = document.getElementById("reg_msg");
-      box.className = "msg";
-      box.textContent = "";
-
-      const d = await apiPost("/register", { username:u, password:p, apartment:a });
-      if (d.ok){
-        box.className = "msg ok";
-        box.textContent = "Регистрация успешна. Теперь можно войти.";
-      } else {
-        box.className = "msg err";
-        box.textContent = d.error || "Ошибка регистрации";
+      const msg = document.getElementById("reg_msg");
+      msg.className="msg"; msg.textContent="";
+      const d = await apiPost("/register", {username:u,password:p,apartment:a});
+      if(d.ok){
+        msg.className="msg ok";
+        msg.textContent="Регистрация успешна. Теперь можно войти.";
+      }else{
+        msg.className="msg err";
+        msg.textContent=d.error || "Ошибка регистрации";
       }
     }
 
     async function login(){
       const u = document.getElementById("log_user").value.trim();
       const p = document.getElementById("log_pass").value;
-      const box = document.getElementById("log_msg");
-      box.className = "msg";
-      box.textContent = "";
-
-      const d = await apiPost("/login", { username:u, password:p });
-      if (!d.ok){
-        box.className = "msg err";
-        box.textContent = d.error || "Ошибка входа";
+      const msg = document.getElementById("log_msg");
+      msg.className="msg"; msg.textContent="";
+      const d = await apiPost("/login", {username:u,password:p});
+      if(!d.ok){
+        msg.className="msg err";
+        msg.textContent=d.error || "Ошибка входа";
         return;
       }
+      const user = { username:u, apartment:d.apartment, role:d.role || "member" };
+      localStorage.setItem("ku_user", JSON.stringify(user));
       localStorage.setItem("ku_token", d.token || "");
-      localStorage.setItem("ku_user", JSON.stringify({ username:u, apartment:d.apartment, role:d.role || "member" }));
-      showApp({ username:u, apartment:d.apartment, role:d.role || "member" });
+      showApp(user);
     }
 
     function logout(){
-      localStorage.removeItem("ku_token");
       localStorage.removeItem("ku_user");
+      localStorage.removeItem("ku_token");
       showAuth();
     }
 
+    // wire
     document.getElementById("btnRegister").addEventListener("click", register);
     document.getElementById("btnLogin").addEventListener("click", login);
-    document.getElementById("btnLogout").addEventListener("click", logout);
+    document.getElementById("btnTopLogout").addEventListener("click", logout);
 
-    document.querySelectorAll(".nav a[data-page]").forEach(a => {
-      a.addEventListener("click", (e) => {
-        e.preventDefault();
-        navigateTo(a.getAttribute("data-page"));
-      });
+    // sidebar + tabs
+    document.querySelectorAll(".side-link").forEach(a=>{
+      a.addEventListener("click",(e)=>{ e.preventDefault(); navigate(a.getAttribute("data-page")); });
+    });
+    document.querySelectorAll(".tab").forEach(b=>{
+      b.addEventListener("click",()=> navigate(b.getAttribute("data-page")));
     });
 
-    document.getElementById("btnToRegister").addEventListener("click", () => {
-      document.getElementById("reg_user").focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-    document.getElementById("btnToLogin").addEventListener("click", () => {
-      document.getElementById("log_user").focus();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-
-    (function restore(){
+    // restore
+    (function(){
       const saved = localStorage.getItem("ku_user");
-      if (!saved) { showAuth(); return; }
+      if(!saved){ showAuth(); return; }
       try{
         const user = JSON.parse(saved);
-        if (user && user.username && user.apartment){
-          showApp({ username:user.username, apartment:user.apartment, role:user.role || "member" });
-        } else { showAuth(); }
-      } catch(_){ showAuth(); }
+        if(user && user.username){ showApp(user); }
+        else showAuth();
+      }catch(_){ showAuth(); }
     })();
   </script>
 </body>
