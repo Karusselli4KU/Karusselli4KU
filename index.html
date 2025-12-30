@@ -20,10 +20,10 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ</title>
+  <title>Karusselli 4 KÜ — v1.63</title>
   <style>
     :root{
-      /* Palette D — Warm Light (v1.8) */
+      /* Palette D — Warm Light (v1.63) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -277,7 +277,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.63</span>
         <small id="brandSub"></small>
       </div>
 
@@ -335,7 +335,7 @@
             <label id="regUserLabel">Имя пользователя</label>
             <input id="reg_user" placeholder="например: test1" autocomplete="username"/>
           
-          <label id="regEmailLabel">Email</label>
+          <label id="regEmailLabel">Username or email</label>
           <input id="reg_email" type="email" placeholder="name@example.com" autocomplete="email"/>
         </div>
           <div>
@@ -470,7 +470,10 @@
     // API (Cloudflare Worker proxy)
     const API_BASE = "https://withered-lake-3ad8.andrei-voronenko836.workers.dev";
 
-    // i18n packs (full coverage for UI + demo strings)
+    
+    // Helpers
+    function byId(id){ return document.getElementById(id); }
+// i18n packs (full coverage for UI + demo strings)
     const I18N = {
       ru: {
         brandTitle: "Karusselli 4 KÜ",
@@ -548,6 +551,7 @@
         resetCodePrompt: "Введите код из письма:",
         resetNewPassPrompt: "Введите НОВЫЙ пароль (мин 6):",
         resetDone: "Пароль обновлён. Теперь можно войти.",
+        resetCodeSent: "Код отправлен. Введите его ниже.",
         forgotError: "Ошибка сброса пароля: "},
 
       et: {
@@ -626,6 +630,7 @@
         resetCodePrompt: "Sisesta e-kirjas olev kood:",
         resetNewPassPrompt: "Sisesta UUS parool (min 6):",
         resetDone: "Parool uuendatud. Nüüd saad sisse logida.",
+        resetCodeSent: "Kood saadetud. Sisestage see allpool.",
         forgotError: "Parooli lähtestamise viga: "},
 
       en: {
@@ -704,6 +709,7 @@
         resetCodePrompt: "Enter the code from the email:",
         resetNewPassPrompt: "Enter a NEW password (min 6):",
         resetDone: "Password updated. You can sign in now.",
+        resetCodeSent: "Code sent. Enter it below.",
         forgotError: "Password reset error: "}
     };
 
@@ -722,10 +728,15 @@
         try { renderDemoTables(JSON.parse(saved)); } catch(_){}
       }
     }
+    const TEXT = (typeof I18N !== "undefined" ? I18N : {});
+
     function tr(key){
       const lang = getLang();
-      const pack = I18N[lang] || I18N.ru;
-      return pack[key];
+      const pack = (TEXT[lang] || TEXT.ru || {});
+      if (pack && Object.prototype.hasOwnProperty.call(pack, key)) return pack[key];
+      const fallback = (TEXT.ru || {});
+      if (fallback && Object.prototype.hasOwnProperty.call(fallback, key)) return fallback[key];
+      return key;
     }
     function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
@@ -914,13 +925,33 @@
     }
 
     async function apiPost(path, payload){
-      const res = await fetch(API_BASE + path, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(payload || {})
-      });
-      const data = await res.json().catch(()=>({ok:false,error:"Bad JSON"}));
-      return data;
+      // Robust fetch with timeout to avoid hanging UI when Apps Script is slow/unreachable
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), 20000); // 20s
+      try{
+        const res = await fetch(API_BASE + path, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload || {}),
+          signal: ctrl.signal
+        });
+        const data = await res.json().catch(()=>({ ok:false, error:"Bad JSON" }));
+        // If upstream returns non-2xx, still surface the payload error if present
+        if (!res.ok && data && typeof data === "object" && !data.ok){
+          data.http_status = res.status;
+        }
+        return data;
+      }catch(err){
+        const msg = (err && err.name === "AbortError") ? "Request timeout" : String(err);
+        return { ok:false, error: msg };
+      }finally{
+        clearTimeout(t);
+      }
+    }
+
+    // Compatibility alias used by forgot/reset helpers
+    async function apiCall(path, payload){
+      return apiPost(path, payload);
     }
 
     async function register(){
@@ -999,76 +1030,178 @@
       }
     })();
   
-    // --- Forgot password (email-based reset) ---
-    const resetModal = byId("resetModal");
-    const openReset = (ev)=>{ ev && ev.preventDefault(); if(resetModal){ resetModal.style.display="block"; byId("resetMsg").textContent=""; byId("resetMsg2").textContent=""; byId("resetStep2").style.display="none"; } };
-    const closeReset = ()=>{ if(resetModal) resetModal.style.display="none"; };
+    // --- Forgot password (email reset) ---
+// In-page modal (not browser prompt) so it won't disappear when switching windows.
+// IMPORTANT: modal markup is placed AFTER this <script>, so DO NOT cache elements at load time.
 
-    const forgotLink = byId("forgotLink");
-    if (forgotLink) forgotLink.addEventListener("click", async (ev) => {
-      ev.preventDefault();
+const resetFlow = { stage: 1, identifier: "" }; // 1: ask identifier, 2: ask code
 
-      // 1) Ask identifier (email or username)
-      const ident = prompt(t("forgotPrompt") || "Enter your email or username:", "");
-      if (!ident) return;
+function getLang_() {
+  return (window.lang || localStorage.getItem("lang") || "RU").toUpperCase();
+}
+function t_(key, fallback) {
+  const L = getLang_();
+  return (window.TEXT && window.TEXT[L] && window.TEXT[L][key]) || fallback || key;
+}
 
-      try {
-        const res = await apiForgot({ identifier: ident });
-        if (!res || !res.ok) throw new Error(res?.error || "Request failed");
-        alert(t("forgotSent") || "We sent a reset code to your email. Check inbox/spam.");
+function showReset_() {
+  const m = byId("resetModal");
+  if (!m) return;
+  m.style.display = "block";
+  // reset UI
+  resetFlow.stage = 1;
+  resetFlow.identifier = "";
+  const msg1 = byId("resetMsg");
+  const msg2 = byId("resetMsg2");
+  const step2 = byId("resetStep2");
+  const email = byId("resetEmail");
+  const code = byId("resetCode");
+  const sendBtn = byId("resetSendBtn");
+  const doBtn = byId("resetDoBtn");
+  if (msg1) if (msg1) msg1.textContent = t_("forgot_hint", "Enter username or email to receive a code.");
+  if (msg2) msg2.textContent = "";
+  if (step2) step2.style.display = "none";
+  if (email) { email.type="text"; email.value=""; email.placeholder = t_("forgot_placeholder","username or email"); }
+  if (code) { code.value=""; code.placeholder = t_("reset_code_placeholder","code"); }
+  if (sendBtn) sendBtn.textContent = t_("forgot_send_code","Send code");
+  if (doBtn) doBtn.textContent = t_("reset_continue","Continue");
+  // focus
+  setTimeout(()=>{ const e = byId("resetEmail"); e && e.focus(); }, 0);
+}
 
-        // 2) Ask reset code + new password (simple flow, no extra UI)
-        const code = prompt(t("resetCodePrompt") || "Enter the reset code from email:", "");
-        if (!code) return;
-        const newPass = prompt(t("resetNewPassPrompt") || "Enter a NEW password (min 6):", "");
-        if (!newPass) return;
+function hideReset_() {
+  const m = byId("resetModal");
+  if (!m) return;
+  m.style.display = "none";
+}
 
-        const r2 = await apiReset({ identifier: ident, code, new_password: newPass });
-        if (!r2 || !r2.ok) throw new Error(r2?.error || "Reset failed");
-        alert(t("resetDone") || "Password updated. Now you can sign in.");
-      } catch (e) {
-        alert((t("forgotError") || "Password reset error: ") + String(e.message || e));
+async function onSendCode_() {
+  const idEl = byId("resetEmail");
+  const msg1 = byId("resetMsg");
+  const msg2 = byId("resetMsg2");
+
+  const raw = (idEl && idEl.value ? idEl.value : "").trim();
+  if (!raw) { if (msg1) msg1.textContent = tr("missing_identifier"); return; }
+
+  // remember what user entered for the next step
+  window.__resetIdentifier = raw;
+
+  if (msg1) msg1.textContent = tr("sending") + "…";
+  if (msg2) msg2.textContent = "";
+
+  // Apps Script expects either {username} OR {email}
+  const payload = raw.includes("@") ? { email: raw } : { username: raw };
+
+  // Never let the UI "hang" if something throws
+  (async () => {
+    try {
+      const res = await apiCall("/forgot", payload);
+
+      // If API says user not found / any error: show message and stop (do NOT proceed to step 2)
+      if (!res || !res.ok) {
+        msg1.textContent = "";
+        msg2.textContent = t(res && res.error ? res.error : "error_generic");
+        sendBtn.disabled = false;
+        return;
       }
-    });
-    const resetClose = byId("resetClose"); if (resetClose) resetClose.addEventListener("click", closeReset);
-    const resetX = byId("resetX"); if (resetX) resetX.addEventListener("click", closeReset);
 
-    async function apiForgot(payload){
-      return apiCall("/forgot", payload);
+
+      if (!res || !res.ok) {
+        window.__resetIdentifier = "";
+        if (msg1) msg1.textContent = "";
+        if (msg2) msg2.textContent =
+          ((res && (res.error === "user_not_found" || res.error === "user not found"))) ? tr("user_not_found")
+          : ((res && res.error) ? res.error : tr("request_failed"));
+        return;
+      }
+
+      // Prefer explicit sent flag (AuthAPI_v3+). If absent, continue (privacy-friendly).
+      if (res.sent === false) {
+        window.__resetIdentifier = "";
+        if (msg1) msg1.textContent = tr("user_not_found");
+        if (msg2) msg2.textContent = "";
+        return;
+      }
+
+      if (msg1) msg1.textContent = tr("code_sent");
+
+      // move to step 2 (code + new password)
+      const step2 = byId("resetStep2");
+      if (step2) step2.style.display = "block";
+
+      // clear step2 fields and focus
+      const codeEl = byId("resetCode");
+      const passEl = byId("resetNewPass");
+      if (codeEl) codeEl.value = "";
+      if (passEl) passEl.value = "";
+      if (codeEl) codeEl.focus();
+
+    } catch (err) {
+      window.__resetIdentifier = "";
+      if (msg1) msg1.textContent = "";
+      if (msg2) msg2.textContent = (err && err.message) ? err.message : String(err);
     }
-    async function apiReset(payload){
-      return apiCall("/reset", payload);
-    }
+  })();
+}
 
-    const resetSendBtn = byId("resetSendBtn");
-    if (resetSendBtn) resetSendBtn.addEventListener("click", async ()=>{
-      const email = (byId("resetEmail")?.value || "").trim();
-      if(!email){ byId("resetMsg").textContent = t("email_required"); return; }
-      byId("resetMsg").textContent = "…";
-      try{
-        await apiForgot(email);
-        byId("resetMsg").textContent = t("reset_sent");
-        byId("resetStep2").style.display = "block";
-      }catch(e){
-        byId("resetMsg").textContent = (e && e.message) ? e.message : "Error";
-        byId("resetStep2").style.display = "block";
-      }
-    });
+async function onVerifyCode_() {
+  const doBtn = byId("resetDoBtn");
+  const msg2 = byId("resetMsg2");
+  const codeEl = byId("resetCode");
+  const passEl = byId("resetNewPass");
 
-    const resetDoBtn = byId("resetDoBtn");
-    if (resetDoBtn) resetDoBtn.addEventListener("click", async ()=>{
-      const email = (byId("resetEmail")?.value || "").trim();
-      const code = (byId("resetCode")?.value || "").trim();
-      const np = (byId("resetNewPass")?.value || "");
-      if(!email){ byId("resetMsg2").textContent = t("email_required"); return; }
-      byId("resetMsg2").textContent = "…";
-      try{
-        await apiReset(email, code, np);
-        byId("resetMsg2").textContent = t("reset_ok");
-      }catch(e){
-        byId("resetMsg2").textContent = (e && e.message) ? e.message : "Error";
-      }
-    });
+  const code = (codeEl && codeEl.value ? codeEl.value : "").trim();
+  if (!code) { msg2.textContent = tr("missing_code"); return; }
+
+  const newPass = (passEl && passEl.value ? passEl.value : "");
+  if (!newPass || newPass.length < 6) { msg2.textContent = tr("password_too_short"); return; }
+
+  const ident = (window.__resetIdentifier || "").trim();
+  if (!ident) { msg2.textContent = tr("missing_identifier"); return; }
+
+  doBtn.disabled = true;
+  msg2.textContent = tr("verifying") + "…";
+
+  // Backend expects `identifier` (username OR email). Keep username/email too for compatibility.
+  const payloadBase = ident.includes("@") ? { email: ident } : { username: ident };
+  const payload = { identifier: ident, ...payloadBase, code, new_password: newPass };
+
+  const res = await apiCall("/reset", payload);
+
+  doBtn.disabled = false;
+
+  if (!res || !res.ok) {
+    msg2.textContent = (res && res.error) ? res.error : tr("request_failed");
+    return;
+  }
+
+
+// Success
+    msg2.textContent = "password_reset_ok";
+    // Close + reset so the next reset works immediately
+    setTimeout(() => { hideReset_(); }, 600);
+    return;
+}
+
+// Delegate clicks so language re-render won't break handlers
+document.addEventListener("click", (e) => {
+  const forgot = e.target && e.target.closest ? e.target.closest("#forgotLink") : null;
+  if (forgot) { e.preventDefault(); showReset_(); return; }
+
+  if (e.target && e.target.id === "resetSendBtn") { e.preventDefault(); onSendCode_(); return; }
+  if (e.target && e.target.id === "resetDoBtn") { e.preventDefault(); onVerifyCode_(); return; }
+  if (e.target && (e.target.id === "resetClose" || e.target.id === "resetX")) { e.preventDefault(); hideReset_(); return; }
+
+  // Close only when clicking on overlay background (not when switching windows)
+  if (e.target && e.target.id === "resetModal") { hideReset_(); return; }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    const m = byId("resetModal");
+    if (m && m.style.display === "block") hideReset_();
+  }
+});
 
 </script>
 
@@ -1083,7 +1216,7 @@
         <p class="muted" data-i18n="forgot_hint">Enter the email used during registration. We will send a reset code.</p>
 
         <div class="field">
-          <label><span data-i18n="email">Email</span></label>
+          <label><span data-i18n="email">Username or email</span></label>
           <input id="resetEmail" type="email" autocomplete="email" placeholder="name@example.com" data-i18n-ph="email_ph"/>
         </div>
 
