@@ -20,10 +20,11 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.67</title>
+  <title>Karusselli 4 KÜ — v1.77</title>
   <style>
+
     :root{
-      /* Palette D — Warm Light (v1.67) */
+      /* Palette D — Warm Light (v1.77) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -135,19 +136,20 @@
     .sub{margin:0 0 10px; color:var(--muted); font-size:12px}
     label{display:block; color:var(--muted); font-size:12px; margin-top:10px}
     input{
-      width:100%;
-      margin-top:6px;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background: #ffffff;
-      color:var(--text);
-      outline:none;
-    }
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(107,124,255,.55);
+  background:#eef4ff;
+  box-shadow:0 0 0 4px rgba(107,124,255,.16);
+  outline:none;
+  transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+}
     input:focus{
-      border-color: rgba(107,124,255,.55);
-      box-shadow: 0 0 0 4px rgba(107,124,255,.16);
-    }
+  border-color: rgba(107,124,255,.9);
+  box-shadow:0 0 0 5px rgba(107,124,255,.22);
+  background:#eef4ff;
+}
     .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
     @media (max-width:520px){ .row{grid-template-columns:1fr} }
     .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
@@ -271,13 +273,30 @@
     .iconbtn{border:1px solid var(--stroke); background:var(--pill); border-radius:10px; padding:8px 10px; cursor:pointer}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
     @media (max-width:720px){.grid2{grid-template-columns:1fr}}
+
+textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(107,124,255,.55);
+  background:#eef4ff;
+  box-shadow:0 0 0 4px rgba(107,124,255,.16);
+  outline:none;
+  transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+}
+textarea:focus{
+  border-color: rgba(107,124,255,.9);
+  box-shadow:0 0 0 5px rgba(107,124,255,.22);
+  background:#eef4ff;
+}
+
 </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.67</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.77</span>
         <small id="brandSub"></small>
       </div>
 
@@ -487,6 +506,7 @@
         userLabel: "Имя пользователя",
         passLabel: "Пароль",
         loginBtn: "Войти",
+        forgot: "Забыли пароль?",
 
         regTitle: "Создать аккаунт",
         regSub: "Создайте имя пользователя и пароль.",
@@ -556,9 +576,27 @@
         missing_code: "Введите код из письма.",
         network_error: "Ошибка сети. Попробуйте ещё раз.",
         user_not_found: "Пользователь не найден.",
+    reset_title: "Сброс пароля",
+    reset_desc: "Введите имя пользователя или email, указанный при регистрации. Мы отправим код сброса.",
+    username_or_email: "Имя пользователя или email",
+    send_code: "Отправить код",
+    new_password: "Новый пароль",
+    continue: "Продолжить",
+    close: "Закрыть",
+    code_sent: "Код отправлен",
+    sending: "Отправка…",
+    verifying: "Проверка…",
+    password_reset_ok: "Пароль изменён",
+    missing_identifier: "Введите имя пользователя или email",
+    missing_new_password: "Введите новый пароль",
+    password_too_short: "Пароль слишком короткий (мин. 6 символов)",
+    invalid_code: "Неверный или просроченный код",
+    reset_done_close: "Готово",
 },
 
       et: {
+
+        forgot: "Unustasid parooli?",
         brandTitle: "Karusselli 4 KÜ",
         brandSub: "",
         statusOut: "Pole sisse logitud",
@@ -639,6 +677,22 @@
         missing_code: "Sisesta e-kirjas saadud kood.",
         network_error: "Võrgu viga. Proovi uuesti.",
         user_not_found: "Kasutajat ei leitud.",
+    reset_title: "Parooli taastamine",
+    reset_desc: "Sisesta registreerimisel kasutatud kasutajanimi või e‑post. Saadame taastamiskoodi.",
+    username_or_email: "Kasutajanimi või e‑post",
+    send_code: "Saada kood",
+    new_password: "Uus parool",
+    continue: "Jätka",
+    close: "Sulge",
+    code_sent: "Kood saadetud",
+    sending: "Saatmine…",
+    verifying: "Kontrollimine…",
+    password_reset_ok: "Parool muudetud",
+    missing_identifier: "Sisesta kasutajanimi või e‑post",
+    missing_new_password: "Sisesta uus parool",
+    password_too_short: "Parool liiga lühike (min 6 märki)",
+    invalid_code: "Vale või aegunud kood",
+    reset_done_close: "Valmis",
 },
 
       en: {
@@ -653,6 +707,7 @@
         userLabel: "Username",
         passLabel: "Password",
         loginBtn: "Sign in",
+        forgot: "Forgot password?",
 
         regTitle: "Create account",
         regSub: "Create a username and password.",
@@ -722,6 +777,22 @@
         missing_code: "Enter the code from the email.",
         network_error: "Network error. Please try again.",
         user_not_found: "User not found.",
+    reset_title: "Password reset",
+    reset_desc: "Enter the username or email used during registration. We will send a reset code.",
+    username_or_email: "Username or email",
+    send_code: "Send code",
+    new_password: "New password",
+    continue: "Continue",
+    close: "Close",
+    code_sent: "Code sent",
+    sending: "Sending…",
+    verifying: "Verifying…",
+    password_reset_ok: "Password changed",
+    missing_identifier: "Enter username or email",
+    missing_new_password: "Enter new password",
+    password_too_short: "Password too short (min 6 characters)",
+    invalid_code: "Invalid or expired code",
+    reset_done_close: "Done",
 }
     };
 
@@ -730,6 +801,11 @@
       if (saved && I18N[saved]) return saved;
       return "ru";
     }
+
+function getLangSafe(){
+  try { return getLang(); } catch(e){ return 'ru'; }
+}
+
     function setLang(lang){
       if (!I18N[lang]) return;
       localStorage.setItem("ku_lang", lang);
@@ -845,19 +921,31 @@
       document.getElementById("nextBills1").textContent = t.nextBills1;
       document.getElementById("nextBills2").textContent = t.nextBills2;
       // status (header only)
-      const saved = localStorage.getItem("ku_user");
-      if (saved){
-        try{
-          const u = JSON.parse(saved);
-          setStatus(true, u.username);
-        }catch(_){
-          setStatus(false);
-        }
-      }else{
-        setStatus(false);
-      }
+const saved = localStorage.getItem("ku_user");
+if (saved){
+  try{
+    const u = JSON.parse(saved);
+    setStatus(true, u.username);
+  }catch(_){
+    setStatus(false);
+  }
+}else{
+  setStatus(false);
+}
 
-      // active lang button
+// Apply generic i18n bindings (e.g. reset modal)
+document.querySelectorAll("[data-i18n]").forEach(el => {
+  const k = el.getAttribute("data-i18n");
+  if (!k) return;
+  el.textContent = tr(k);
+});
+document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+  const k = el.getAttribute("data-i18n-placeholder");
+  if (!k) return;
+  el.setAttribute("placeholder", tr(k));
+});
+
+// active lang button
 
       document.getElementById("lang_ru").classList.toggle("active", lang==="ru");
       document.getElementById("lang_et").classList.toggle("active", lang==="et");
@@ -1059,27 +1147,50 @@ function t_(key, fallback) {
 function showReset_() {
   const m = byId("resetModal");
   if (!m) return;
-  m.style.display = "block";
-  // reset UI
-  resetFlow.stage = 1;
-  resetFlow.identifier = "";
+
+  // reset state
+  window.__resetIdentifier = "";
   const msg1 = byId("resetMsg");
   const msg2 = byId("resetMsg2");
+  if (msg1) msg1.textContent = "";
+  if (msg2) msg2.textContent = "";
+
   const step2 = byId("resetStep2");
+  if (step2) step2.style.display = "none";
+
   const email = byId("resetEmail");
-  const code = byId("resetCode");
+  const codeEl = byId("resetCode");
+  const passEl = byId("resetNewPass");
+  if (email) {
+    email.type = "text";
+    email.value = "";
+  }
+  if (codeEl) codeEl.value = "";
+  if (passEl) passEl.value = "";
+
   const sendBtn = byId("resetSendBtn");
   const doBtn = byId("resetDoBtn");
-  if (msg1) if (msg1) msg1.textContent = t_("forgot_hint", "Enter username or email to receive a code.");
-  if (msg2) msg2.textContent = "";
-  if (step2) step2.style.display = "none";
-  if (email) { email.type="text"; email.value=""; email.placeholder = t_("forgot_placeholder","username or email"); }
-  if (code) { code.value=""; code.placeholder = t_("reset_code_placeholder","code"); }
-  if (sendBtn) sendBtn.textContent = t_("forgot_send_code","Send code");
-  if (doBtn) doBtn.textContent = t_("reset_continue","Continue");
-  // focus
-  setTimeout(()=>{ const e = byId("resetEmail"); e && e.focus(); }, 0);
+  if (sendBtn) sendBtn.disabled = false;
+  if (doBtn) doBtn.disabled = false;
+
+  // Apply i18n to modal elements explicitly
+  const titleEl = byId("resetTitle");
+  const hintEl = byId("resetHint");
+  const idLabel = byId("resetIdentifierLabel");
+  const codeLabel = byId("resetCodeLabel");
+  const newPassLabel = byId("resetNewPassLabel");
+
+  if (titleEl) titleEl.textContent = tr("reset_title");
+  if (hintEl) hintEl.textContent = tr("reset_desc");
+  if (idLabel) idLabel.textContent = tr("username_or_email");
+  if (codeLabel) codeLabel.textContent = tr("code");
+  if (newPassLabel) newPassLabel.textContent = tr("new_password");
+  if (sendBtn) sendBtn.textContent = tr("send_code");
+  if (doBtn) doBtn.textContent = tr("continue");
+
+  m.style.display = "block";
 }
+
 
 function hideReset_() {
   const m = byId("resetModal");
@@ -1109,7 +1220,7 @@ async function onSendCode_() {
   if (sendBtn) sendBtn.disabled = true;
 
   try {
-    const res = await apiCall("/forgot", { identifier });
+    const res = await apiCall("/forgot", { identifier, lang: getLang() });
 
     if (!res || res.ok !== true) {
       const err = (res && res.error) ? String(res.error) : "error";
@@ -1164,7 +1275,7 @@ async function onVerifyCode_() {
   if (msg2) msg2.textContent = tr("verifying");
 
   try {
-    const res = await apiCall("/reset", { identifier, code, new_password });
+    const res = await apiCall("/reset", { identifier, code, new_password, lang: getLang() });
 
     if (!res || res.ok !== true) {
       const err = (res && res.error) ? String(res.error) : "error";
@@ -1217,19 +1328,19 @@ document.addEventListener("keydown", (e) => {
     <div class="modal-backdrop" id="resetClose"></div>
     <div class="modal-card">
       <div class="modal-head">
-        <div class="h2" data-i18n="forgot_title">Password reset</div>
+        <div class="h2" data-i18n="reset_title">Password reset</div>
         <button class="iconbtn" id="resetX" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
-        <p class="muted" data-i18n="forgot_hint">Enter the email used during registration. We will send a reset code.</p>
+        <p class="muted" data-i18n="reset_desc">Enter the email used during registration. We will send a reset code.</p>
 
         <div class="field">
-          <label><span data-i18n="email">Username or email</span></label>
-          <input id="resetEmail" type="text" autocomplete="email" placeholder="name@example.com" data-i18n-ph="email_ph"/>
+          <label><span data-i18n="username_or_email">Username or email</span></label>
+          <input id="resetEmail" type="text" autocomplete="email" placeholder="name@example.com"/>
         </div>
 
         <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
-          <button class="btn primary" id="resetSendBtn" data-i18n="send">Send</button>
+          <button class="btn primary" id="resetSendBtn" data-i18n="send_code">Send</button>
           <div class="muted" id="resetMsg" style="flex:1"></div>
         </div>
 
@@ -1245,7 +1356,7 @@ document.addEventListener("keydown", (e) => {
             </div>
           </div>
           <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
-            <button class="btn primary" id="resetDoBtn" data-i18n="reset">Reset password</button>
+            <button class="btn primary" id="resetDoBtn" data-i18n="continue">Reset password</button>
             <div class="muted" id="resetMsg2" style="flex:1"></div>
           </div>
         </div>
