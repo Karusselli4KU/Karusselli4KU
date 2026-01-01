@@ -20,11 +20,11 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.89</title>
+  <title>Karusselli 4 KÜ — v1.91</title>
   <style>
 
     :root{
-      /* Palette D — Warm Light (v1.89) */
+      /* Palette D — Warm Light (v1.91) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -169,7 +169,7 @@
     .hidden{display:none !important}
 
     
-/* === AUTH INPUTS (v1.89 UI fix) === */
+/* === AUTH INPUTS (v1.91 UI fix) === */
 #authSection input,
 #authSection textarea{
   width:100%;
@@ -241,7 +241,7 @@
   #authSection .login-actions{ flex-wrap:wrap; }
 }
 
-/* === v1.89 precise auth sizing (per screenshot) === */
+/* === v1.91 precise auth sizing (per screenshot) === */
 
 /* Narrow LEFT login card */
 #authSection > .card:first-child{
@@ -270,7 +270,7 @@
   }
 }
 
-/* === v1.89 align widths to bottom field (per arrows) === */
+/* === v1.91 align widths to bottom field (per arrows) === */
 
 /* Reference width = apartment field */
 #authSection #reg_apt{
@@ -288,7 +288,7 @@
 
 /* Keep buttons unchanged */
 
-/* === v1.89 HOME: Quick Status (final) === */
+/* === v1.91 HOME: Quick Status (final) === */
 #page_home .qs88{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
 #page_home .qs88-row{ display:grid; grid-template-columns: 56px 1fr; gap:14px; align-items:center; }
 #page_home .qs88-icon{ width:56px; height:56px; display:flex; align-items:center; justify-content:center; }
@@ -428,7 +428,7 @@ textarea:focus{
   background:#eef4ff;
 }
 
-    /* ====== v1.89 menu layout ====== */
+    /* ====== v1.91 menu layout ====== */
     .langSelect{
       appearance: none;
       padding: 8px 12px;
@@ -473,7 +473,7 @@ textarea:focus{
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.89</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.91</span>
         <small id="brandSub"></small>
       </div>
 
@@ -616,7 +616,7 @@ textarea:focus{
             <div class="mini">
               <h4 id="quickTitle">Быстрый статус</h4>
 
-<!-- v1.89: New Quick Status layout (no totals, no legacy cards, no demo note) -->
+<!-- v1.91: New Quick Status layout (no totals, no legacy cards, no demo note) -->
 <div class="qs88">
   <div class="qs88-row">
     <div class="qs88-icon">
@@ -820,6 +820,9 @@ textarea:focus{
     password_too_short: "Пароль слишком короткий (мин. 6 символов)",
     invalid_code: "Неверный или просроченный код",
     reset_done_close: "Готово",
+      errAptTaken: "Эта квартира уже зарегистрирована. Используйте \"Забыли пароль?\" или обратитесь в правление.",
+      errUserTaken: "Имя пользователя уже занято.",
+      errEmailTaken: "Email уже используется."
 },
 
       et: {
@@ -921,6 +924,9 @@ textarea:focus{
     password_too_short: "Parool liiga lühike (min 6 märki)",
     invalid_code: "Vale või aegunud kood",
     reset_done_close: "Valmis",
+      errAptTaken: "See korter on juba registreeritud. Kasuta \"Unustasid parooli?\" või võta ühendust juhatusega.",
+      errUserTaken: "Kasutajanimi on juba võetud.",
+      errEmailTaken: "E-post on juba kasutusel."
 },
 
       en: {
@@ -1022,6 +1028,9 @@ textarea:focus{
     password_too_short: "Password too short (min 6 characters)",
     invalid_code: "Invalid or expired code",
     reset_done_close: "Done",
+      errAptTaken: "This apartment is already registered. Use \"Forgot password?\" or contact the board.",
+      errUserTaken: "Username is already taken.",
+      errEmailTaken: "Email is already in use."
 }
     };
 
@@ -1136,7 +1145,7 @@ function applyLang(){
       safeSetText("lbl_missing", t.lblMissing);
       safeSetText("quickNote", t.quickNote);
 
-// v1.89 quick status new layout labels (fallbacks if keys not present in I18N)
+// v1.91 quick status new layout labels (fallbacks if keys not present in I18N)
 safeSetText("qsCurrTitle", (t.qsCurrTitle || (lang==="et" ? "Kokkuvõte käesolevaks kuuks" : (lang==="en" ? "Summary for current month" : "Сводка по текущему месяцу"))));
 safeSetText("qsPrevTitle", (t.qsPrevTitle || (lang==="et" ? "Kokkuvõte eelmise kuu kohta" : (lang==="en" ? "Summary for previous month" : "Сводка по прошлому месяцу"))));
 safeSetText("qsReadOkLbl", (t.qsReadOkLbl || (lang==="et" ? "esitasid näidud" : (lang==="en" ? "submitted readings" : "сдали показания"))));
@@ -1329,7 +1338,11 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
         msg.textContent = t.regOk;
       }else{
         msg.className="msg err";
-        msg.textContent = d.error || t.errReg;
+        const code = String(d.error||"");
+if(code==="APARTMENT_TAKEN") msg.textContent = t.errAptTaken;
+else if(code==="USERNAME_TAKEN") msg.textContent = t.errUserTaken;
+else if(code==="EMAIL_TAKEN") msg.textContent = t.errEmailTaken;
+else msg.textContent = d.error || t.errReg;
       }
     }
 
