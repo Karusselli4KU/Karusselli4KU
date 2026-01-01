@@ -20,11 +20,11 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.85</title>
+  <title>Karusselli 4 KÜ — v1.86</title>
   <style>
 
     :root{
-      /* Palette D — Warm Light (v1.85) */
+      /* Palette D — Warm Light (v1.86) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -169,7 +169,7 @@
     .hidden{display:none !important}
 
     
-/* === AUTH INPUTS (v1.85 UI fix) === */
+/* === AUTH INPUTS (v1.86 UI fix) === */
 #authSection input,
 #authSection textarea{
   width:100%;
@@ -243,7 +243,7 @@
 }
 
 
-/* === v1.85 precise auth sizing (per screenshot) === */
+/* === v1.86 precise auth sizing (per screenshot) === */
 
 /* Narrow LEFT login card */
 #authSection > .card:first-child{
@@ -273,7 +273,7 @@
 }
 
 
-/* === v1.85 align widths to bottom field (per arrows) === */
+/* === v1.86 align widths to bottom field (per arrows) === */
 
 /* Reference width = apartment field */
 #authSection #reg_apt{
@@ -292,12 +292,87 @@
 /* Keep buttons unchanged */
 
 
-/* === v1.85 language flag (image) === */
-.langWrap{display:flex; align-items:center; gap:8px}
-.langFlag{
-  width:16px; height:12px;
-  border-radius:2px;
-  box-shadow:0 0 0 1px rgba(0,0,0,.10);
+/* === v1.86 HOME: Quick status layout (counts, no amounts) === */
+#page_home .qs85-hidden{display:none !important;}
+
+#page_home .qs85-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:8px;
+}
+
+#page_home .qs85-section{
+  display:grid;
+  grid-template-columns: 56px 1fr;
+  gap:14px;
+  align-items:center;
+}
+
+#page_home .qs85-icon{
+  width:56px;
+  height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#page_home .qs85-icon svg{width:56px;height:56px; display:block}
+
+/* user icon PNGs */
+#page_home .qs85-img{
+  max-width:56px;
+  max-height:56px;
+  width:auto;
+  height:auto;
+  display:block;
+}
+
+#page_home .qs85-line{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+#page_home .qs85-title{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+#page_home .qs85-cards{
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+}
+
+#page_home .qs85-card{
+  min-width:120px;
+  padding:10px 12px;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:12px;
+  background: rgba(255,255,255,.6);
+}
+
+#page_home .qs85-num{
+  font-weight:900;
+  font-size:18px;
+  line-height:1;
+}
+
+#page_home .qs85-num.ok{ color: rgba(34,197,94,.95); }  /* green */
+#page_home .qs85-num.bad{ color: rgba(239,68,68,.95); } /* red */
+
+#page_home .qs85-lbl{
+  font-size:12px;
+  color:var(--text);
+  margin-top:6px;
+}
+
+@media (max-width:720px){
+  #page_home .qs85-section{grid-template-columns:1fr;}
+  #page_home .qs85-icon{display:none;}
 }
 
 /* APP */
@@ -423,7 +498,7 @@ textarea:focus{
 }
 
 
-    /* ====== v1.85 menu layout ====== */
+    /* ====== v1.86 menu layout ====== */
     .langSelect{
       appearance: none;
       padding: 8px 12px;
@@ -462,25 +537,33 @@ textarea:focus{
       justify-content:flex-end;
     }
 
-  </style>
+  
+/* === v1.86 quick status icon sizing === */
+#page_home .qs85-icon img.qs-water {
+  transform: scale(1.2);
+  transform-origin: center;
+}
+#page_home .qs85-icon img.qs-pay {
+  width: 56px;
+  height: 56px;
+}
+
+</style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.85</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.86</span>
         <small id="brandSub"></small>
       </div>
 
       <div class="right-actions" id="topRightActions">
-        <div id="langWrap" class="langWrap" aria-label="Language selector">
-  <img id="langFlag" class="langFlag" alt="" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23fff%22/%3E%0A%20%20%3Crect%20y%3D%224%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%230039A6%22/%3E%0A%20%20%3Crect%20y%3D%228%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%23D52B1E%22/%3E%0A%3C/svg%3E"/>
-  <select id="langSelect" class="langSelect" aria-label="Language">
+        <select id="langSelect" class="langSelect" aria-label="Language">
           <option value="ru">RU</option>
           <option value="et">EST</option>
           <option value="en">EN</option>
         </select>
-</div>
 
         <div class="status" id="statusPill">
           <span id="statusDot" class="dot bad"></span>
@@ -613,7 +696,72 @@ textarea:focus{
 
             <div class="mini">
               <h4 id="quickTitle">Быстрый статус</h4>
-              <div class="muted" id="quickSub">Сводка по прошлому месяцу (демо-данные):</div>
+
+<!-- keep legacy nodes for existing JS/i18n, but hide visually -->
+<div class="qs85-hidden">
+  <div class="muted" id="quickSub">Сводка по прошлому месяцу (демо-данные):</div>
+
+  <div class="status-cards">
+    <div class="stat">
+      <div class="num" id="stat_total">24</div>
+      <div class="lbl" id="lbl_total">квартир всего</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="stat_done">20</div>
+      <div class="lbl" id="lbl_done">сдали показания</div>
+    </div>
+    <div class="stat" style="grid-column:1 / span 2">
+      <div class="num" id="stat_missing">4</div>
+      <div class="lbl" id="lbl_missing">не сдали</div>
+    </div>
+  </div>
+
+  <div class="muted" style="margin-top:10px" id="quickNote">
+    Дальше подключим реальные данные: статусы можно показывать жильцу только по его квартире.
+  </div>
+</div>
+
+<!-- v1.86 visible layout -->
+<div class="qs85-wrap" id="quickStatus85">
+  <div class="qs85-section">
+    <div class="qs85-icon" aria-hidden="true">
+      <img class="qs85-img" alt="" src="data:image/png;base64,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"/>
+    </div>
+    <div>
+      <div class="qs85-title" id="qs85_curr_title">Сводка по текущему месяцу</div>
+      <div class="qs85-cards">
+        <div class="qs85-card">
+          <div class="qs85-num ok" id="qs85_read_ok">4</div>
+          <div class="qs85-lbl" id="qs85_read_ok_lbl">сдали показания</div>
+        </div>
+        <div class="qs85-card">
+          <div class="qs85-num bad" id="qs85_read_bad">1</div>
+          <div class="qs85-lbl" id="qs85_read_bad_lbl">не сдали</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qs85-section">
+    <div class="qs85-icon" aria-hidden="true">
+      <img class="qs85-img" alt="" src="data:image/png;base64,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"/>
+    </div>
+    <div>
+      <div class="qs85-title" id="qs85_prev_title">Сводка по прошлому месяцу</div>
+      <div class="qs85-cards">
+        <div class="qs85-card">
+          <div class="qs85-num ok" id="qs85_pay_ok">4</div>
+          <div class="qs85-lbl" id="qs85_pay_ok_lbl">оплатили счета</div>
+        </div>
+        <div class="qs85-card">
+          <div class="qs85-num bad" id="qs85_pay_bad">1</div>
+          <div class="qs85-lbl" id="qs85_pay_bad_lbl">не оплатили счета</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 
               <div class="status-cards">
                 <div class="stat">
@@ -997,19 +1145,6 @@ textarea:focus{
 }
     };
 
-// Flag images (data URIs)
-const LANG_FLAGS = {
-  ru: "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23fff%22/%3E%0A%20%20%3Crect%20y%3D%224%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%230039A6%22/%3E%0A%20%20%3Crect%20y%3D%228%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%23D52B1E%22/%3E%0A%3C/svg%3E",
-  et: "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23fff%22/%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%230072CE%22/%3E%0A%20%20%3Crect%20y%3D%224%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%23000%22/%3E%0A%3C/svg%3E",
-  en: "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23012169%22/%3E%0A%20%20%3Cpath%20d%3D%22M0%2C0%20L16%2C12%20M16%2C0%20L0%2C12%22%20stroke%3D%22%23FFF%22%20stroke-width%3D%223%22/%3E%0A%20%20%3Cpath%20d%3D%22M0%2C0%20L16%2C12%20M16%2C0%20L0%2C12%22%20stroke%3D%22%23C8102E%22%20stroke-width%3D%221.5%22/%3E%0A%20%20%3Cpath%20d%3D%22M8%2C0%20V12%20M0%2C6%20H16%22%20stroke%3D%22%23FFF%22%20stroke-width%3D%225%22/%3E%0A%20%20%3Cpath%20d%3D%22M8%2C0%20V12%20M0%2C6%20H16%22%20stroke%3D%22%23C8102E%22%20stroke-width%3D%223%22/%3E%0A%3C/svg%3E"
-};
-function updateLangFlag(lang){
-  const img = document.getElementById("langFlag");
-  if (!img) return;
-  img.src = LANG_FLAGS[lang] || LANG_FLAGS.ru;
-  img.alt = (lang === "ru" ? "RU" : lang === "et" ? "EST" : "EN");
-}
-
     function getLang(){
       const saved = localStorage.getItem("ku_lang");
       if (saved && I18N[saved]) return saved;
@@ -1057,7 +1192,6 @@ function getLangSafe(){
     function applyLang(){
       const lang = getLang();
       const t = I18N[lang] || I18N.ru;
-      updateLangFlag(lang);
 
       document.documentElement.lang = (lang === "et" ? "et" : lang);
 
@@ -1174,7 +1308,7 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       const app = document.getElementById("appRightControls");
       if (!top || !app) return;
 
-      const nodes = ["langWrap","statusPill","btnTopLogout"].map(id=>document.getElementById(id)).filter(Boolean);
+      const nodes = ["langSelect","statusPill","btnTopLogout"].map(id=>document.getElementById(id)).filter(Boolean);
 
       // place controls depending on current view
       const target = toApp ? app : top;
