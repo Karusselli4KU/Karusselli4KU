@@ -20,11 +20,11 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.77</title>
+  <title>Karusselli 4 KÜ — v1.85</title>
   <style>
 
     :root{
-      /* Palette D — Warm Light (v1.77) */
+      /* Palette D — Warm Light (v1.85) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -168,7 +168,139 @@
     }
     .hidden{display:none !important}
 
-    /* APP */
+    
+/* === AUTH INPUTS (v1.85 UI fix) === */
+#authSection input,
+#authSection textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(107,124,255,.55);
+  background:transparent;
+  box-shadow:none;
+  outline:none;
+}
+#authSection input:focus,
+#authSection textarea:focus\{
+  border-color: rgba\(107,124,255,.9\);
+  box-shadow:none;
+  background:transparent;
+  outline:none;
+\}
+
+/* field widths — match mock (inputs are not full width) */
+#authSection .auth-stack > div,
+#authSection .register-grid .row > div{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+/* default auth input width */
+#authSection input,
+#authSection textarea{
+  width:min(100%, 280px);
+}
+
+/* narrower fields where needed */
+#authSection #reg_pass{ width:min(100%, 220px); }
+#authSection #reg_apt{ width:min(100%, 220px); }
+
+/* button sizing/placement similar to mock */
+#authSection .login-actions .btn.primary{ padding:8px 16px; border-radius:12px; }
+#authSection .register-grid .actions .btn.primary{ padding:8px 16px; border-radius:12px; }
+
+/* ensure rows don't stretch columns to full card width */
+#authSection .register-grid .row{
+  grid-template-columns: max-content max-content;
+  justify-content:flex-start;
+  column-gap:24px;
+}
+@media (max-width:520px){
+  #authSection .register-grid .row{ grid-template-columns:1fr; }
+  #authSection input, #authSection textarea{ width:100%; max-width: 320px; }
+}
+
+
+/* forgot link position — keep inline with button like mock */
+#authSection .login-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:16px;
+  margin-top:12px;
+  flex-wrap:nowrap;
+}
+#authSection .login-actions .muted{
+  margin:0 !important;
+  display:flex;
+  align-items:center;
+  line-height:1;
+}
+#authSection .login-actions a{ display:inline-block; padding:0; margin:0; }
+@media (max-width:520px){
+  #authSection .login-actions{ flex-wrap:wrap; }
+}
+
+
+/* === v1.85 precise auth sizing (per screenshot) === */
+
+/* Narrow LEFT login card */
+#authSection > .card:first-child{
+  max-width: 420px;
+}
+
+/* Inputs even narrower */
+
+/* Password + apartment slightly narrower */
+
+/* Keep alignment clean */
+#authSection .auth-stack > div,
+#authSection .register-grid .row > div{
+  align-items:flex-start;
+}
+
+/* On small screens allow full width */
+@media (max-width:520px){
+  #authSection > .card:first-child{
+    max-width:100%;
+  }
+  #authSection input,
+  #authSection textarea{
+    width:100%;
+    max-width:320px;
+  }
+}
+
+
+/* === v1.85 align widths to bottom field (per arrows) === */
+
+/* Reference width = apartment field */
+#authSection #reg_apt{
+  width: 210px;
+}
+
+/* Align indicated fields to the same width */
+#authSection #log_user,
+#authSection #log_pass,
+#authSection #reg_user,
+#authSection #reg_pass,
+#authSection #reg_email{
+  width: 210px;
+}
+
+/* Keep buttons unchanged */
+
+
+/* === v1.85 language flag (image) === */
+.langWrap{display:flex; align-items:center; gap:8px}
+.langFlag{
+  width:16px; height:12px;
+  border-radius:2px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.10);
+}
+
+/* APP */
     .app-shell{display:grid; grid-template-columns: 1fr; gap:16px}
     .main{padding:14px; background: var(--card)}
     .tabs{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-bottom:12px}
@@ -290,22 +422,65 @@ textarea:focus{
   background:#eef4ff;
 }
 
-</style>
+
+    /* ====== v1.85 menu layout ====== */
+    .langSelect{
+      appearance: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .app-header{
+      display:flex;
+      justify-content:center;
+      padding: 6px 0 10px;
+    }
+    .app-title{
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .app-navrow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 8px 0 14px;
+      border-top: 1px solid rgba(0,0,0,.06);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      margin-bottom: 12px;
+    }
+    .tabs-left{ margin: 0; }
+    .nav-right{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+  </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.77</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.85</span>
         <small id="brandSub"></small>
       </div>
 
-      <div class="right-actions">
-        <div class="lang" id="langSwitch" style="display:flex; gap:8px; align-items:center;">
-          <button class="btn" id="lang_ru" type="button" title="Русский">RU</button>
-          <button class="btn" id="lang_et" type="button" title="Eesti">EST</button>
-          <button class="btn" id="lang_en" type="button" title="English">EN</button>
-        </div>
+      <div class="right-actions" id="topRightActions">
+        <div id="langWrap" class="langWrap" aria-label="Language selector">
+  <img id="langFlag" class="langFlag" alt="" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23fff%22/%3E%0A%20%20%3Crect%20y%3D%224%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%230039A6%22/%3E%0A%20%20%3Crect%20y%3D%228%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%23D52B1E%22/%3E%0A%3C/svg%3E"/>
+  <select id="langSelect" class="langSelect" aria-label="Language">
+          <option value="ru">RU</option>
+          <option value="et">EST</option>
+          <option value="en">EN</option>
+        </select>
+</div>
 
         <div class="status" id="statusPill">
           <span id="statusDot" class="dot bad"></span>
@@ -324,24 +499,25 @@ textarea:focus{
         <h2 id="loginTitle">Войти</h2>
         <p class="sub" id="loginSub">Введите имя пользователя и пароль.</p>
 
-        <div class="row">
-          <div>
-            <label id="loginUserLabel">Имя пользователя</label>
-            <input id="log_user" placeholder="например: member12" autocomplete="username"/>
-          </div>
-          <div>
-            <label id="loginPassLabel">Пароль</label>
-            <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
-          
-            <div class="muted" style="margin-top:6px">
-              <a href="#" id="forgotLink" style="text-decoration:none" data-i18n="forgot">Forgot password?</a>
-            </div>
-        </div>
-        </div>
+        
+<div class="auth-stack">
+  <div>
+    <label id="loginUserLabel">Имя пользователя</label>
+    <input id="log_user" placeholder="например: member12" autocomplete="username"/>
+  </div>
+  <div>
+    <label id="loginPassLabel">Пароль</label>
+    <input id="log_pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+  </div>
+</div>
 
-        <div class="actions">
-          <button class="btn primary" id="btnLogin">Войти</button>
-        </div>
+<div class="login-actions">
+  <button class="btn primary" id="btnLogin">Войти</button>
+  <div class="muted">
+    <a href="#" id="forgotLink" style="text-decoration:none" data-i18n="forgot">Forgot password?</a>
+  </div>
+</div>
+
 <div id="log_msg" class="msg"></div>
       </div>
 
@@ -349,39 +525,62 @@ textarea:focus{
         <h2 id="registerTitle">Создать аккаунт</h2>
         <p class="sub" id="registerSub">Создайте имя пользователя и пароль.</p>
 
-        <div class="row">
-          <div>
-            <label id="regUserLabel">Имя пользователя</label>
-            <input id="reg_user" placeholder="например: test1" autocomplete="username"/>
-          
-          <label id="regEmailLabel">Username or email</label>
-          <input id="reg_email" type="email" placeholder="name@example.com" autocomplete="email"/>
-        </div>
-          <div>
-            <label id="regPassLabel">Пароль</label>
-            <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password"/>
-          </div>
-        </div>
+        
+<div class="register-grid">
+  <div class="row">
+    <div>
+      <label id="regUserLabel">Имя пользователя</label>
+      <input id="reg_user" placeholder="например: test1" autocomplete="username"/>
+    </div>
+    <div>
+      <label id="regPassLabel">Пароль</label>
+      <input id="reg_pass" type="password" placeholder="минимум 6 символов" autocomplete="new-password"/>
+    </div>
+  </div>
 
-        <label id="aptLabel">Квартира</label>
-        <input id="reg_apt" placeholder="например: 5" inputmode="numeric"/>
+  <div class="row">
+    <div>
+      <label id="regEmailLabel">Username or email</label>
+      <input id="reg_email" type="email" placeholder="name@example.com" autocomplete="email"/>
+    </div>
+    <div></div>
+  </div>
 
-        <div class="actions">
-          <button class="btn primary" id="btnRegister">Создать аккаунт</button>
-        </div>
+  <div class="row">
+    <div>
+      <label id="aptLabel">Квартира</label>
+      <input id="reg_apt" placeholder="например: 5" inputmode="numeric"/>
+    </div>
+    <div></div>
+  </div>
 
-        <div id="reg_msg" class="msg"></div>
+  <div class="actions">
+    <button class="btn primary" id="btnRegister">Создать аккаунт</button>
+  </div>
+
+  <div id="reg_msg" class="msg"></div>
+</div>
+
       </div>
     </section>
 
     <!-- APP -->
     <section id="appSection" class="app-shell hidden">
       <section class="card main">
-        <div class="tabs">
-          <button class="tab active" id="tab_home" data-page="home">Главная</button>
+        
+        <div class="app-header">
+          <div class="app-title" id="appPortalTitle">Karusselli 4 KÜ портал</div>
+        </div>
+
+        <div class="app-navrow">
+          <div class="tabs tabs-left">
+            <button class="tab active" id="tab_home" data-page="home">Главная</button>
           <button class="tab" id="tab_readings" data-page="readings">Показания</button>
           <button class="tab" id="tab_bills" data-page="bills">Счета</button>
+          </div>
+          <div class="nav-right" id="appRightControls"></div>
         </div>
+
 <!-- HOME -->
         <div id="page_home">
           <div class="page-title" id="homeTitle">Главная</div>
@@ -495,6 +694,7 @@ textarea:focus{
 // i18n packs (full coverage for UI + demo strings)
     const I18N = {
       ru: {
+        portal_title: "Karusselli 4 KÜ портал",
         brandTitle: "Karusselli 4 KÜ",
         brandSub: "",
         statusOut: "Вход не выполнен",
@@ -696,6 +896,7 @@ textarea:focus{
 },
 
       en: {
+        portal_title: "Karusselli 4 KÜ portal",
         brandTitle: "Karusselli 4 KÜ",
         brandSub: "",
         statusOut: "Not logged in",
@@ -796,6 +997,19 @@ textarea:focus{
 }
     };
 
+// Flag images (data URIs)
+const LANG_FLAGS = {
+  ru: "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23fff%22/%3E%0A%20%20%3Crect%20y%3D%224%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%230039A6%22/%3E%0A%20%20%3Crect%20y%3D%228%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%23D52B1E%22/%3E%0A%3C/svg%3E",
+  et: "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23fff%22/%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%230072CE%22/%3E%0A%20%20%3Crect%20y%3D%224%22%20width%3D%2216%22%20height%3D%224%22%20fill%3D%22%23000%22/%3E%0A%3C/svg%3E",
+  en: "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2212%22%20viewBox%3D%220%200%2016%2012%22%3E%0A%20%20%3Crect%20width%3D%2216%22%20height%3D%2212%22%20fill%3D%22%23012169%22/%3E%0A%20%20%3Cpath%20d%3D%22M0%2C0%20L16%2C12%20M16%2C0%20L0%2C12%22%20stroke%3D%22%23FFF%22%20stroke-width%3D%223%22/%3E%0A%20%20%3Cpath%20d%3D%22M0%2C0%20L16%2C12%20M16%2C0%20L0%2C12%22%20stroke%3D%22%23C8102E%22%20stroke-width%3D%221.5%22/%3E%0A%20%20%3Cpath%20d%3D%22M8%2C0%20V12%20M0%2C6%20H16%22%20stroke%3D%22%23FFF%22%20stroke-width%3D%225%22/%3E%0A%20%20%3Cpath%20d%3D%22M8%2C0%20V12%20M0%2C6%20H16%22%20stroke%3D%22%23C8102E%22%20stroke-width%3D%223%22/%3E%0A%3C/svg%3E"
+};
+function updateLangFlag(lang){
+  const img = document.getElementById("langFlag");
+  if (!img) return;
+  img.src = LANG_FLAGS[lang] || LANG_FLAGS.ru;
+  img.alt = (lang === "ru" ? "RU" : lang === "et" ? "EST" : "EN");
+}
+
     function getLang(){
       const saved = localStorage.getItem("ku_lang");
       if (saved && I18N[saved]) return saved;
@@ -843,6 +1057,7 @@ function getLangSafe(){
     function applyLang(){
       const lang = getLang();
       const t = I18N[lang] || I18N.ru;
+      updateLangFlag(lang);
 
       document.documentElement.lang = (lang === "et" ? "et" : lang);
 
@@ -947,21 +1162,41 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
 
 // active lang button
 
-      document.getElementById("lang_ru").classList.toggle("active", lang==="ru");
-      document.getElementById("lang_et").classList.toggle("active", lang==="et");
-      document.getElementById("lang_en").classList.toggle("active", lang==="en");
+      const bRu=document.getElementById("lang_ru"); if(bRu) bRu.classList.toggle("active", lang==="ru");
+      const bEt=document.getElementById("lang_et"); if(bEt) bEt.classList.toggle("active", lang==="et");
+      const bEn=document.getElementById("lang_en"); if(bEn) bEn.classList.toggle("active", lang==="en");
+      const sel=document.getElementById("langSelect"); if(sel) sel.value = lang;
+      }
+
+    
+    function mountControls(toApp){
+      const top = document.getElementById("topRightActions");
+      const app = document.getElementById("appRightControls");
+      if (!top || !app) return;
+
+      const nodes = ["langWrap","statusPill","btnTopLogout"].map(id=>document.getElementById(id)).filter(Boolean);
+
+      // place controls depending on current view
+      const target = toApp ? app : top;
+      nodes.forEach(n=>{ if (n.parentElement !== target) target.appendChild(n); });
+    }
+    function isAppVisible(){
+      const app = document.getElementById("appSection");
+      return app && !app.classList.contains("hidden");
     }
 
     function showAuth(){
       document.getElementById("authSection").classList.remove("hidden");
       document.getElementById("appSection").classList.add("hidden");
       setStatus(false);
+      mountControls(false);
       applyLang();
     }
 
     function showApp(user){
       document.getElementById("authSection").classList.add("hidden");
       document.getElementById("appSection").classList.remove("hidden");
+      mountControls(true);
 
       const t = I18N[getLang()] || I18N.ru;
 
@@ -1112,9 +1347,14 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     });
 
     // language switch
-    document.getElementById("lang_ru").addEventListener("click", ()=> setLang("ru"));
-    document.getElementById("lang_et").addEventListener("click", ()=> setLang("et"));
-    document.getElementById("lang_en").addEventListener("click", ()=> setLang("en"));
+    const _lru=document.getElementById("lang_ru"); if(_lru) _lru.addEventListener("click", ()=> setLang("ru"));
+    const _let=document.getElementById("lang_et"); if(_let) _let.addEventListener("click", ()=> setLang("et"));
+    const _len=document.getElementById("lang_en"); if(_len) _len.addEventListener("click", ()=> setLang("en"));
+    const langSelect=document.getElementById("langSelect");
+    if(langSelect){
+      langSelect.addEventListener("change", ()=> setLang(langSelect.value));
+      langSelect.value = getLang();
+    }
 
     // restore
     (function init(){
