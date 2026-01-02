@@ -20,11 +20,11 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.110</title>
+  <title>Karusselli 4 KÜ — v1.115</title>
   <style>
 
     :root{
-      /* Palette D — Warm Light (v1.110) */
+      /* Palette D — Warm Light (v1.115) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -169,7 +169,7 @@
     .hidden{display:none !important}
 
     
-/* === AUTH INPUTS (v1.110 UI fix) === */
+/* === AUTH INPUTS (v1.115 UI fix) === */
 #authSection input,
 #authSection textarea{
   width:100%;
@@ -241,7 +241,7 @@
   #authSection .login-actions{ flex-wrap:wrap; }
 }
 
-/* === v1.110 precise auth sizing (per screenshot) === */
+/* === v1.115 precise auth sizing (per screenshot) === */
 
 /* Narrow LEFT login card */
 #authSection > .card:first-child{
@@ -270,7 +270,7 @@
   }
 }
 
-/* === v1.110 align widths to bottom field (per arrows) === */
+/* === v1.115 align widths to bottom field (per arrows) === */
 
 /* Reference width = apartment field */
 #authSection #reg_apt{
@@ -288,7 +288,7 @@
 
 /* Keep buttons unchanged */
 
-/* === v1.110 HOME: Quick Status (final) === */
+/* === v1.115 HOME: Quick Status (final) === */
 #page_home .qs88{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
 #page_home .qs88-row{ display:grid; grid-template-columns: 56px 1fr; gap:14px; align-items:center; }
 #page_home .qs88-icon{ width:56px; height:56px; display:flex; align-items:center; justify-content:center; }
@@ -428,9 +428,11 @@ textarea:focus{
   background:#eef4ff;
 }
 
-    /* ====== v1.110 menu layout ====== */
+    /* ====== v1.115 menu layout ====== */
     .langSelect{
-      appearance: none;
+      min-width:72px;
+      flex:0 0 auto;
+appearance: none;
       padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
@@ -467,12 +469,14 @@ textarea:focus{
       justify-content:flex-end;
     }
 
-  /* === v1.110 language flag in selector === */
+  /* === v1.115 language flag in selector === */
 .langWrap{
-  display:inline-flex;
+display:inline-flex;
   align-items:center;
   gap:8px;
+  flex:0 0 auto;
 }
+
 .langFlag{
   width:18px;
   height:12px;
@@ -480,12 +484,14 @@ textarea:focus{
   display:block;
   box-shadow: 0 0 0 1px rgba(0,0,0,.08);
 }
-/* === v1.110: language flag + selector layout fixes === */
+/* === v1.115: language flag + selector layout fixes === */
 .right-actions{
   display:flex;
   align-items:center;
+  justify-content:flex-end;
   gap:12px;
-  flex-wrap:wrap;
+  white-space:nowrap;
+  flex-wrap:nowrap;
 }
 .langWrap{
   display:inline-flex;
@@ -506,12 +512,12 @@ textarea:focus{
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.110</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.115</span>
         <small id="brandSub"></small>
       </div>
 
       <div class="right-actions" id="topRightActions">
-        <div class="langWrap" title="Language">
+        <div class="langWrap" id="langControl" title="Language">
   <img id="langFlag" class="langFlag" alt="EST" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23fff'/%3E%3Crect width='18' height='4' fill='%230072CE'/%3E%3Crect width='18' height='4' y='4' fill='%23000'/%3E%3Crect width='18' height='4' y='8' fill='%23fff'/%3E%3C/svg%3E">
   <select id="langSelect" class="langSelect" aria-label="Language">
           <option value="ru">RU</option>
@@ -652,7 +658,7 @@ textarea:focus{
             <div class="mini">
               <h4 id="quickTitle">Быстрый статус</h4>
 
-<!-- v1.110: New Quick Status layout (no totals, no legacy cards, no demo note) -->
+<!-- v1.115: New Quick Status layout (no totals, no legacy cards, no demo note) -->
 <div class="qs88">
   <div class="qs88-row">
     <div class="qs88-icon">
@@ -844,10 +850,11 @@ textarea:focus{
     reset_desc: "Введите имя пользователя или email, указанный при регистрации. Мы отправим код сброса.",
     username_or_email: "Имя пользователя или email",
     send_code: "Отправить код",
+    have_code: "У меня есть код",
     new_password: "Новый пароль",
     continue: "Продолжить",
     close: "Закрыть",
-    code_sent: "Код отправлен",
+    code_sent: "Если аккаунт существует, письмо отправлено.",
     sending: "Отправка…",
     verifying: "Проверка…",
     password_reset_ok: "Пароль изменён",
@@ -951,6 +958,7 @@ textarea:focus{
     reset_desc: "Sisesta registreerimisel kasutatud kasutajanimi või e‑post. Saadame taastamiskoodi.",
     username_or_email: "Kasutajanimi või e‑post",
     send_code: "Saada kood",
+    have_code: "Mul on kood",
     new_password: "Uus parool",
     continue: "Jätka",
     close: "Sulge",
@@ -1058,6 +1066,7 @@ textarea:focus{
     reset_desc: "Enter the username or email used during registration. We will send a reset code.",
     username_or_email: "Username or email",
     send_code: "Send code",
+    have_code: "I have a code",
     new_password: "New password",
     continue: "Continue",
     close: "Close",
@@ -1191,7 +1200,7 @@ function applyLang(){
       safeSetText("lbl_missing", t.lblMissing);
       safeSetText("quickNote", t.quickNote);
 
-// v1.110 quick status new layout labels (fallbacks if keys not present in I18N)
+// v1.115 quick status new layout labels (fallbacks if keys not present in I18N)
 safeSetText("qsCurrTitle", (t.qsCurrTitle || (lang==="et" ? "Kokkuvõte käesolevaks kuuks" : (lang==="en" ? "Summary for current month" : "Сводка по текущему месяцу"))));
 safeSetText("qsPrevTitle", (t.qsPrevTitle || (lang==="et" ? "Kokkuvõte eelmise kuu kohta" : (lang==="en" ? "Summary for previous month" : "Сводка по прошлому месяцу"))));
 safeSetText("qsReadOkLbl", (t.qsReadOkLbl || (lang==="et" ? "esitasid näidud" : (lang==="en" ? "submitted readings" : "сдали показания"))));
@@ -1254,7 +1263,7 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       const app = document.getElementById("appRightControls");
       if (!top || !app) return;
 
-      const nodes = ["langSelect","statusPill","btnTopLogout"].map(id=>document.getElementById(id)).filter(Boolean);
+      const nodes = ["langControl","statusPill","btnTopLogout"].map(id=>document.getElementById(id)).filter(Boolean);
 
       // place controls depending on current view
       const target = toApp ? app : top;
@@ -1439,7 +1448,7 @@ else msg.textContent = t.errLogin;
     const _len=document.getElementById("lang_en"); if(_len) _len.addEventListener("click", ()=> setLang("en"));
     const langSelect=document.getElementById("langSelect");
     
-// v1.110: language flag next to selector
+// v1.115: language flag next to selector
 const LANG_FLAGS = {"ru": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23fff'/%3E%3Crect width='18' height='8' y='4' fill='%230039A6'/%3E%3Crect width='18' height='4' y='8' fill='%23D52B1E'/%3E%3C/svg%3E", "et": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23fff'/%3E%3Crect width='18' height='4' fill='%230072CE'/%3E%3Crect width='18' height='4' y='4' fill='%23000'/%3E%3Crect width='18' height='4' y='8' fill='%23fff'/%3E%3C/svg%3E", "en": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23012169'/%3E %3Cpath d='M0,0 L18,12 M18,0 L0,12' stroke='%23fff' stroke-width='2.4'/%3E %3Cpath d='M0,0 L18,12 M18,0 L0,12' stroke='%23C8102E' stroke-width='1.2'/%3E %3Crect x='7.2' width='3.6' height='12' fill='%23fff'/%3E %3Crect y='4.2' width='18' height='3.6' fill='%23fff'/%3E %3Crect x='7.8' width='2.4' height='12' fill='%23C8102E'/%3E %3Crect y='4.8' width='18' height='2.4' fill='%23C8102E'/%3E %3C/svg%3E"};
 function updateLangFlag_() {
   const sel = document.getElementById("langSelect");
@@ -1497,6 +1506,8 @@ function showReset_() {
 
   const step2 = byId("resetStep2");
   if (step2) step2.style.display = "none";
+  const haveBtn = byId("resetHaveCodeBtn");
+  if (haveBtn) haveBtn.style.display = "none";
 
   const email = byId("resetEmail");
   const codeEl = byId("resetCode");
@@ -1573,7 +1584,9 @@ async function onSendCode_() {
     window.__resetIdentifier = identifier;
     if (msg1) { msg1.style.color = ""; msg1.textContent = tr("code_sent"); }
     if (msg2) msg2.textContent = "";
-    if (step2) step2.style.display = "block";
+    if (step2) step2.style.display = "none";
+    const haveBtn = byId("resetHaveCodeBtn");
+    if (haveBtn) haveBtn.style.display = "inline-block";
 
     const codeEl = byId("resetCode");
     if (codeEl) codeEl.focus();
@@ -1645,6 +1658,13 @@ document.addEventListener("click", (e) => {
   if (forgot) { e.preventDefault(); showReset_(); return; }
 
   if (e.target && e.target.id === "resetSendBtn") { e.preventDefault(); onSendCode_(); return; }
+  if (e.target && e.target.id === "resetHaveCodeBtn") { e.preventDefault();
+    const step2 = byId("resetStep2");
+    if (step2) step2.style.display = "block";
+    const codeEl = byId("resetCode");
+    if (codeEl) { try { codeEl.focus(); } catch(_){} }
+    return;
+  }
   if (e.target && e.target.id === "resetDoBtn") { e.preventDefault(); onVerifyCode_(); return; }
   if (e.target && (e.target.id === "resetClose" || e.target.id === "resetX")) { e.preventDefault(); hideReset_(); return; }
 
@@ -1678,6 +1698,7 @@ document.addEventListener("keydown", (e) => {
 
         <div style="display:flex; gap:10px; align-items:center; margin-top:10px">
           <button class="btn primary" id="resetSendBtn" data-i18n="send_code">Send</button>
+          <button class="btn" id="resetHaveCodeBtn" data-i18n="have_code" style="display:none; white-space:nowrap">I have a code</button>
           <div class="muted" id="resetMsg" style="flex:1"></div>
         </div>
 
