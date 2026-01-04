@@ -20,16 +20,16 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.118</title>
+  <title>Karusselli 4 KÜ — v1.153</title>
 <script>
-// v1.118: force default language to Estonian (ku_lang) before UI init
+// v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
 </script>
 
   <style>
 
     :root{
-      /* Palette D — Warm Light (v1.118) */
+      /* Palette D — Warm Light (v1.151) */
       --bg0:#FAFAF9;
       --bg1:#F5F5F4;
       --bg2:#F5F5F4;
@@ -174,7 +174,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
     .hidden{display:none !important}
 
     
-/* === AUTH INPUTS (v1.118 UI fix) === */
+/* === AUTH INPUTS (v1.151 UI fix) === */
 #authSection input,
 #authSection textarea{
   width:100%;
@@ -246,7 +246,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
   #authSection .login-actions{ flex-wrap:wrap; }
 }
 
-/* === v1.118 precise auth sizing (per screenshot) === */
+/* === v1.151 precise auth sizing (per screenshot) === */
 
 /* Narrow LEFT login card */
 #authSection > .card:first-child{
@@ -275,7 +275,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
   }
 }
 
-/* === v1.118 align widths to bottom field (per arrows) === */
+/* === v1.151 align widths to bottom field (per arrows) === */
 
 /* Reference width = apartment field */
 #authSection #reg_apt{
@@ -293,7 +293,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
 
 /* Keep buttons unchanged */
 
-/* === v1.118 HOME: Quick Status (final) === */
+/* === v1.151 HOME: Quick Status (final) === */
 #page_home .qs88{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
 #page_home .qs88-row{ display:grid; grid-template-columns: 56px 1fr; gap:14px; align-items:center; }
 #page_home .qs88-icon{ width:56px; height:56px; display:flex; align-items:center; justify-content:center; }
@@ -351,7 +351,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
       content:"";
       position:absolute;
       width:160px;height:160px;
-      right:48px; top:30px;
+top:30px;
       border-radius:999px;
       background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.20), rgba(255,255,255,.04) 55%, transparent 70%);
       border:1px solid rgba(255,255,255,.10);
@@ -433,7 +433,7 @@ textarea:focus{
   background:#eef4ff;
 }
 
-    /* ====== v1.118 menu layout ====== */
+    /* ====== v1.151 menu layout ====== */
     .langSelect{
       appearance: none;
       padding: 8px 12px;
@@ -472,7 +472,7 @@ textarea:focus{
       justify-content:flex-end;
     }
 
-  /* === v1.118 language flag in selector === */
+  /* === v1.151 language flag in selector === */
 .langWrap{
   display:inline-flex;
   align-items:center;
@@ -485,7 +485,7 @@ textarea:focus{
   display:block;
   box-shadow: 0 0 0 1px rgba(0,0,0,.08);
 }
-/* === v1.118: language flag + selector layout fixes === */
+/* === v1.151: language flag + selector layout fixes === */
 .right-actions{
   display:flex;
   align-items:center;
@@ -505,13 +505,177 @@ textarea:focus{
   display:block;
   box-shadow: 0 0 0 1px rgba(0,0,0,.08);
 }
+
+/* === v1.151: Arved table visual (scoped) === */
+#page_bills #billsTitle,
+#page_bills #billsDesc,
+#page_bills #nextBillsWrap{ display:none !important; }
+
+#page_bills .bills-owner{
+  margin: 8px 0 10px 0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+#page_bills .bills-owner .lbl{ color: var(--muted); font-size:13px; }
+#page_bills .bills-owner b{ font-weight:900; }
+
+#page_bills .bills-year-row{
+  position:absolute;
+  top: 245px;
+  left: 43%;
+  margin: 0;
+}
+
+#page_bills .bills-year-row select{
+  appearance:none;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  min-width: 110px;
+}
+
+#page_bills .bills-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+}
+#page_bills .bills-table th{
+  font-size:12px;
+  color:var(--muted);
+  text-align:left !important;
+  font-weight:800;
+  padding: 0 10px 6px 10px;
+  white-space:nowrap;
+}
+#page_bills .bills-table td{
+  background:#fff;
+  border:1px solid var(--stroke);
+  padding: 2px 12px;  /* compact height */
+  font-size:13px;
+  vertical-align:middle;
+  line-height:1.15;
+  text-align:left !important;
+}
+#page_bills .bills-table td + td{ border-left:0; }
+#page_bills .bills-table td:first-child{ border-radius:12px 0 0 12px; }
+#page_bills .bills-table td:last-child{ border-radius:0 12px 12px 0; }
+
+/* hide apartment column completely */
+#page_bills .col-apt{ display:none !important; }
+
+/* status: text-only, no background */
+#page_bills .st-paid{ color: var(--good); font-weight:900; background:transparent !important; }
+#page_bills .st-pending{ color: var(--warn); font-weight:900; background:transparent !important; }
+#page_bills .st-overdue{ color:#B91C1C; font-weight:900; background:transparent !important; }
+
+/* PDF button */
+#page_bills .pdf-btn{
+  display:inline-block;
+  border:1px solid var(--stroke);
+  background: var(--pill);
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 900;
+  cursor:pointer;
+  line-height:1.1;
+}
+#page_bills .pdf-btn:hover{ background: var(--pill2); }
+
+
+/* === v1.151: hide duplicate portal title inside page === */
+.app-card h1,
+.app-card .portal-title{
+  display:none !important;
+}
+
+
+/* === v1.151: hide inner portal title (appPortalTitle) === */
+#appPortalTitle{ display:none !important; }
+
+
+/* tighten app header when portal title hidden */
+#appSection .app-header{ padding-top: 0 !important; padding-bottom: 0 !important; }
+
+
+/* === v1.151: move year selector to top-right near logout === */
+#page_bills .bills-year-row{
+  position:absolute;
+  top: 170px;            /* aligns with top controls row */
+margin: 0;
+}
+@media (max-width: 900px){
+  #page_bills .bills-year-row{
+    position: static;
+    display:flex;
+    justify-content:flex-end;
+    margin: 8px 0;
+  }
+}
+
+/* === v1.151: dropdown arrow for year selector === */
+#page_bills .bills-year-row select{
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #666 50%),
+    linear-gradient(135deg, #666 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 3px),
+    calc(100% - 10px) calc(50% - 3px);
+  background-size:6px 6px, 6px 6px;
+  background-repeat:no-repeat;
+  padding-
+}
+
+
+/* === v1.151: FINAL override for bills year selector position (desktop) === */
+#page_bills .bills-year-row{
+  position: absolute !important;
+  top: 195px !important;
+  left: 43% !important;
+  right: auto !important;
+  margin: 0 !important;
+}
+@media (max-width: 900px){
+  #page_bills .bills-year-row{
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 8px 0 !important;
+    display:flex !important;
+    justify-content:flex-end !important;
+  }
+}
+
+
+/* === v1.151: center table header labels over columns === */
+#page_bills .bills-table th{
+  text-align: center !important;
+}
+
+
+/* === v1.151: center PDF icons/buttons in last column === */
+#page_bills .bills-table td:last-child{
+  text-align: center !important;
+}
+#page_bills .bills-table td:last-child .pdf-btn{
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
 </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.118</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.153</span>
         <small id="brandSub"></small>
       </div>
 
@@ -657,7 +821,7 @@ textarea:focus{
             <div class="mini">
               <h4 id="quickTitle">Быстрый статус</h4>
 
-<!-- v1.118: New Quick Status layout (no totals, no legacy cards, no demo note) -->
+<!-- v1.151: New Quick Status layout (no totals, no legacy cards, no demo note) -->
 <div class="qs88">
   <div class="qs88-row">
     <div class="qs88-icon">
@@ -727,26 +891,50 @@ textarea:focus{
           </div>
         </div>
 
-        <!-- BILLS -->
+        
+<!-- BILLS -->
         <div id="page_bills" class="hidden">
+          <!-- tab already shows where we are; keep id for i18n but hide visually via CSS -->
           <div class="page-title" id="billsTitle">Счета</div>
-          <div class="muted" id="billsDesc" style="font-size:12px">Выставленные счета за весь период (пока демо).</div>
+          <!-- keep id for i18n but hide visually and clear content -->
+          <div class="muted" id="billsDesc" style="font-size:12px"></div>
 
-          <table style="margin-top:10px">
+          <!-- owner / apartment shown once -->
+          <div class="bills-owner">
+            <div><span class="lbl" id="billsOwnerLabel">Omanik:</span> <b id="billsOwnerName">—</b></div>
+            <div><span class="lbl" id="billsAptLabel">Korter:</span> <b id="billsAptNum">—</b></div>
+          </div>
+
+          <!-- year selector -->
+          <div class="bills-year-row">
+            <select id="billsYear" aria-label="Year">
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+
+          <table class="bills-table" style="margin-top:0">
             <thead>
               <tr>
+                <th id="thBillDate">Дата</th>
                 <th id="thPeriod">Период</th>
-                <th id="thApartment2">Квартира</th>
+                <!-- keep legacy apartment header for applyLang; hidden by CSS -->
+                <th id="thApartment2" class="col-apt">Квартира</th>
                 <th id="thSum">Сумма</th>
                 <th id="thStatus2">Статус</th>
+                <th id="thBillPdf">Счёт</th>
               </tr>
             </thead>
             <tbody id="billsBody"></tbody>
           </table>
 
-          <div class="muted" style="font-size:12px; margin-top:8px">
-            <span id="nextBills1">Следующий шаг: подключим лист</span> “Invoices” <span id="nextBills2">и покажем счета только по квартире жильца.</span>
+          <!-- keep legacy next-step ids if referenced elsewhere; hidden by CSS -->
+          <div class="muted" id="nextBillsWrap" style="font-size:12px; margin-top:8px">
+            <span id="nextBills1"></span> <span id="nextBills2"></span>
           </div>
+        </div>
+
         </div>
 
       </section>
@@ -764,7 +952,7 @@ textarea:focus{
     const I18N = {
       ru: {
         portal_title: "Karusselli 4 KÜ портал",
-        brandTitle: "Karusselli 4 KÜ",
+        brandTitle: "Karusselli 4 KÜ портал",
         brandSub: "",
         statusOut: "Вход не выполнен",
         statusIn: (u)=> `Вход выполнен: ${u}`,
@@ -821,8 +1009,10 @@ textarea:focus{
         thApartment: "Квартира",
         thStatus: "Статус",
         thComment: "Комментарий",
+        thBillDate: "Дата",
         thPeriod: "Период",
         thSum: "Сумма",
+        thBillPdf: "Счёт",
 
         nextReadings1: "Следующий шаг: читать данные из листа",
         nextReadings2: "и фильтровать по квартире/роли.",
@@ -835,6 +1025,7 @@ textarea:focus{
         commentReminder: "Напоминание: последний день месяца",
         billPaid: "Оплачено",
         billPending: "Ожидает оплаты",
+        billOverdue: "Просрочено",
         forgotPrompt: "Введите email или имя пользователя:",
         forgotSent: "Мы отправили код для сброса на ваш email. Проверьте входящие/спам.",
         resetCodePrompt: "Введите код из письма:",
@@ -871,8 +1062,9 @@ textarea:focus{
 
       et: {
 
-        forgot: "Unustasid parooli?",
-        brandTitle: "Karusselli 4 KÜ",
+        
+        portal_title: "Karusselli 4 KÜ portaal",forgot: "Unustasid parooli?",
+        brandTitle: "Karusselli 4 KÜ portaal",
         brandSub: "",
         statusOut: "Pole sisse logitud",
         statusIn: (u)=> `Sisselogitud: ${u}`,
@@ -928,8 +1120,10 @@ textarea:focus{
         thApartment: "Korter",
         thStatus: "Staatus",
         thComment: "Kommentaar",
+        thBillDate: "Kuupäev",
         thPeriod: "Periood",
         thSum: "Summa",
+        thBillPdf: "Arve",
 
         nextReadings1: "Järgmine samm: loeme andmed lehelt",
         nextReadings2: "ja filtreerime korteri/rolli järgi.",
@@ -942,6 +1136,7 @@ textarea:focus{
         commentReminder: "Meeldetuletus: kuu viimane päev",
         billPaid: "Makstud",
         billPending: "Ootab makset",
+        billOverdue: "Üle tähtaja",
         forgotPrompt: "Sisesta email või kasutajanimi:",
         forgotSent: "Saatsime parooli lähtestamise koodi sinu e-postile. Kontrolli ka spam-kausta.",
         resetCodePrompt: "Sisesta e-kirjas olev kood:",
@@ -978,7 +1173,7 @@ textarea:focus{
 
       en: {
         portal_title: "Karusselli 4 KÜ portal",
-        brandTitle: "Karusselli 4 KÜ",
+        brandTitle: "Karusselli 4 KÜ portal",
         brandSub: "",
         statusOut: "Not logged in",
         statusIn: (u)=> `Logged in: ${u}`,
@@ -1035,8 +1230,10 @@ textarea:focus{
         thApartment: "Apartment",
         thStatus: "Status",
         thComment: "Comment",
+        thBillDate: "Date",
         thPeriod: "Period",
         thSum: "Amount",
+        thBillPdf: "Invoice",
 
         nextReadings1: "Next step: read data from sheet",
         nextReadings2: "and filter by apartment/role.",
@@ -1049,6 +1246,7 @@ textarea:focus{
         commentReminder: "Reminder: last day of month",
         billPaid: "Paid",
         billPending: "Payment pending",
+        billOverdue: "Overdue",
         forgotPrompt: "Enter email or username:",
         forgotSent: "We sent a reset code to your email. Check inbox/spam.",
         resetCodePrompt: "Enter the code from the email:",
@@ -1106,6 +1304,18 @@ function getLangSafe(){
       }
     }
     const TEXT = (typeof I18N !== "undefined" ? I18N : {});
+
+    const MONTHS = {
+      en: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+      et: ["Jaanuar","Veebruar","Märts","Aprill","Mai","Juuni","Juuli","August","September","Oktoober","November","Detsember"],
+      ru: ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"],
+    };
+    function formatPeriod(monthIndex, year){
+      const lang = getLang();
+      const arr = MONTHS[lang] || MONTHS.en;
+      const name = arr[monthIndex] || "";
+      return `${name} ${year}`;
+    }
 
     function tr(key){
       const lang = getLang();
@@ -1196,7 +1406,7 @@ function applyLang(){
       safeSetText("lbl_missing", t.lblMissing);
       safeSetText("quickNote", t.quickNote);
 
-// v1.118 quick status new layout labels (fallbacks if keys not present in I18N)
+// v1.151 quick status new layout labels (fallbacks if keys not present in I18N)
 safeSetText("qsCurrTitle", (t.qsCurrTitle || (lang==="et" ? "Kokkuvõte käesolevaks kuuks" : (lang==="en" ? "Summary for current month" : "Сводка по текущему месяцу"))));
 safeSetText("qsPrevTitle", (t.qsPrevTitle || (lang==="et" ? "Kokkuvõte eelmise kuu kohta" : (lang==="en" ? "Summary for previous month" : "Сводка по прошлому месяцу"))));
 safeSetText("qsReadOkLbl", (t.qsReadOkLbl || (lang==="et" ? "esitasid näidud" : (lang==="en" ? "submitted readings" : "сдали показания"))));
@@ -1212,8 +1422,11 @@ safeSetText("qsPayBadLbl", (t.qsPayBadLbl || (lang==="et" ? "ei maksnud" : (lang
       document.getElementById("thStatus").textContent = t.thStatus;
       document.getElementById("thStatus2").textContent = t.thStatus;
       document.getElementById("thComment").textContent = t.thComment;
+      // bills table headers
+      safeSetText("thBillDate", t.thBillDate);
       document.getElementById("thPeriod").textContent = t.thPeriod;
       document.getElementById("thSum").textContent = t.thSum;
+      safeSetText("thBillPdf", t.thBillPdf);
 
       document.getElementById("nextReadings1").textContent = t.nextReadings1;
       document.getElementById("nextReadings2").textContent = t.nextReadings2;
@@ -1325,20 +1538,30 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
         `);
       });
 
-      // bills demo
+      // bills demo (Arved layout)
+      const bo = document.getElementById("billsOwnerName");
+      const ba = document.getElementById("billsAptNum");
+      if (bo) bo.textContent = user.fullname || user.username || "—";
+      if (ba) ba.textContent = String(user.apartment || "—");
+
       const bb = document.getElementById("billsBody");
       bb.innerHTML = "";
       const demo = [
-        {period:"2025-11", apt:apt || "—", sum:"123.45 €", st: t.billPaid, ok:true},
-        {period:"2025-12", apt:apt || "—", sum:"98.10 €", st: t.billPending, ok:false},
+        {date:"05.01.2026", m:0, y:2026, apt:apt || "—", sum:"123,45 €", stKey:"billPaid", cls:"st-paid"},
+        {date:"05.02.2026", m:1, y:2026, apt:apt || "—", sum:"98,10 €", stKey:"billOverdue", cls:"st-overdue"},
+        {date:"05.03.2026", m:2, y:2026, apt:apt || "—", sum:"110,00 €", stKey:"billPending", cls:"st-pending"},
       ];
       demo.forEach(x=>{
+        const period = formatPeriod(x.m, x.y);
+        const stText = (t && x.stKey && t[x.stKey]) ? t[x.stKey] : (x.stKey || "");
         bb.insertAdjacentHTML("beforeend", `
           <tr>
-            <td><b>${esc(x.period)}</b></td>
-            <td>${esc(x.apt)}</td>
+            <td><b>${esc(x.date)}</b></td>
+            <td>${esc(period)}</td>
+            <td class="col-apt">${esc(x.apt)}</td>
             <td>${esc(x.sum)}</td>
-            <td class="${x.ok ? "ok":"warn"}">${esc(x.st)}</td>
+            <td class="${esc(x.cls)}">${esc(stText)}</td>
+            <td><button class="pdf-btn" type="button">PDF</button></td>
           </tr>
         `);
       });
@@ -1444,7 +1667,7 @@ else msg.textContent = t.errLogin;
     const _len=document.getElementById("lang_en"); if(_len) _len.addEventListener("click", ()=> setLang("en"));
     const langSelect=document.getElementById("langSelect");
     
-// v1.118: language flag next to selector
+// v1.151: language flag next to selector
 const LANG_FLAGS = {"ru": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23fff'/%3E%3Crect width='18' height='8' y='4' fill='%230039A6'/%3E%3Crect width='18' height='4' y='8' fill='%23D52B1E'/%3E%3C/svg%3E", "et": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23fff'/%3E%3Crect width='18' height='4' fill='%230072CE'/%3E%3Crect width='18' height='4' y='4' fill='%23000'/%3E%3Crect width='18' height='4' y='8' fill='%23fff'/%3E%3C/svg%3E", "en": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E %3Crect width='18' height='12' fill='%23012169'/%3E %3Cpath d='M0,0 L18,12 M18,0 L0,12' stroke='%23fff' stroke-width='2.4'/%3E %3Cpath d='M0,0 L18,12 M18,0 L0,12' stroke='%23C8102E' stroke-width='1.2'/%3E %3Crect x='7.2' width='3.6' height='12' fill='%23fff'/%3E %3Crect y='4.2' width='18' height='3.6' fill='%23fff'/%3E %3Crect x='7.8' width='2.4' height='12' fill='%23C8102E'/%3E %3Crect y='4.8' width='18' height='2.4' fill='%23C8102E'/%3E %3C/svg%3E"};
 function updateLangFlag_() {
   const sel = document.getElementById("langSelect");
