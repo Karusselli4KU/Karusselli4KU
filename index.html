@@ -20,7 +20,7 @@
       }catch(e){}
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.153</title>
+  <title>Karusselli 4 KÜ — v1.157</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -675,7 +675,7 @@ margin: 0;
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.153</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.157</span>
         <small id="brandSub"></small>
       </div>
 
@@ -908,17 +908,14 @@ margin: 0;
           <!-- year selector -->
           <div class="bills-year-row">
             <select id="billsYear" aria-label="Year">
-              <option value="2026">2026</option>
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
+              <option value="">—</option>
             </select>
           </div>
 
           <table class="bills-table" style="margin-top:0">
             <thead>
               <tr>
-                <th id="thBillDate">Дата</th>
-                <th id="thPeriod">Период</th>
+                                <th id="thPeriod">Период</th>
                 <!-- keep legacy apartment header for applyLang; hidden by CSS -->
                 <th id="thApartment2" class="col-apt">Квартира</th>
                 <th id="thSum">Сумма</th>
@@ -1501,6 +1498,7 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       setStatus(true, user.username);
 
       renderDemoTables(user);
+      attachBillsYearListener_();
       navigate("home");
     }
 
@@ -1516,6 +1514,7 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     function navigate(page){
       markActive(page);
       history.replaceState(null,"", "#"+page);
+      if(page==="bills") initBillsPage_();
     }
 
     function renderDemoTables(user){
@@ -1547,17 +1546,16 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       const bb = document.getElementById("billsBody");
       bb.innerHTML = "";
       const demo = [
-        {date:"05.01.2026", m:0, y:2026, apt:apt || "—", sum:"123,45 €", stKey:"billPaid", cls:"st-paid"},
-        {date:"05.02.2026", m:1, y:2026, apt:apt || "—", sum:"98,10 €", stKey:"billOverdue", cls:"st-overdue"},
-        {date:"05.03.2026", m:2, y:2026, apt:apt || "—", sum:"110,00 €", stKey:"billPending", cls:"st-pending"},
+        {m:0, y:2026, apt:apt || "—", sum:"123,45 €", stKey:"billPaid", cls:"st-paid"},
+        {m:1, y:2026, apt:apt || "—", sum:"98,10 €", stKey:"billOverdue", cls:"st-overdue"},
+        {m:2, y:2026, apt:apt || "—", sum:"110,00 €", stKey:"billPending", cls:"st-pending"},
       ];
       demo.forEach(x=>{
         const period = formatPeriod(x.m, x.y);
         const stText = (t && x.stKey && t[x.stKey]) ? t[x.stKey] : (x.stKey || "");
         bb.insertAdjacentHTML("beforeend", `
           <tr>
-            <td><b>${esc(x.date)}</b></td>
-            <td>${esc(period)}</td>
+                        <td>${esc(period)}</td>
             <td class="col-apt">${esc(x.apt)}</td>
             <td>${esc(x.sum)}</td>
             <td class="${esc(x.cls)}">${esc(stText)}</td>
@@ -1645,10 +1643,163 @@ else msg.textContent = t.errLogin;
       showApp(user);
     }
 
+    function getToken(){ return localStorage.getItem("ku_token") || ""; }
+
     function logout(){
       localStorage.removeItem("ku_user");
       localStorage.removeItem("ku_token");
       showAuth();
+    }
+
+
+    async function loadBillsFromApi(year){
+      const token = getToken();
+      const t = I18N[getLang()] || I18N.ru;
+
+      // Fallback to demo if not logged in
+      if(!token){ renderDemoTables(); return; }
+
+      const resp = await apiPost("/invoices", { token, year });
+      if(!resp || !resp.ok){
+        // keep existing demo as fallback for now
+        renderDemoTables();
+        return;
+      }
+
+      // owner / apartment
+      const bo = document.getElementById("billsOwnerName");
+      const ba = document.getElementById("billsAptNum");
+      if (bo) bo.textContent = resp.username || (JSON.parse(localStorage.getItem("ku_user")||"{}").username||"—");
+      if (ba) ba.textContent = String(resp.apartment || "");
+
+      const bb = document.getElementById("billsBody");
+      bb.innerHTML = "";
+
+      const monthName = (m)=> {
+        const map = {
+          1: t.mJan || "Jaanuar", 2: t.mFeb || "Veebruar", 3: t.mMar || "Märts",
+          4: t.mApr || "Aprill", 5: t.mMay || "Mai", 6: t.mJun || "Juuni",
+          7: t.mJul || "Juuli", 8: t.mAug || "August", 9: t.mSep || "September",
+          10: t.mOct || "Oktoober", 11: t.mNov || "November", 12: t.mDec || "Detsember"
+        };
+        return map[m] || String(m);
+      };
+
+      const statusText = (s)=> {
+        const code = String(s||"").toLowerCase();
+        if(code==="paid") return t.billPaid || "Makstud";
+        if(code==="overdue") return t.billOverdue || "Üle tähtaja";
+        return t.billPending || "Ootab makset";
+      };
+      const statusCls = (s)=> {
+        const code = String(s||"").toLowerCase();
+        if(code==="paid") return "st-paid";
+        if(code==="overdue") return "st-overdue";
+        return "st-pending";
+      };
+
+      resp.invoices.forEach(inv=>{
+        const period = `${monthName(Number(inv.month||0))} ${inv.year}`;
+        const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
+        const st = statusText(inv.status);
+        const cls = statusCls(inv.status);
+        const id = String(inv.invoice_id||"");
+        bb.insertAdjacentHTML("beforeend", `
+          <tr>
+                        <td>${esc(period)}</td>
+            <td>${esc(sum)}</td>
+            <td class="${esc(cls)}">${esc(st)}</td>
+            <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
+          </tr>
+        `);
+      });
+
+      // pdf click
+      bb.querySelectorAll(".pdf-btn").forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          const invoiceId = btn.getAttribute("data-invoice") || "";
+          await downloadInvoicePdf(invoiceId);
+        });
+      });
+    }
+
+    // Bills: dynamic year list (from Sheets via API)
+    async function populateBillsYearsFromApi_(){
+      const token = getToken();
+      const sel = document.getElementById("billsYear");
+      if(!sel) return;
+      if(!token) return;
+
+      const prev = sel.value;
+      const resp = await apiPost("/invoiceYears", { token });
+
+      if(resp && resp.ok && Array.isArray(resp.years) && resp.years.length){
+        sel.innerHTML = "";
+        resp.years.forEach(y=>{
+          const opt = document.createElement("option");
+          opt.value = String(y);
+          opt.textContent = String(y);
+          sel.appendChild(opt);
+        });
+        // restore previous selection if still exists
+        if(prev && [...sel.options].some(o=>o.value===prev)) sel.value = prev;
+      } else {
+        // fallback: keep existing options if any; otherwise show current year
+        if(sel.options.length === 0 || (sel.options.length===1 && sel.options[0].value==="")){
+          const y = new Date().getFullYear();
+          sel.innerHTML = `<option value="${y}">${y}</option>`;
+        }
+      }
+    }
+
+    function attachBillsYearListener_(){
+      const sel = document.getElementById("billsYear");
+      if(!sel || sel.__ku_bound) return;
+      sel.__ku_bound = true;
+      sel.addEventListener("change", ()=>{
+        const y = Number(sel.value || 0);
+        if(y) loadBillsFromApi(y);
+      });
+    }
+
+    async function initBillsPage_(){
+      attachBillsYearListener_();
+      await populateBillsYearsFromApi_();
+
+      const sel = document.getElementById("billsYear");
+      const y = Number(sel && sel.value ? sel.value : 0) || Number((sel && sel.options[0] && sel.options[0].value) || 0);
+      if(y) loadBillsFromApi(y);
+    }
+
+
+    async function downloadInvoicePdf(invoiceId){
+      const token = getToken();
+      if(!token || !invoiceId) return;
+      try{
+        const r = await fetch(API_BASE + "/invoicePdf", {
+          method: "POST",
+          headers: { "content-type":"application/json; charset=utf-8" },
+          body: JSON.stringify({ token, invoice_id: invoiceId })
+        });
+        if(!r.ok){ return; }
+
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+
+        // Prefer opening in a new tab (so user can view/print)
+        const w = window.open(url, "_blank", "noopener,noreferrer");
+        if(!w){
+          // Fallback: download if popup is blocked
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = invoiceId + ".pdf";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+
+        setTimeout(()=>URL.revokeObjectURL(url), 15000);
+      }catch(e){}
     }
 
     // wire
