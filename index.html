@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.174</title>
+  <title>Karusselli 4 KÜ — v1.177</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -717,13 +717,27 @@ margin: 0;
 
   .bills-status{margin-top:6px; font-size:12px; color:#666; min-height:16px}
   .is-busy{opacity:.6; pointer-events:none}
+
+    /* v1.177: highlight active process messages */
+    .process.is-active{
+      background: #fff3bf !important;
+      border-color: #f1c40f !important;
+      color: #6b5d00 !important;
+      box-shadow: 0 8px 18px rgba(241,196,15,.18) !important;
+    }
+    .process.is-active .spinner{ border-color: rgba(107,93,0,.25); border-top-color: #6b5d00; }
+
+    /* v1.177: remove duplicate owner/apartment + old status line on invoices page */
+    .bills-owner{ display:none !important; }
+    .bills-status{ display:none !important; }
+
 </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.174</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.177</span>
         <small id="brandSub"></small>
       </div>
 
@@ -1671,9 +1685,11 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       if(!pill || !t) return;
       if(text){
         t.textContent = String(text);
+        pill.classList.add('is-active');
         pill.style.display = 'inline-flex';
       } else {
         t.textContent = '';
+        pill.classList.remove('is-active');
         pill.style.display = 'none';
       }
     }
