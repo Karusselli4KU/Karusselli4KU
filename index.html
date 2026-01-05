@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.177</title>
+  <title>Karusselli 4 KÜ — v1.188</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -718,7 +718,7 @@ margin: 0;
   .bills-status{margin-top:6px; font-size:12px; color:#666; min-height:16px}
   .is-busy{opacity:.6; pointer-events:none}
 
-    /* v1.177: highlight active process messages */
+    /* v1.188: highlight active process messages */
     .process.is-active{
       background: #fff3bf !important;
       border-color: #f1c40f !important;
@@ -727,17 +727,46 @@ margin: 0;
     }
     .process.is-active .spinner{ border-color: rgba(107,93,0,.25); border-top-color: #6b5d00; }
 
-    /* v1.177: remove duplicate owner/apartment + old status line on invoices page */
+    /* v1.188: remove duplicate owner/apartment + old status line on invoices page */
     .bills-owner{ display:none !important; }
     .bills-status{ display:none !important; }
 
 </style>
+
+<style>
+
+<style>
+/* FIX: move the invoices table down so the year selector never overlaps the header */
+.bills-year-row { margin-bottom: 10px; }
+.bills-table { margin-top: 14px !important; }
+
+/* v1.188: Bills year selector — left aligned above table, no overlap */
+#page_bills .bills-year-row{
+  position: static !important;
+  inset: auto !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 10px 0 12px 0 !important;
+  padding: 0 !important;
+}
+#page_bills .bills-year-row select{
+  margin: 0 !important;
+}
+#page_bills .bills-table{
+  margin-top: 0 !important;
+}
+
+</style>
+
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.177</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.188</span>
         <small id="brandSub"></small>
       </div>
 
@@ -989,7 +1018,7 @@ margin: 0;
           <!-- year selector -->
           <div class="bills-year-row">
             <select id="billsYear" aria-label="Year">
-              <option value="">—</option>
+              <option value="" disabled selected hidden>—</option>
             </select>
           </div>
           <div id="billsStatus" class="bills-status" aria-live="polite"></div>
@@ -1035,6 +1064,10 @@ margin: 0;
         brandSub: "",
         statusOut: "Вход не выполнен",
         statusIn: (u)=> `Вход выполнен: ${u}`,
+        userStatusLabel: "Пользователь",
+        aptStatusLabel: "Квартира",
+        ownerStatusLabel: "Собственник",
+
         logout: "Выйти",
 
         loginTitle: "Войти",
@@ -1147,6 +1180,10 @@ margin: 0;
         brandSub: "",
         statusOut: "Pole sisse logitud",
         statusIn: (u)=> `Sisselogitud: ${u}`,
+        userStatusLabel: "Kasutaja",
+        aptStatusLabel: "Korter",
+        ownerStatusLabel: "Omanik",
+
         logout: "Logi välja",
 
         loginTitle: "Logi sisse",
@@ -1256,6 +1293,10 @@ margin: 0;
         brandSub: "",
         statusOut: "Not logged in",
         statusIn: (u)=> `Logged in: ${u}`,
+        userStatusLabel: "User",
+        aptStatusLabel: "Apartment",
+        ownerStatusLabel: "Owner",
+
         logout: "Log out",
 
         loginTitle: "Sign in",
@@ -1421,6 +1462,9 @@ function getLangSafe(){
 
       const pack = I18N[getLang()] || I18N.ru;
 
+      const __esc = (s)=>String(s).replace(/[&<>"\']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#39;" }[c]));
+
+
       dot.classList.toggle("good", !!isIn);
       dot.classList.toggle("bad", !isIn);
 
@@ -1431,11 +1475,11 @@ function getLangSafe(){
         b4.style.display = "none";
       } else {
         const u = String(username || "").trim();
-        l1.textContent = (u ? ("User: " + u) : (pack.statusIn ? pack.statusIn("") : ""));
+        l1.innerHTML = (u ? (`<b>${__esc(pack.userStatusLabel || "User")}:</b> ${__esc(u)}`) : __esc(pack.statusIn ? pack.statusIn("") : ""));
 
         const aptVal = (apartment !== undefined && apartment !== null) ? String(apartment).trim() : "";
         if(aptVal){
-          l2.textContent = `${pack.aptStatusLabel || "Korter"}: ${aptVal}`;
+          l2.innerHTML = `<b>${__esc(pack.aptStatusLabel || "Korter")}:</b> ${__esc(aptVal)}`;
           b2.style.display = "flex";
         } else {
           b2.style.display = "none";
@@ -1443,7 +1487,7 @@ function getLangSafe(){
 
         const dn = String(displayName || "").trim();
         if(dn){
-          l3.textContent = `${pack.ownerStatusLabel || "Omanik"}: ${dn}`;
+          l3.innerHTML = `<b>${__esc(pack.ownerStatusLabel || "Omanik")}:</b> ${__esc(dn)}`;
           l4.textContent = "";
           b3.style.display = "flex";
           b4.style.display = "none";
@@ -1918,10 +1962,11 @@ else msg.textContent = t.errLogin;
   try{
     const resp = await apiPost("/invoiceYears", { token });
     if(resp && resp.ok && Array.isArray(resp.years) && resp.years.length){
-      const prev = sel.value;
+      sel.disabled = false;
+const prev = sel.value;
 
       // keep empty option at top to avoid accidental "0" selection
-      sel.innerHTML = '<option value=""></option>';
+      sel.innerHTML = '<option value="" disabled selected hidden>—</option>'; sel.disabled = true;
       resp.years.forEach(y=>{
         const opt = document.createElement("option");
         opt.value = String(y);
@@ -1938,7 +1983,7 @@ else msg.textContent = t.errLogin;
     }
 
     // no data -> keep selector empty
-    sel.innerHTML = '<option value=""></option>';
+    sel.innerHTML = '<option value="" disabled selected hidden>—</option>'; sel.disabled = true;
     return [];
   }finally{
     setBillsBusy(false, "");
