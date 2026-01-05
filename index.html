@@ -17,10 +17,10 @@
         if (!p.endsWith("/") && !looksLikeFile){
           location.replace(p + "/" + location.search + location.hash);
         }
-      }catch(e){}
+      }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.157</title>
+  <title>Karusselli 4 KÜ — v1.166</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -105,6 +105,33 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
     .dot{width:8px;height:8px;border-radius:50%}
     .dot.good{background:var(--good); box-shadow:0 0 0 3px rgba(53,208,127,.16)}
     .dot.bad{background:#ff4d4d; box-shadow:0 0 0 3px rgba(255,77,77,.14)}
+
+    /* Process indicator near login status (v1.166) */
+    .process{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--pill);
+      color:var(--muted);
+      border:1px solid var(--stroke);
+      box-shadow: 0 8px 18px rgba(0,0,0,.06);
+      font-size:14px;
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .process .spinner{
+      width:14px; height:14px;
+      border-radius:50%;
+      border:2px solid rgba(0,0,0,.15);
+      border-top-color: rgba(0,0,0,.45);
+      animation: spin 0.9s linear infinite;
+      flex:0 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+
     .btn{
       border:1px solid var(--stroke);
       background:var(--pill);
@@ -669,13 +696,16 @@ margin: 0;
   justify-content: center;
 }
 
+
+  .bills-status{margin-top:6px; font-size:12px; color:#666; min-height:16px}
+  .is-busy{opacity:.6; pointer-events:none}
 </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.157</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.166</span>
         <small id="brandSub"></small>
       </div>
 
@@ -692,6 +722,11 @@ margin: 0;
         <div class="status" id="statusPill">
           <span id="statusDot" class="dot bad"></span>
           <span id="statusText">Вход не выполнен</span>
+        </div>
+
+        <div class="process" id="processPill" style="display:none">
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="processText"></span>
         </div>
 
         <button class="btn" id="btnTopLogout" style="display:none">Выйти</button>
@@ -911,6 +946,7 @@ margin: 0;
               <option value="">—</option>
             </select>
           </div>
+          <div id="billsStatus" class="bills-status" aria-live="polite"></div>
 
           <table class="bills-table" style="margin-top:0">
             <thead>
@@ -1545,27 +1581,47 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
 
       const bb = document.getElementById("billsBody");
       bb.innerHTML = "";
-      const demo = [
-        {m:0, y:2026, apt:apt || "—", sum:"123,45 €", stKey:"billPaid", cls:"st-paid"},
-        {m:1, y:2026, apt:apt || "—", sum:"98,10 €", stKey:"billOverdue", cls:"st-overdue"},
-        {m:2, y:2026, apt:apt || "—", sum:"110,00 €", stKey:"billPending", cls:"st-pending"},
-      ];
-      demo.forEach(x=>{
-        const period = formatPeriod(x.m, x.y);
-        const stText = (t && x.stKey && t[x.stKey]) ? t[x.stKey] : (x.stKey || "");
-        bb.insertAdjacentHTML("beforeend", `
-          <tr>
-                        <td>${esc(period)}</td>
-            <td class="col-apt">${esc(x.apt)}</td>
-            <td>${esc(x.sum)}</td>
-            <td class="${esc(x.cls)}">${esc(stText)}</td>
-            <td><button class="pdf-btn" type="button">PDF</button></td>
-          </tr>
-        `);
-      });
+      // bills demo removed (v1.166)
+}
+
+    
+    function _uiMsg(key){
+      const l = getLang();
+      const dict = {
+        ru: { loggingIn:"Выполняю вход…", loadingYears:"Загружаю годы…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…"},
+        et: { loggingIn:"Sisselogimine…", loadingYears:"Laadin aastaid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…"},
+        en: { loggingIn:"Signing in…", loadingYears:"Loading years…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…"}
+      };
+      return (dict[l] && dict[l][key]) || (dict.ru[key] || "");
     }
 
-    async function apiPost(path, payload){
+    function setProcessPill(text){
+      const pill = document.getElementById('processPill');
+      const t = document.getElementById('processText');
+      if(!pill || !t) return;
+      if(text){
+        t.textContent = String(text);
+        pill.style.display = 'inline-flex';
+      } else {
+        t.textContent = '';
+        pill.style.display = 'none';
+      }
+    }
+
+    function setBillsStatus(text){
+      const el = document.getElementById("billsStatus");
+      if(el) el.textContent = text || "";
+    }
+
+    function setBillsBusy(isBusy, text){
+      const yearSel = document.getElementById("billsYear");
+      const table = document.querySelector("#page_bills .bills-table");
+      if(yearSel) yearSel.disabled = !!isBusy;
+      if(table) table.classList.toggle("is-busy", !!isBusy);
+      // show noticeable process message near login status while bills operations run
+      setProcessPill(isBusy ? (text || "") : "");
+    }
+async function apiPost(path, payload){
       // Robust fetch with timeout to avoid hanging UI when Apps Script is slow/unreachable
       const ctrl = new AbortController();
       const t = setTimeout(()=>ctrl.abort(), 20000); // 20s
@@ -1625,8 +1681,14 @@ else msg.textContent = d.error || t.errReg;
       const msg = document.getElementById("log_msg");
       msg.className="msg"; msg.textContent="";
 
-      const d = await apiPost("/login", {username:u,password:p});
-      const t = I18N[getLang()] || I18N.ru;
+      
+      const btn = document.getElementById("btnLogin");
+      if(btn) btn.disabled = true;
+      msg.textContent = _uiMsg("loggingIn");
+const d = await apiPost("/login", {username:u,password:p});
+      
+      if(btn) btn.disabled = false;
+const t = I18N[getLang()] || I18N.ru;
 
       if(!d.ok){
         msg.className="msg err";
@@ -1640,6 +1702,17 @@ else msg.textContent = t.errLogin;
       const user = { username:u, apartment:d.apartment, role:d.role || "member" };
       localStorage.setItem("ku_user", JSON.stringify(user));
       localStorage.setItem("ku_token", d.token || "");
+      msg.textContent = "";
+      // reset invoices UI state on every login (so default year logic works reliably)
+      const sel = document.getElementById("billsYear");
+      if(sel){
+        sel.__ku_userSelected = false;
+        sel.value = "";
+      }
+      const bb = document.getElementById("billsBody");
+      if(bb) bb.innerHTML = "";
+      setProcessPill("");
+
       showApp(user);
     }
 
@@ -1648,148 +1721,214 @@ else msg.textContent = t.errLogin;
     function logout(){
       localStorage.removeItem("ku_user");
       localStorage.removeItem("ku_token");
+
+      // reset invoices UI state so next login defaults to latest year again
+      const sel = document.getElementById("billsYear");
+      if(sel){
+        sel.__ku_userSelected = false;
+        sel.value = "";
+      }
+      const bb = document.getElementById("billsBody");
+      if(bb) bb.innerHTML = "";
+      setProcessPill("");
+
       showAuth();
     }
 
 
     async function loadBillsFromApi(year){
       const token = getToken();
-      const t = I18N[getLang()] || I18N.ru;
 
-      // Fallback to demo if not logged in
-      if(!token){ renderDemoTables(); return; }
-
-      const resp = await apiPost("/invoices", { token, year });
-      if(!resp || !resp.ok){
-        // keep existing demo as fallback for now
-        renderDemoTables();
+      // If not logged in, just clear bills UI
+      if(!token){
+        setBillsBusy(false, "");
+        const bb = document.getElementById("billsBody");
+        if(bb) bb.innerHTML = "";
         return;
       }
 
-      // owner / apartment
-      const bo = document.getElementById("billsOwnerName");
-      const ba = document.getElementById("billsAptNum");
-      if (bo) bo.textContent = resp.username || (JSON.parse(localStorage.getItem("ku_user")||"{}").username||"—");
-      if (ba) ba.textContent = String(resp.apartment || "");
-
-      const bb = document.getElementById("billsBody");
-      bb.innerHTML = "";
-
-      const monthName = (m)=> {
-        const map = {
-          1: t.mJan || "Jaanuar", 2: t.mFeb || "Veebruar", 3: t.mMar || "Märts",
-          4: t.mApr || "Aprill", 5: t.mMay || "Mai", 6: t.mJun || "Juuni",
-          7: t.mJul || "Juuli", 8: t.mAug || "August", 9: t.mSep || "September",
-          10: t.mOct || "Oktoober", 11: t.mNov || "November", 12: t.mDec || "Detsember"
-        };
-        return map[m] || String(m);
-      };
-
-      const statusText = (s)=> {
-        const code = String(s||"").toLowerCase();
-        if(code==="paid") return t.billPaid || "Makstud";
-        if(code==="overdue") return t.billOverdue || "Üle tähtaja";
-        return t.billPending || "Ootab makset";
-      };
-      const statusCls = (s)=> {
-        const code = String(s||"").toLowerCase();
-        if(code==="paid") return "st-paid";
-        if(code==="overdue") return "st-overdue";
-        return "st-pending";
-      };
-
-      resp.invoices.forEach(inv=>{
-        const period = `${monthName(Number(inv.month||0))} ${inv.year}`;
-        const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
-        const st = statusText(inv.status);
-        const cls = statusCls(inv.status);
-        const id = String(inv.invoice_id||"");
-        bb.insertAdjacentHTML("beforeend", `
-          <tr>
-                        <td>${esc(period)}</td>
-            <td>${esc(sum)}</td>
-            <td class="${esc(cls)}">${esc(st)}</td>
-            <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
-          </tr>
-        `);
-      });
-
-      // pdf click
-      bb.querySelectorAll(".pdf-btn").forEach(btn=>{
-        btn.addEventListener("click", async ()=>{
-          const invoiceId = btn.getAttribute("data-invoice") || "";
-          await downloadInvoicePdf(invoiceId);
-        });
-      });
-    }
-
-    // Bills: dynamic year list (from Sheets via API)
-    async function populateBillsYearsFromApi_(){
-      const token = getToken();
-      const sel = document.getElementById("billsYear");
-      if(!sel) return;
-      if(!token) return;
-
-      const prev = sel.value;
-      const resp = await apiPost("/invoiceYears", { token });
-
-      if(resp && resp.ok && Array.isArray(resp.years) && resp.years.length){
-        sel.innerHTML = "";
-        resp.years.forEach(y=>{
-          const opt = document.createElement("option");
-          opt.value = String(y);
-          opt.textContent = String(y);
-          sel.appendChild(opt);
-        });
-        // restore previous selection if still exists
-        if(prev && [...sel.options].some(o=>o.value===prev)) sel.value = prev;
-      } else {
-        // fallback: keep existing options if any; otherwise show current year
-        if(sel.options.length === 0 || (sel.options.length===1 && sel.options[0].value==="")){
-          const y = new Date().getFullYear();
-          sel.innerHTML = `<option value="${y}">${y}</option>`;
+      setBillsBusy(true, _uiMsg("loadingBills"));
+      try{
+        const resp = await apiPost("/invoices", { token, year });
+        if(!resp || !resp.ok){
+          const bb = document.getElementById("billsBody");
+          if(bb) bb.innerHTML = "";
+          return;
         }
+
+        // owner / apartment
+        const bo = document.getElementById("billsOwnerName");
+        const ba = document.getElementById("billsAptNum");
+        if (bo) bo.textContent = resp.username || (JSON.parse(localStorage.getItem("ku_user")||"{}").username||"—");
+        if (ba) ba.textContent = String(resp.apartment || "");
+
+        const bb = document.getElementById("billsBody");
+        if(!bb) return;
+        bb.innerHTML = "";
+
+        const t = I18N[getLang()] || I18N.ru;
+
+        const monthName = (m)=> {
+          const map = {
+            1: t.mJan || "Jaanuar", 2: t.mFeb || "Veebruar", 3: t.mMar || "Märts",
+            4: t.mApr || "Aprill", 5: t.mMay || "Mai", 6: t.mJun || "Juuni",
+            7: t.mJul || "Juuli", 8: t.mAug || "August", 9: t.mSep || "September",
+            10: t.mOct || "Oktoober", 11: t.mNov || "November", 12: t.mDec || "Detsember"
+          };
+          return map[m] || String(m);
+        };
+
+        const statusText = (s)=> {
+          const code = String(s||"").toLowerCase();
+          if(code==="paid") return t.billPaid || "Makstud";
+          if(code==="overdue") return t.billOverdue || "Üle tähtaja";
+          return t.billPending || "Ootab makset";
+        };
+        const statusCls = (s)=> {
+          const code = String(s||"").toLowerCase();
+          if(code==="paid") return "st-paid";
+          if(code==="overdue") return "st-overdue";
+          return "st-pending";
+        };
+
+        (resp.invoices || []).forEach(inv=>{
+          const period = `${monthName(Number(inv.month||0))} ${inv.year}`;
+          const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
+          const st = statusText(inv.status);
+          const cls = statusCls(inv.status);
+          const id = String(inv.invoice_id||"");
+          bb.insertAdjacentHTML("beforeend", `
+            <tr>
+              <td>${esc(period)}</td>
+              <td>${esc(sum)}</td>
+              <td class="${esc(cls)}">${esc(st)}</td>
+              <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
+            </tr>
+          `);
+        });
+
+        // pdf click
+        bb.querySelectorAll(".pdf-btn").forEach(btn=>{
+          btn.addEventListener("click", async ()=>{
+            const invoiceId = btn.getAttribute("data-invoice") || "";
+            await downloadInvoicePdf(invoiceId, btn);
+          });
+        });
+      }finally{
+        setBillsBusy(false, "");
       }
     }
 
-    function attachBillsYearListener_(){
-      const sel = document.getElementById("billsYear");
-      if(!sel || sel.__ku_bound) return;
-      sel.__ku_bound = true;
-      sel.addEventListener("change", ()=>{
-        const y = Number(sel.value || 0);
-        if(y) loadBillsFromApi(y);
+
+
+    // Bills: dynamic year list (from Sheets via API)
+    async function populateBillsYearsFromApi_(){
+  const token = getToken();
+  const sel = document.getElementById("billsYear");
+  if(!sel) return [];
+  if(!token) return [];
+
+  setBillsBusy(true, _uiMsg("loadingYears"));
+  try{
+    const resp = await apiPost("/invoiceYears", { token });
+    if(resp && resp.ok && Array.isArray(resp.years) && resp.years.length){
+      const prev = sel.value;
+
+      // keep empty option at top to avoid accidental "0" selection
+      sel.innerHTML = '<option value=""></option>';
+      resp.years.forEach(y=>{
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = String(y);
+        sel.appendChild(opt);
       });
+
+      // if user already chose something earlier in this session - keep it (if still exists)
+      if(sel.__ku_userSelected && prev && [...sel.options].some(o=>o.value===prev)){
+        sel.value = prev;
+      }
+
+      return resp.years.slice();
     }
 
-    async function initBillsPage_(){
-      attachBillsYearListener_();
-      await populateBillsYearsFromApi_();
+    // no data -> keep selector empty
+    sel.innerHTML = '<option value=""></option>';
+    return [];
+  }finally{
+    setBillsBusy(false, "");
+  }
+}
 
-      const sel = document.getElementById("billsYear");
-      const y = Number(sel && sel.value ? sel.value : 0) || Number((sel && sel.options[0] && sel.options[0].value) || 0);
-      if(y) loadBillsFromApi(y);
+function attachBillsYearListener_(){
+  const sel = document.getElementById("billsYear");
+  if(!sel || sel.__ku_bound) return;
+  sel.__ku_bound = true;
+  sel.addEventListener("change", ()=>{
+    sel.__ku_userSelected = true;
+    const y = Number(sel.value || 0);
+    if(y) loadBillsFromApi(y);
+  });
+}
+
+async function initBillsPage_(){
+  attachBillsYearListener_();
+
+  const sel = document.getElementById("billsYear");
+  if(!sel) return;
+
+  const years = await populateBillsYearsFromApi_();
+
+  // If user did NOT manually select a year, always default to latest available year
+  // This also fixes "logout -> login -> invoices empty" (selector resets to blank).
+  if(!sel.__ku_userSelected){
+    const ys = (Array.isArray(years) && years.length)
+      ? years.map(Number).filter(Boolean)
+      : [...sel.options].map(o=>Number(o.value)).filter(Boolean);
+
+    if(ys.length){
+      const lastYear = Math.max(...ys);
+      sel.value = String(lastYear);
+      await loadBillsFromApi(lastYear);
+      return;
     }
 
+    // no data -> keep empty
+    return;
+  }
 
-    async function downloadInvoicePdf(invoiceId){
+  // user already selected a year in this session: respect it
+  const y = Number(sel.value || 0);
+  if(y) loadBillsFromApi(y);
+}
+
+async function downloadInvoicePdf(invoiceId, btnEl){
       const token = getToken();
       if(!token || !invoiceId) return;
+
+      setProcessPill(_uiMsg("openingPdf"));
+      if(btnEl) { btnEl.disabled = true; btnEl.classList.add("is-busy"); }
+
       try{
         const r = await fetch(API_BASE + "/invoicePdf", {
           method: "POST",
           headers: { "content-type":"application/json; charset=utf-8" },
           body: JSON.stringify({ token, invoice_id: invoiceId })
         });
-        if(!r.ok){ return; }
+
+        if(!r.ok){
+          // try to show server error in a simple way
+          let j = null;
+          try { j = await r.json(); } catch {}
+          const msg = (j && j.error) ? String(j.error) : ("HTTP " + r.status);
+          alert("Не удалось открыть PDF: " + msg);
+          return;
+        }
 
         const blob = await r.blob();
         const url = URL.createObjectURL(blob);
 
-        // Prefer opening in a new tab (so user can view/print)
         const w = window.open(url, "_blank", "noopener,noreferrer");
         if(!w){
-          // Fallback: download if popup is blocked
           const a = document.createElement("a");
           a.href = url;
           a.download = invoiceId + ".pdf";
@@ -1798,9 +1937,16 @@ else msg.textContent = t.errLogin;
           a.remove();
         }
 
-        setTimeout(()=>URL.revokeObjectURL(url), 15000);
-      }catch(e){}
+        // release later
+        setTimeout(()=>URL.revokeObjectURL(url), 60_000);
+      }catch(e){
+        alert("Не удалось открыть PDF: " + String(e));
+      }finally{
+        setProcessPill("");
+        if(btnEl) { btnEl.disabled = false; btnEl.classList.remove("is-busy"); }
+      }
     }
+
 
     // wire
     document.getElementById("btnRegister").addEventListener("click", register);
