@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.192</title>
+  <title>Karusselli 4 KÜ — v1.194</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -627,6 +627,8 @@ textarea:focus{
   font-weight: 900;
   cursor:pointer;
   line-height:1.1;
+
+  font-size: 12px; /* v1.194 */
 }
 #page_bills .pdf-btn:hover{ background: var(--pill2); }
 
@@ -718,7 +720,7 @@ margin: 0;
   .bills-status{margin-top:6px; font-size:12px; color:#666; min-height:16px}
   .is-busy{opacity:.6; pointer-events:none}
 
-    /* v1.192: highlight active process messages */
+    /* v1.194: highlight active process messages */
     .process.is-active{
       background: #fff3bf !important;
       border-color: #f1c40f !important;
@@ -727,7 +729,7 @@ margin: 0;
     }
     .process.is-active .spinner{ border-color: rgba(107,93,0,.25); border-top-color: #6b5d00; }
 
-    /* v1.192: remove duplicate owner/apartment + old status line on invoices page */
+    /* v1.194: remove duplicate owner/apartment + old status line on invoices page */
     .bills-owner{ display:none !important; }
     .bills-status{ display:none !important; }
 
@@ -740,7 +742,7 @@ margin: 0;
 .bills-year-row { margin-bottom: 10px; }
 .bills-table { margin-top: 14px !important; }
 
-/* v1.192: Bills year selector — left aligned above table, no overlap */
+/* v1.194: Bills year selector — left aligned above table, no overlap */
 #page_bills .bills-year-row{
   position: static !important;
   inset: auto !important;
@@ -766,7 +768,7 @@ margin: 0;
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.192</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.194</span>
         <small id="brandSub"></small>
       </div>
 
