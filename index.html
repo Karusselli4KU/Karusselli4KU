@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.194</title>
+  <title>Karusselli 4 KÜ — v1.267</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -565,14 +565,16 @@ textarea:focus{
 #page_bills .bills-owner .lbl{ color: var(--muted); font-size:13px; }
 #page_bills .bills-owner b{ font-weight:900; }
 
-#page_bills .bills-year-row{
+#page_bills .bills-year-row,
+#page_readings .bills-year-row{
   position:absolute;
   top: 245px;
   left: 43%;
   margin: 0;
 }
 
-#page_bills .bills-year-row select{
+#page_bills .bills-year-row select,
+#page_readings .bills-year-row select{
   appearance:none;
   padding: 8px 12px;
   border-radius: 12px;
@@ -609,9 +611,6 @@ textarea:focus{
 #page_bills .bills-table td:first-child{ border-radius:12px 0 0 12px; }
 #page_bills .bills-table td:last-child{ border-radius:0 12px 12px 0; }
 
-/* hide apartment column completely */
-#page_bills .col-apt{ display:none !important; }
-
 /* status: text-only, no background */
 #page_bills .st-paid{ color: var(--good); font-weight:900; background:transparent !important; }
 #page_bills .st-pending{ color: var(--warn); font-weight:900; background:transparent !important; }
@@ -624,15 +623,69 @@ textarea:focus{
   background: var(--pill);
   padding: 3px 8px;
   border-radius: 10px;
-  font-weight: 900;
+  font-weight: 400;
   cursor:pointer;
   line-height:1.1;
 
-  font-size: 12px; /* v1.194 */
+  font-size: 12px; /* v1.204 */
 }
 #page_bills .pdf-btn:hover{ background: var(--pill2); }
 
 
+
+#page_readings .bills-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+}
+#page_readings .bills-table th{
+  font-size:12px;
+  color:var(--muted);
+  text-align:left !important;
+  font-weight:800;
+  padding: 0 10px 6px 10px;
+  white-space:nowrap;
+}
+#page_readings .bills-table td{
+  background:#fff;
+  border:1px solid var(--stroke);
+  padding: 2px 12px;  /* compact height */
+  font-size:13px;
+  vertical-align:middle;
+  line-height:1.15;
+  text-align:left !important;
+}
+#page_readings .bills-table td + td{ border-left:0; }
+#page_readings .bills-table td:first-child{ border-radius:12px 0 0 12px; }
+#page_readings .bills-table td:last-child{ border-radius:0 12px 12px 0; }
+
+/* status: text-only, no background */
+#page_readings .st-paid{ color: var(--good); font-weight:900; background:transparent !important; }
+#page_readings .st-pending{ color: var(--warn); font-weight:900; background:transparent !important; }
+#page_readings .st-overdue{ color:#B91C1C; font-weight:900; background:transparent !important; }
+
+/* PDF button */
+#page_readings .pdf-btn{
+  display:inline-block;
+  border:1px solid var(--stroke);
+  background: var(--pill);
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-weight: 400;
+  cursor:pointer;
+  line-height:1.1;
+
+  font-size: 12px; /* v1.204 */
+}
+#page_readings .pdf-btn:hover{ background: var(--pill2); }
+
+
+
+
+/* === v1.258: Readings table visual matches bills table === */
+#page_readings .rd-ok{ color: var(--good); font-weight:900; background:transparent !important; }
+#page_readings .rd-warn{ color: var(--warn); font-weight:900; background:transparent !important; }
+#page_readings .rd-miss{ color: var(--muted); font-weight:700; background:transparent !important; }
 /* === v1.151: hide duplicate portal title inside page === */
 .app-card h1,
 .app-card .portal-title{
@@ -649,13 +702,15 @@ textarea:focus{
 
 
 /* === v1.151: move year selector to top-right near logout === */
-#page_bills .bills-year-row{
+#page_bills .bills-year-row,
+#page_readings .bills-year-row{
   position:absolute;
   top: 170px;            /* aligns with top controls row */
 margin: 0;
 }
 @media (max-width: 900px){
-  #page_bills .bills-year-row{
+  #page_bills .bills-year-row,
+#page_readings .bills-year-row{
     position: static;
     display:flex;
     justify-content:flex-end;
@@ -664,7 +719,8 @@ margin: 0;
 }
 
 /* === v1.151: dropdown arrow for year selector === */
-#page_bills .bills-year-row select{
+#page_bills .bills-year-row select,
+#page_readings .bills-year-row select{
   -webkit-appearance:none;
   -moz-appearance:none;
   appearance:none;
@@ -681,7 +737,8 @@ margin: 0;
 
 
 /* === v1.151: FINAL override for bills year selector position (desktop) === */
-#page_bills .bills-year-row{
+#page_bills .bills-year-row,
+#page_readings .bills-year-row{
   position: absolute !important;
   top: 195px !important;
   left: 43% !important;
@@ -689,7 +746,8 @@ margin: 0;
   margin: 0 !important;
 }
 @media (max-width: 900px){
-  #page_bills .bills-year-row{
+  #page_bills .bills-year-row,
+#page_readings .bills-year-row{
     position: static !important;
     left: auto !important;
     top: auto !important;
@@ -720,7 +778,7 @@ margin: 0;
   .bills-status{margin-top:6px; font-size:12px; color:#666; min-height:16px}
   .is-busy{opacity:.6; pointer-events:none}
 
-    /* v1.194: highlight active process messages */
+    /* v1.204: highlight active process messages */
     .process.is-active{
       background: #fff3bf !important;
       border-color: #f1c40f !important;
@@ -729,9 +787,186 @@ margin: 0;
     }
     .process.is-active .spinner{ border-color: rgba(107,93,0,.25); border-top-color: #6b5d00; }
 
-    /* v1.194: remove duplicate owner/apartment + old status line on invoices page */
+    /* v1.204: remove duplicate owner/apartment + old status line on invoices page */
     .bills-owner{ display:none !important; }
     .bills-status{ display:none !important; }
+
+
+#page_readings table td{ padding:2px 12px; }
+
+/* v1.242: align Readings row height with Invoices */
+#page_readings .readings-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+}
+#page_readings .readings-table td{
+  background:#fff;
+  border:1px solid var(--stroke);
+  padding: 2px 12px;  /* compact height like bills */
+  font-size:13px;
+  vertical-align:middle;
+  line-height:1.15;
+  text-align:left !important;
+}
+#page_readings .readings-table td + td{ border-left:0; }
+#page_readings .readings-table td:first-child{ border-radius:14px 0 0 14px; }
+#page_readings .readings-table td:last-child{ border-radius:0 14px 14px 0; }
+#page_readings .readings-table tr + tr td{ border-top:0; }
+
+
+/* v1.242: slightly increase Readings row height to match Invoices visually */
+#page_readings table.bills-table td{
+  padding: 4px 12px !important; /* was 2px 12px */
+  line-height: 1.25 !important;
+}
+
+
+/* v1.242: reduce vertical gap between Readings rows */
+#page_readings table.bills-table{
+  border-spacing: 0 6px !important; /* was larger */
+}
+
+
+/* v1.242: fine-tune row gap (slightly larger than v1.231) */
+#page_readings table.bills-table{
+  border-spacing:0 6px !important;
+}
+
+
+/* v1.242: final micro-adjust of row gap */
+#page_readings table.bills-table{
+  border-spacing:0 6px !important;
+}
+
+
+
+/* v1.247: make Readings row height match Bills (Invoices) */
+#page_readings table.bills-table td{
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+
+/* FIX: remove gray background inside readings table cells */
+#page_readings table.bills-table td,
+#page_readings table.bills-table th {
+    background: transparent !important;
+}
+
+
+/* v1.254: bills table — center Summa and Staatus columns */
+#page_bills .bills-table th:nth-child(2),
+#page_bills .bills-table td:nth-child(2),
+#page_bills .bills-table th:nth-child(3),
+#page_bills .bills-table td:nth-child(3){
+  text-align:center !important;
+}
+
+
+/* readings: enforce column widths (match bills table rhythm) */
+#page_readings table.readings-table {
+  table-layout: fixed;
+  width: max-content;
+}
+#page_readings table.readings-table th,
+#page_readings table.readings-table td{
+  width: 110px !important;
+  min-width: 110px !important;
+  max-width: 110px !important;
+}
+
+/* v1.254: Bills table fixed column widths (1..4) = 110px; Apartment column removed */
+#page_bills .bills-table{ table-layout: fixed; }
+#page_bills .bills-table th:nth-child(1),
+#page_bills .bills-table td:nth-child(1),
+#page_bills .bills-table th:nth-child(2),
+#page_bills .bills-table td:nth-child(2),
+#page_bills .bills-table th:nth-child(3),
+#page_bills .bills-table td:nth-child(3),
+#page_bills .bills-table th:nth-child(4),
+#page_bills .bills-table td:nth-child(4){
+  width:110px !important;
+  max-width:110px !important;
+}
+
+
+/* v1.259: enforce Readings column width = 110px (final) */
+#page_readings table.bills-table{
+  table-layout: fixed !important;
+  width: max-content !important;
+}
+#page_readings table.bills-table th,
+#page_readings table.bills-table td{
+  width:110px !important;
+  min-width:110px !important;
+  max-width:110px !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+
+/* v1.261: center header and values in Readings table */
+#page_readings table.bills-table th,
+#page_readings table.bills-table td{
+  text-align: center !important;
+  vertical-align: middle;
+}
+
+
+/* v1.264: increase Readings header height and allow wrapping */
+#page_readings table.bills-table th{
+  height: 2.2em;
+  white-space: normal !important;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+
+/* v1.266: Readings status colors + bold */
+#page_readings .rd-st-ok{ color: var(--good); font-weight:900; }
+#page_readings .rd-st-warn{ color: var(--warn); font-weight:900; }
+#page_readings .rd-st-miss{ color: #B91C1C; font-weight:900; }
+
+
+/* v1.267: FIXED layout (disable responsive reflow when window narrows) */
+html, body{
+  min-width: 1020px;
+}
+body{
+  overflow-x: auto; /* allow horizontal scroll instead of reflow */
+}
+.topbar-inner,
+.wrap{
+  width: 1020px !important;
+  max-width: none !important;
+}
+
+/* Keep desktop grids always */
+.auth-grid{ grid-template-columns: 1fr 1fr !important; }
+.bottom-grid{ grid-template-columns: 1fr 1fr !important; }
+.grid2{ grid-template-columns: 1fr 1fr !important; }
+
+/* Prevent wrapping of top controls / tabs */
+.right-actions{ flex-wrap: nowrap !important; }
+.tabs{ flex-wrap: nowrap !important; }
+.nav-right{ flex-wrap: nowrap !important; }
+.app-navrow{ flex-wrap: nowrap !important; }
+
+/* Keep quick status icon visible and desktop layout */
+#page_home .qs88-row{ grid-template-columns: 56px 1fr !important; }
+#page_home .qs88-icon{ display:flex !important; }
+
+/* Keep year selector behavior consistent (avoid mobile overrides) */
+#page_bills .bills-year-row,
+#page_readings .bills-year-row{
+  position: static !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin: 10px 0 12px 0 !important;
+}
 
 </style>
 
@@ -742,8 +977,9 @@ margin: 0;
 .bills-year-row { margin-bottom: 10px; }
 .bills-table { margin-top: 14px !important; }
 
-/* v1.194: Bills year selector — left aligned above table, no overlap */
-#page_bills .bills-year-row{
+/* v1.204: Bills year selector — left aligned above table, no overlap */
+#page_bills .bills-year-row,
+#page_readings .bills-year-row{
   position: static !important;
   inset: auto !important;
   display: flex !important;
@@ -754,11 +990,148 @@ margin: 0;
   margin: 10px 0 12px 0 !important;
   padding: 0 !important;
 }
-#page_bills .bills-year-row select{
+#page_bills .bills-year-row select,
+#page_readings .bills-year-row select{
+  margin: 0 !important;
+}
+
+#page_readings .bills-year-row{
+  position: static !important;
+  inset: auto !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 10px 0 12px 0 !important;
+  padding: 0 !important;
+}
+#page_readings .bills-year-row select{
   margin: 0 !important;
 }
 #page_bills .bills-table{
   margin-top: 0 !important;
+}
+
+
+#page_readings table td{ padding:2px 12px; }
+
+/* v1.242: align Readings row height with Invoices */
+#page_readings .readings-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+}
+#page_readings .readings-table td{
+  background:#fff;
+  border:1px solid var(--stroke);
+  padding: 2px 12px;  /* compact height like bills */
+  font-size:13px;
+  vertical-align:middle;
+  line-height:1.15;
+  text-align:left !important;
+}
+#page_readings .readings-table td + td{ border-left:0; }
+#page_readings .readings-table td:first-child{ border-radius:14px 0 0 14px; }
+#page_readings .readings-table td:last-child{ border-radius:0 14px 14px 0; }
+#page_readings .readings-table tr + tr td{ border-top:0; }
+
+
+/* v1.242: slightly increase Readings row height to match Invoices visually */
+#page_readings table.bills-table td{
+  padding: 4px 12px !important; /* was 2px 12px */
+  line-height: 1.25 !important;
+}
+
+
+/* v1.242: reduce vertical gap between Readings rows */
+#page_readings table.bills-table{
+  border-spacing: 0 6px !important; /* was larger */
+}
+
+
+/* v1.242: fine-tune row gap (slightly larger than v1.231) */
+#page_readings table.bills-table{
+  border-spacing:0 6px !important;
+}
+
+
+/* v1.242: final micro-adjust of row gap */
+#page_readings table.bills-table{
+  border-spacing:0 6px !important;
+}
+
+
+
+/* v1.242: Readings row height alignment (no functional JS/GS changes) */
+#page_readings table.bills-table td{
+  padding: 2px 12px !important;
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+}
+
+#page_readings table.bills-table{
+  border-spacing:0 6px !important;
+}
+
+
+
+/* v1.247: make Readings row height match Bills (Invoices) */
+#page_readings table.bills-table td{
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+
+/* FIX: remove gray background inside readings table cells */
+#page_readings table.bills-table td,
+#page_readings table.bills-table th {
+    background: transparent !important;
+}
+
+
+/* v1.254: set Bills table column widths (1..4) to 110px */
+#page_bills table.bills-table th:nth-child(1),
+#page_bills table.bills-table td:nth-child(1),
+#page_bills table.bills-table th:nth-child(2),
+#page_bills table.bills-table td:nth-child(2),
+#page_bills table.bills-table th:nth-child(3),
+#page_bills table.bills-table td:nth-child(3),
+#page_bills table.bills-table th:nth-child(4),
+#page_bills table.bills-table td:nth-child(4){
+  width:110px !important;
+  max-width:110px !important;
+}
+
+
+/* v1.254: Bills table fixed column widths (1..4) = 110px; Apartment column removed */
+#page_bills .bills-table{ table-layout: fixed; }
+#page_bills .bills-table th:nth-child(1),
+#page_bills .bills-table td:nth-child(1),
+#page_bills .bills-table th:nth-child(2),
+#page_bills .bills-table td:nth-child(2),
+#page_bills .bills-table th:nth-child(3),
+#page_bills .bills-table td:nth-child(3),
+#page_bills .bills-table th:nth-child(4),
+#page_bills .bills-table td:nth-child(4){
+  width:110px !important;
+  max-width:110px !important;
+}
+
+
+
+/* v1.255: enforce Bills column widths to 110px (real, not stretched) */
+#page_bills table.bills-table{
+  table-layout: fixed !important;
+  width: max-content !important; /* prevent auto-stretch to full container */
+}
+#page_bills table.bills-table th,
+#page_bills table.bills-table td{
+  width:110px !important;
+  max-width:110px !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 </style>
@@ -768,7 +1141,7 @@ margin: 0;
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.194</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.267</span>
         <small id="brandSub"></small>
       </div>
 
@@ -1029,8 +1402,6 @@ margin: 0;
             <thead>
               <tr>
                                 <th id="thPeriod">Период</th>
-                <!-- keep legacy apartment header for applyLang; hidden by CSS -->
-                <th id="thApartment2" class="col-apt">Квартира</th>
                 <th id="thSum">Сумма</th>
                 <th id="thStatus2">Статус</th>
                 <th id="thBillPdf">Счёт</th>
@@ -1508,56 +1879,56 @@ function applyLang(){
       document.documentElement.lang = (lang === "et" ? "et" : lang);
 
       // top
-      document.getElementById("brandTitle").textContent = t.brandTitle;
-      document.getElementById("brandSub").textContent = t.brandSub;
-      document.getElementById("btnTopLogout").textContent = t.logout;
+      const _el_brandTitle = document.getElementById("brandTitle"); if(_el_brandTitle) _el_brandTitle.textContent = t.brandTitle;
+      const _el_brandSub = document.getElementById("brandSub"); if(_el_brandSub) _el_brandSub.textContent = t.brandSub;
+      const _el_btnTopLogout = document.getElementById("btnTopLogout"); if(_el_btnTopLogout) _el_btnTopLogout.textContent = t.logout;
 
       // auth texts
-      document.getElementById("loginTitle").textContent = t.loginTitle;
-      document.getElementById("loginSub").textContent = t.loginSub;
-      document.getElementById("loginUserLabel").textContent = t.userLabel;
-      document.getElementById("loginPassLabel").textContent = t.passLabel;
-      document.getElementById("btnLogin").textContent = t.loginBtn;
+      const _el_loginTitle = document.getElementById("loginTitle"); if(_el_loginTitle) _el_loginTitle.textContent = t.loginTitle;
+      const _el_loginSub = document.getElementById("loginSub"); if(_el_loginSub) _el_loginSub.textContent = t.loginSub;
+      const _el_loginUserLabel = document.getElementById("loginUserLabel"); if(_el_loginUserLabel) _el_loginUserLabel.textContent = t.userLabel;
+      const _el_loginPassLabel = document.getElementById("loginPassLabel"); if(_el_loginPassLabel) _el_loginPassLabel.textContent = t.passLabel;
+      const _el_btnLogin = document.getElementById("btnLogin"); if(_el_btnLogin) _el_btnLogin.textContent = t.loginBtn;
 
-      document.getElementById("registerTitle").textContent = t.regTitle;
-      document.getElementById("registerSub").textContent = t.regSub;
-      document.getElementById("regUserLabel").textContent = t.userLabel;
-      document.getElementById("regPassLabel").textContent = t.passLabel;
-      document.getElementById("aptLabel").textContent = t.aptLabel;
-      document.getElementById("btnRegister").textContent = t.regBtn;
+      const _el_registerTitle = document.getElementById("registerTitle"); if(_el_registerTitle) _el_registerTitle.textContent = t.regTitle;
+      const _el_registerSub = document.getElementById("registerSub"); if(_el_registerSub) _el_registerSub.textContent = t.regSub;
+      const _el_regUserLabel = document.getElementById("regUserLabel"); if(_el_regUserLabel) _el_regUserLabel.textContent = t.userLabel;
+      const _el_regPassLabel = document.getElementById("regPassLabel"); if(_el_regPassLabel) _el_regPassLabel.textContent = t.passLabel;
+      const _el_aptLabel = document.getElementById("aptLabel"); if(_el_aptLabel) _el_aptLabel.textContent = t.aptLabel;
+      const _el_btnRegister = document.getElementById("btnRegister"); if(_el_btnRegister) _el_btnRegister.textContent = t.regBtn;
 
-      document.getElementById("log_user").placeholder = t.ph_user;
-      document.getElementById("reg_user").placeholder = t.ph_reg_user;
-      document.getElementById("log_pass").placeholder = t.ph_pass_login;
-      document.getElementById("reg_pass").placeholder = t.ph_pass_reg;
-      document.getElementById("reg_apt").placeholder = t.ph_apt;
+      const _el_log_user = document.getElementById("log_user"); if(_el_log_user) _el_log_user.placeholder = t.ph_user;
+      const _el_reg_user = document.getElementById("reg_user"); if(_el_reg_user) _el_reg_user.placeholder = t.ph_reg_user;
+      const _el_log_pass = document.getElementById("log_pass"); if(_el_log_pass) _el_log_pass.placeholder = t.ph_pass_login;
+      const _el_reg_pass = document.getElementById("reg_pass"); if(_el_reg_pass) _el_reg_pass.placeholder = t.ph_pass_reg;
+      const _el_reg_apt = document.getElementById("reg_apt"); if(_el_reg_apt) _el_reg_apt.placeholder = t.ph_apt;
 
       // app nav
-      document.getElementById("tab_home").textContent = t.tabHome;
-      document.getElementById("tab_readings").textContent = t.tabReadings;
-      document.getElementById("tab_bills").textContent = t.tabBills;
+      const _el_tab_home = document.getElementById("tab_home"); if(_el_tab_home) _el_tab_home.textContent = t.tabHome;
+      const _el_tab_readings = document.getElementById("tab_readings"); if(_el_tab_readings) _el_tab_readings.textContent = t.tabReadings;
+      const _el_tab_bills = document.getElementById("tab_bills"); if(_el_tab_bills) _el_tab_bills.textContent = t.tabBills;
 
       // page titles + blocks
-      document.getElementById("homeTitle").textContent = t.tabHome;
-      document.getElementById("readingsTitle").textContent = t.tabReadings;
-      document.getElementById("billsTitle").textContent = t.tabBills;
+      const _el_homeTitle = document.getElementById("homeTitle"); if(_el_homeTitle) _el_homeTitle.textContent = t.tabHome;
+      const _el_readingsTitle = document.getElementById("readingsTitle"); if(_el_readingsTitle) _el_readingsTitle.textContent = t.tabReadings;
+      const _el_billsTitle = document.getElementById("billsTitle"); if(_el_billsTitle) _el_billsTitle.textContent = t.tabBills;
 
-      document.getElementById("contactTitle").textContent = t.contactTitle;
-      document.getElementById("boardMembersTitle").textContent = t.boardMembersTitle;
-      document.getElementById("chairmanTitle").textContent = t.chairmanTitle;
-      document.getElementById("boardMemberTitle").textContent = t.boardMemberTitle;
+      const _el_contactTitle = document.getElementById("contactTitle"); if(_el_contactTitle) _el_contactTitle.textContent = t.contactTitle;
+      const _el_boardMembersTitle = document.getElementById("boardMembersTitle"); if(_el_boardMembersTitle) _el_boardMembersTitle.textContent = t.boardMembersTitle;
+      const _el_chairmanTitle = document.getElementById("chairmanTitle"); if(_el_chairmanTitle) _el_chairmanTitle.textContent = t.chairmanTitle;
+      const _el_boardMemberTitle = document.getElementById("boardMemberTitle"); if(_el_boardMemberTitle) _el_boardMemberTitle.textContent = t.boardMemberTitle;
 
-      document.getElementById("phName1").textContent = t.phName;
-      document.getElementById("phName2").textContent = t.phName;
-      document.getElementById("phEmailPhone1").textContent = t.phEmailPhone;
-      document.getElementById("phEmailPhone2").textContent = t.phEmailPhone;
+      const _el_phName1 = document.getElementById("phName1"); if(_el_phName1) _el_phName1.textContent = t.phName;
+      const _el_phName2 = document.getElementById("phName2"); if(_el_phName2) _el_phName2.textContent = t.phName;
+      const _el_phEmailPhone1 = document.getElementById("phEmailPhone1"); if(_el_phEmailPhone1) _el_phEmailPhone1.textContent = t.phEmailPhone;
+      const _el_phEmailPhone2 = document.getElementById("phEmailPhone2"); if(_el_phEmailPhone2) _el_phEmailPhone2.textContent = t.phEmailPhone;
 
-      document.getElementById("addressTitle").textContent = t.addressTitle;
-      document.getElementById("bankDetailsTitle").textContent = t.bankDetailsTitle;
-      document.getElementById("bankTitle").textContent = t.bankTitle;
-      document.getElementById("recipientTitle").textContent = t.recipientTitle;
-      document.getElementById("phIban").textContent = t.phIban;
-      document.getElementById("phBank").textContent = t.phBank;
+      const _el_addressTitle = document.getElementById("addressTitle"); if(_el_addressTitle) _el_addressTitle.textContent = t.addressTitle;
+      const _el_bankDetailsTitle = document.getElementById("bankDetailsTitle"); if(_el_bankDetailsTitle) _el_bankDetailsTitle.textContent = t.bankDetailsTitle;
+      const _el_bankTitle = document.getElementById("bankTitle"); if(_el_bankTitle) _el_bankTitle.textContent = t.bankTitle;
+      const _el_recipientTitle = document.getElementById("recipientTitle"); if(_el_recipientTitle) _el_recipientTitle.textContent = t.recipientTitle;
+      const _el_phIban = document.getElementById("phIban"); if(_el_phIban) _el_phIban.textContent = t.phIban;
+      const _el_phBank = document.getElementById("phBank"); if(_el_phBank) _el_phBank.textContent = t.phBank;
 
       safeSetText("quickTitle", t.quickTitle);
       safeSetText("quickSub", t.quickSub);
@@ -1574,24 +1945,24 @@ safeSetText("qsReadBadLbl", (t.qsReadBadLbl || (lang==="et" ? "ei esitanud" : (l
 safeSetText("qsPayOkLbl", (t.qsPayOkLbl || (lang==="et" ? "maksid arved" : (lang==="en" ? "paid bills" : "оплатили счета"))));
 safeSetText("qsPayBadLbl", (t.qsPayBadLbl || (lang==="et" ? "ei maksnud" : (lang==="en" ? "not paid" : "не оплатили счета"))));
 
-      document.getElementById("readingsDesc").textContent = t.readingsDesc;
-      document.getElementById("billsDesc").textContent = t.billsDesc;
+      const _el_readingsDesc = document.getElementById("readingsDesc"); if(_el_readingsDesc) _el_readingsDesc.textContent = t.readingsDesc;
+      const _el_billsDesc = document.getElementById("billsDesc"); if(_el_billsDesc) _el_billsDesc.textContent = t.billsDesc;
 
-      document.getElementById("thApartment").textContent = t.thApartment;
-      document.getElementById("thApartment2").textContent = t.thApartment;
-      document.getElementById("thStatus").textContent = t.thStatus;
-      document.getElementById("thStatus2").textContent = t.thStatus;
-      document.getElementById("thComment").textContent = t.thComment;
+      const _el_thApartment = document.getElementById("thApartment"); if(_el_thApartment) _el_thApartment.textContent = t.thApartment;
+      const _el_thApartment2 = document.getElementById("thApartment2"); if(_el_thApartment2) _el_thApartment2.textContent = t.thApartment;
+      const _el_thStatus = document.getElementById("thStatus"); if(_el_thStatus) _el_thStatus.textContent = t.thStatus;
+      const _el_thStatus2 = document.getElementById("thStatus2"); if(_el_thStatus2) _el_thStatus2.textContent = t.thStatus;
+      const _el_thComment = document.getElementById("thComment"); if(_el_thComment) _el_thComment.textContent = t.thComment;
       // bills table headers
       safeSetText("thBillDate", t.thBillDate);
-      document.getElementById("thPeriod").textContent = t.thPeriod;
-      document.getElementById("thSum").textContent = t.thSum;
+      const _el_thPeriod = document.getElementById("thPeriod"); if(_el_thPeriod) _el_thPeriod.textContent = t.thPeriod;
+      const _el_thSum = document.getElementById("thSum"); if(_el_thSum) _el_thSum.textContent = t.thSum;
       safeSetText("thBillPdf", t.thBillPdf);
 
-      document.getElementById("nextReadings1").textContent = t.nextReadings1;
-      document.getElementById("nextReadings2").textContent = t.nextReadings2;
-      document.getElementById("nextBills1").textContent = t.nextBills1;
-      document.getElementById("nextBills2").textContent = t.nextBills2;
+      const _el_nextReadings1 = document.getElementById("nextReadings1"); if(_el_nextReadings1) _el_nextReadings1.textContent = t.nextReadings1;
+      const _el_nextReadings2 = document.getElementById("nextReadings2"); if(_el_nextReadings2) _el_nextReadings2.textContent = t.nextReadings2;
+      const _el_nextBills1 = document.getElementById("nextBills1"); if(_el_nextBills1) _el_nextBills1.textContent = t.nextBills1;
+      const _el_nextBills2 = document.getElementById("nextBills2"); if(_el_nextBills2) _el_nextBills2.textContent = t.nextBills2;
       // status (header only)
 const saved = localStorage.getItem("ku_user");
 if (saved){
@@ -1677,6 +2048,15 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     function navigate(page){
       markActive(page);
       history.replaceState(null,"", "#"+page);
+
+      // notify page-specific modules (Readings/Bills) about navigation
+      try{
+        document.dispatchEvent(new CustomEvent("ku:navigate", { detail:{ page: page } }));
+      }catch(e){
+        // IE11-safe fallback (should not be needed in modern browsers)
+        try{ document.dispatchEvent(new Event("ku:navigate")); }catch(_){}
+      }
+
       if(page==="bills") initBillsPage_();
     }
 
@@ -1715,9 +2095,9 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     function _uiMsg(key){
       const l = getLang();
       const dict = {
-        ru: { loggingIn:"Выполняю вход…", loadingYears:"Загружаю годы…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…"},
-        et: { loggingIn:"Sisselogimine…", loadingYears:"Laadin aastaid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…"},
-        en: { loggingIn:"Signing in…", loadingYears:"Loading years…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…"}
+        ru: { loggingIn:"Выполняю вход…", loadingYears:"Загружаю данные…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…"},
+        et: { loggingIn:"Sisselogimine…", loadingYears:"Laadin andmeid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…"},
+        en: { loggingIn:"Signing in…", loadingYears:"Loading data…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…"}
       };
       return (dict[l] && dict[l][key]) || (dict.ru[key] || "");
     }
@@ -1926,7 +2306,7 @@ else msg.textContent = t.errLogin;
         };
 
         (resp.invoices || []).forEach(inv=>{
-          const period = `${monthName(Number(inv.month||0))} ${inv.year}`;
+          const period = `${monthName(Number(inv.month||0))}`;
           const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
           const st = statusText(inv.status);
           const cls = statusCls(inv.status);
@@ -2028,7 +2408,7 @@ function rerenderBillsFromCache_(){
   };
 
   (resp.invoices || []).forEach(inv=>{
-    const period = `${monthName(Number(inv.month||0))} ${inv.year}`;
+    const period = `${monthName(Number(inv.month||0))}`;
     const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
     const st = statusText(inv.status);
     const cls = statusCls(inv.status);
@@ -2162,7 +2542,7 @@ function updateLangFlag_() {
   const sel = document.getElementById("langSelect");
   const img = document.getElementById("langFlag");
   if(!sel || !img) return;
-  const v = sel.value || "et";
+  const v = getLang();
   img.src = LANG_FLAGS[v] || "";
   img.alt = v.toUpperCase();
 }
@@ -2419,5 +2799,309 @@ document.addEventListener("keydown", (e) => {
     </div>
   </div>
 
+
+<script>
+/* v1.204 add-on: Water Readings write-mode (isolated; does NOT touch login/forgot/reset)
+   Strategy: keep base v1.204 logic intact. We only inject UI into #page_readings and
+   call backend actions via existing API_BASE/apiFetch_/getAuthToken if available.
+*/
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function getToken(){
+    try{
+      if (typeof getAuthToken === "function") return getAuthToken();
+      return localStorage.getItem("ku_token") || localStorage.getItem("token") || "";
+    }catch(e){ return ""; }
+  }
+  async function callApi(action, payload){
+    // Prefer existing helper if available
+    try{
+      if (typeof apiFetch_ === "function"){
+        return await apiFetch_(action, payload || {});
+      }
+    }catch(e){}
+    // Fallback
+    if (typeof API_BASE !== "string") throw new Error("API_BASE missing");
+    const res = await fetch(API_BASE + "/" + action, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(payload || {})
+    });
+    return await res.json();
+  }
+
+  function ensureReadingsUI_(){
+    const host = $("page_readings");
+    if(!host) return;
+
+    // If already injected, skip
+    if ($("readingsYearSelect") && $("readingsMonthsBody")) return;
+
+    // Remove legacy demo UI from page_readings (demo status table, notes, etc.)
+    // We rebuild the page_readings content with the new Water Readings UI.
+    host.innerHTML = "";
+
+
+    const wrap = document.createElement("div");
+    wrap.className = ""; // no outer card border
+    wrap.innerHTML = `
+      <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+<div class="muted" id="readingsStatusMsg"></div>
+        </div>
+        <div></div>
+      </div>
+
+      <div class="bills-year-row">
+        <select id="readingsYearSelect" aria-label="Year">
+          <option value="" disabled selected hidden>—</option>
+        </select>
+      </div>
+
+      <div style="margin-top:12px; overflow:auto">
+        <table class="bills-table" style="margin-top:0">
+          <thead>
+            <tr>
+              <th id="rdThMonth" style="min-width:90px">Период</th>
+              <th id="rdThStart" style="min-width:110px">Начало</th>
+              <th id="rdThEnd" style="min-width:120px">Конец</th>
+              <th id="rdThConsumption" style="min-width:120px">Расход</th>
+              <th id="rdThStatus" style="min-width:140px">Статус</th>
+</tr>
+          </thead>
+          <tbody id="readingsMonthsBody"></tbody>
+        </table>
+      </div>
+    `;
+    // Put at top of readings page
+    host.prepend(wrap);
+    try{ updateReadingsTexts_(); }catch(_){ }
+  }
+
+  function monthName_(m){
+    const mi = Number(m) || 0;
+    // Use the same month dictionaries that are already in the file (used by invoices),
+    // so we don't touch login/forgot flows at all.
+    try{
+      const lang = (typeof getLangSafe === "function") ? getLangSafe() : (typeof getLang === "function" ? getLang() : "ru");
+      const map = (typeof MONTHS !== "undefined" && MONTHS) ? MONTHS : null;
+      const arr = (map && map[lang]) ? map[lang] : (map && map["ru"] ? map["ru"] : null);
+      if (arr && arr[mi-1]) return arr[mi-1];
+    }catch(e){}
+    const fallback = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+    return fallback[mi-1] || String(m);
+  }
+
+  // v1.264: i18n for full Readings table (headers + month names re-render) — isolated, does NOT touch login/forgot/reset.
+  function rdLang_(){
+    try{ return (typeof getLangSafe === "function") ? getLangSafe() : (typeof getLang === "function" ? getLang() : "ru"); }
+    catch(_){ return "ru"; }
+  }
+  function rdText_(k){
+    const L = rdLang_();
+    const dict = {
+      ru: { month:"Период", start:"Показание (начало)", end:"Показание (конец)", cons:"Расход, м³", status:"Статус" },
+      et: { month:"Periood", start:"Näidik (algus)", end:"Näidik (lõpp)", cons:"Tarbimine, m³", status:"Staatus" },
+      en: { month:"Period", start:"Reading (start)", end:"Reading (end)", cons:"Consumption, m³", status:"Status" }
+    };
+    const p = dict[L] || dict.ru;
+    return p[k] || (dict.ru[k] || k);
+  }
+  
+  function capFirst_(s){
+    const t = String(s||"").trim();
+    if(!t) return "";
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  function rdStatusClass_(s){
+    const v = String(s||"").trim().toLowerCase();
+    if(!v || v==="missing" || v==="not_submitted" || v==="not submitted" || v==="absent") return "rd-st-miss";
+    if(v==="submitted" || v==="ok" || v==="done" || v==="esitatud") return "rd-st-ok";
+    if(v==="waiting" || v==="pending" || v==="expected" || v==="awaiting" || v==="ootel") return "rd-st-warn";
+    return "rd-st-warn";
+  }
+  function rdStatusLabel_(s){
+    return capFirst_(s);
+  }
+
+function updateReadingsTexts_(){
+    try{
+      const a = $("rdThMonth"); if(a) a.textContent = rdText_("month");
+      const b = $("rdThStart"); if(b) b.textContent = rdText_("start");
+      const c = $("rdThEnd"); if(c) c.textContent = rdText_("end");
+      const d = $("rdThConsumption"); if(d) d.textContent = rdText_("cons");
+      const e = $("rdThStatus"); if(e) e.textContent = rdText_("status");
+    }catch(_){}
+    // Re-render current rows to refresh month names on language switch
+    try{
+      if (window.__ku_readings_lastRows && Array.isArray(window.__ku_readings_lastRows)){
+        renderRows_(window.__ku_readings_lastRows);
+      }
+    }catch(_){}
+  }
+
+  function renderRows_(rows){
+    const body = $("readingsMonthsBody");
+    if(!body) return;
+    body.innerHTML = "";
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      const start = (r.start_m3 ?? r.start ?? "");
+      const end = (r.end_m3 ?? r.end ?? "");
+      const cons = (r.consumption_m3 ?? r.consumption ?? ((end!=="" && start!=="") ? (Number(end)-Number(start)) : ""));
+      const status = (r.status ?? "");
+      tr.innerHTML = `
+        <td>${monthName_(Number(r.month))}</td>
+        <td>${start}</td>
+        <td>${end}</td>
+        <td class="muted">${(cons===null||cons===undefined)?"":cons}</td>
+        <td><span class="${rdStatusClass_(status)}"><b>${rdStatusLabel_(status)}</b></span></td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  async function loadYears_(){
+const sel = $("readingsYearSelect");
+const msg = $("readingsStatusMsg");
+if(!sel) return;
+const token = getToken();
+if(!token){ msg && (msg.textContent="Сначала войдите"); return; }
+
+msg && (msg.textContent="");
+setProcessPill(_uiMsg("loadingYears"));
+const res = await callApi("readingYears", { token });
+setProcessPill("");
+if(!res || res.ok===false){
+  msg && (msg.textContent = (res && res.error) ? String(res.error) : "ошибка");
+  return;
+}
+
+
+// Годы из таблицы (если пусто — оставляем прочерк и ничего не грузим)
+const yearsRaw = Array.isArray(res.years) ? res.years : [];
+const yearsSet = new Set();
+yearsRaw.forEach(y=>{
+  const n = Number(y);
+  if(Number.isFinite(n) && n>0) yearsSet.add(n);
+});
+
+// НЕТ данных -> только прочерк, селектор заблокирован, таблицу не трогаем
+if(yearsSet.size === 0){
+  sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+  sel.disabled = true;
+  // очистим таблицу (на случай если ранее были данные)
+  renderRows_([]);
+  sel.onchange = null;
+  return;
+}
+
+// Данные есть -> показываем только годы, которые реально есть в таблице
+
+const years = Array.from(yearsSet).sort((a,b)=>a-b);
+
+sel.disabled = false;
+sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+
+years.forEach(y=>{
+  const opt = document.createElement("option");
+  opt.value = String(y);
+  opt.textContent = String(y);
+  sel.appendChild(opt);
+});
+
+// По умолчанию — последний год, который реально есть в таблице (а не текущий)
+const yearsNum = years.map(Number).filter(n=>Number.isFinite(n) && n>0);
+const lastDataYear = Math.max.apply(null, yearsNum);
+sel.value = String(lastDataYear);
+msg && (msg.textContent="");
+
+sel.onchange = ()=> loadYear_(sel.value);
+await loadYear_(sel.value);
+  }
+
+  async function loadYear_(year){
+    const msg = $("readingsStatusMsg");
+    const token = getToken();
+    if(!token) return;
+    msg && (msg.textContent="");
+    setProcessPill(_uiMsg("loadingYears"));
+    const res = await callApi("readings", { token, year: Number(year) });
+    setProcessPill("");
+    if(!res || res.ok===false){ msg && (msg.textContent = (res && res.error) ? String(res.error) : "ошибка"); return; }
+    const __rows = (res.rows || res.readings || []);
+    try{ window.__ku_readings_lastRows = __rows; window.__ku_readings_lastYear = Number(year)||0; }catch(_){ }
+    renderRows_(__rows);
+msg && (msg.textContent="");
+  }
+
+  async function saveMonth_(year, month, endValue){
+    const msg = $("readingsStatusMsg");
+    const token = getToken();
+    if(!token) return;
+    msg && (msg.textContent="Сохранение...");
+    const res = await callApi("saveReading", { token, year:Number(year), month:Number(month), end_m3: endValue });
+    if(!res || res.ok===false){
+      msg && (msg.textContent = (res && res.error) ? String(res.error) : "ошибка");
+      return;
+    }
+    msg && (msg.textContent="Сохранено");
+    await loadYear_(year);
+    setTimeout(()=>{ if(msg) msg.textContent=""; }, 900);
+  }
+
+  // Only run when the Readings page is actually shown
+  function maybeInit_(){
+    const host = $("page_readings");
+    if(!host) return;
+
+    // Run only when the Readings page is active (the app toggles 'hidden' class)
+    if(host.classList && host.classList.contains("hidden")) return;
+
+    // Build/ensure UI markup once the page is visible
+    ensureReadingsUI_();
+    try{ updateReadingsTexts_(); }catch(_){ }
+
+    // Avoid init before user is logged in (token not set yet)
+    const token = getToken();
+    if(!token) return;
+
+    loadYears_().catch(()=>{});
+  }
+
+  // Hook: run after navigation changes and after login
+  window.addEventListener("hashchange", ()=> setTimeout(maybeInit_, 0));
+  document.addEventListener("ku:navigate", (e)=>{
+    try{
+      if(e && e.detail && e.detail.page === "readings") setTimeout(maybeInit_, 0);
+    }catch(_){/*ignore*/}
+  });
+  document.addEventListener("click", (e)=>{
+    const btn = e.target && e.target.closest ? e.target.closest("[data-save]") : null;
+    if(btn){
+      const month = btn.getAttribute("data-save");
+      const sel = $("readingsYearSelect");
+      const inp = document.querySelector('input[data-month="'+month+'"]');
+      if(!sel || !inp) return;
+      const v = (inp.value || "").trim();
+      if(v==="" || isNaN(Number(v))){ $("readingsStatusMsg").textContent="Введите число"; return; }
+      saveMonth_(sel.value, month, Number(v)).catch(()=>{});
+    }
+  });
+
+  // v1.264: re-translate readings table on language change (safe, additive listener)
+  try{
+    const ls = document.getElementById("langSelect");
+    if(ls && !ls.__ku_rd_bound){
+      ls.__ku_rd_bound = true;
+      ls.addEventListener("change", ()=>{ setTimeout(()=>{ try{ updateReadingsTexts_(); }catch(_){} }, 0); });
+    }
+    window.addEventListener("storage", (ev)=>{ if(ev && ev.key==="ku_lang"){ setTimeout(()=>{ try{ updateReadingsTexts_(); }catch(_){} }, 0); } });
+  }catch(_){ }
+
+  // Try init shortly after page load (if hash already points to readings)
+  setTimeout(maybeInit_, 50);
+})();
+</script>
 </body>
 </html>
