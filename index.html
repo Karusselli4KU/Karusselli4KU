@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.309</title>
+  <title>Karusselli 4 KÜ — v1.334</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -148,6 +148,10 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
       flex:0 0 auto;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* v1.334: move process indicator (Laadin andmeid...) */
+    #processPill{ position: relative; transform: translate(-400px, 201px); }
+
 
 
     .btn{
@@ -999,6 +1003,8 @@ body{
 #page_readings .rd-vis-btn[disabled]{ opacity:.55; cursor:not-allowed; }
 #page_readings .rd-vis-foot{margin-top:10px;font-weight:700;color:#333;}
 #page_readings .rd-vis-foot.open{color:#1b7f2a;}
+#page_readings .rd-vis-foot.saved{color:#1b7f2a;}
+#page_readings .rd-vis-foot.saved .savedline{color:#1b7f2a;font-weight:700;}
 #page_readings .rd-vis-meter{
   margin: 18px auto 0 auto;
   width: 150px;
@@ -1043,7 +1049,7 @@ body{
 }
 
 
-/* v1.309: make readings modal compact + lock controls during save */
+/* v1.321: make readings modal compact + lock controls during save */
 #rdModal .modal-card.rd-small{ width:300px; max-width:300px; }
 #rdModal .modal-card.rd-small .field input{ width:100%; }
 #rdModal.busy .modal-card{ pointer-events:none; opacity:0.92; }
@@ -1222,7 +1228,7 @@ body{
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.309</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.334</span>
         <small id="brandSub"></small>
       </div>
 
@@ -1873,6 +1879,7 @@ function getLangSafe(){
       updateLangFlag_();
 // if logged in — re-render invoices table texts in current language (no API call)
       rerenderBillsFromCache_();
+      try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
 }
     const TEXT = (typeof I18N !== "undefined" ? I18N : {});
 
@@ -2100,7 +2107,10 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       document.getElementById("appSection").classList.add("hidden");
       setStatus(false);
       mountControls(false);
-      applyLang();
+      
+      // v1.334: always reset to Home when leaving app (prevents next user landing on last page)
+      try{ markActive('home'); history.replaceState(null,'','#home'); }catch(e){}
+applyLang();
     }
 
     function showApp(user){
@@ -2302,11 +2312,47 @@ else msg.textContent = t.errLogin;
       const bb = document.getElementById("billsBody");
       if(bb) bb.innerHTML = "";
       setProcessPill("");
+      // v1.330: ensure no stale readings UI from previous user session
+      try{ resetReadingsState_("login"); }catch(e){}
 
+      // v1.334: always start from Home after login (ignore previous session page/hash)
+      try{ markActive('home'); history.replaceState(null,'', "#home"); }catch(e){}
       showApp(user);
     }
 
     function getToken(){ return localStorage.getItem("ku_token") || ""; }
+
+
+// v1.330: hard reset Readings state/UI on user switch (prevents showing previous apartment data)
+function resetReadingsState_(reason){
+  try{
+    window.__ku_rd_window = null;
+    window.__ku_rd_permissions = { can_submit:false, can_edit:false };
+    window.__ku_rd_lastRows = [];
+    window.__ku_rd_lastYear = 0;
+    window.__ku_rd_targetYear = 0;
+    window.__ku_rd_targetMonth = 0;
+    window.__ku_rd_action = { target_year:0, target_month:0, can_act:false, phase:"submit" };
+    window.__ku_rd_token_last = "";
+  }catch(e){}
+  try{
+    const sel = document.getElementById("readingsYearSelect");
+    if(sel){
+      sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+      sel.value = "";
+      sel.disabled = true;
+      sel.onchange = null;
+    }
+    const body = document.getElementById("readingsMonthsBody");
+    if(body) body.innerHTML = "";
+    const meta = document.getElementById("rdWindowMeta");
+    if(meta) meta.textContent = "";
+    const msg = document.getElementById("readingsStatusMsg");
+    if(msg) msg.textContent = "";
+  }catch(e){}
+  try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
+}
+
 
     function logout(){
       localStorage.removeItem("ku_user");
@@ -2321,6 +2367,11 @@ else msg.textContent = t.errLogin;
       const bb = document.getElementById("billsBody");
       if(bb) bb.innerHTML = "";
       setProcessPill("");
+      // v1.330: prevent stale readings table when switching accounts
+      try{ resetReadingsState_("logout"); }catch(e){}
+
+      // v1.334: force Home after logout as well
+      try{ markActive('home'); history.replaceState(null,'', "#home"); }catch(e){}
 
       showAuth();
     }
@@ -2665,7 +2716,10 @@ if(langSelect){
         if(user && user.username){ showApp(user); }
         else showAuth();
       }catch(_){
-        showAuth();
+        // v1.334: force Home after logout as well
+      try{ markActive('home'); history.replaceState(null,'', "#home"); }catch(e){}
+
+      showAuth();
       }
     })();
   
@@ -3199,14 +3253,9 @@ msg && (msg.textContent="");
       meta.textContent = "";
       return;
     }
-
-    const openText = win.is_open_now
-      ? (rdUiText_("openUntil") + ": " + String(win.close_at||""))
-      : rdUiText_("closed");
-    const periodTxt = `${rdUiText_("target")} ${monthName_(targetMonth)} ${targetYear}`;
-    meta.innerHTML = `<b>${esc(openText)}</b> · ${esc(periodTxt)}`;
-
-    // Action enable is ONLY by permissions; NOT by selected year
+    // v1.334: hide window/period line (no duplicate text under tabs)
+    meta.innerHTML = "";
+// Action enable is ONLY by permissions; NOT by selected year
     const canAct = !!(perms.can_submit || perms.can_edit);
 
     // Determine phase label based on whether end value already exists for target period
@@ -3224,13 +3273,53 @@ msg && (msg.textContent="");
         phase: (hasEnd ? "edit" : "submit")
       };
     }catch(e){}
-  }
+  
+    // v1.330: allow repeated edit while window open (ignore edited_at edit-once restriction in UI)
+    try{
+      const win = window.__ku_rd_window || {};
+      const rows = window.__ku_rd_lastRows || [];
+      const now = new Date();
+      const baseY = now.getFullYear();
+      const baseM = now.getMonth()+1; // 1..12
+      let hasEnd = false;
+      if (Number(window.__ku_rd_lastYear||0) === baseY){
+        for (let k=0;k<rows.length;k++){
+          const r = rows[k] || {};
+          if (Number(r.month||0) === baseM){
+            const endv = String(r.end_m3||r.end||"").trim();
+            if (endv) hasEnd = true;
+            break;
+          }
+        }
+      }
+      const openNow = !!win.is_open_now;
+      window.__ku_rd_permissions = window.__ku_rd_permissions || {};
+      window.__ku_rd_permissions.can_submit = openNow && !hasEnd;
+      window.__ku_rd_permissions.can_edit   = openNow && hasEnd;
+
+      // v1.330: sync action state for right panel (it relies on window.__ku_rd_action.can_act)
+      try{
+        window.__ku_rd_action = window.__ku_rd_action || {};
+        window.__ku_rd_action.can_act = !!(window.__ku_rd_permissions.can_submit || window.__ku_rd_permissions.can_edit);
+        window.__ku_rd_action.phase   = hasEnd ? "edit" : "submit";
+        window.__ku_rd_action.target_year  = Number(win.target_year||0) || window.__ku_rd_action.target_year || 0;
+        window.__ku_rd_action.target_month = Number(win.target_month||0) || window.__ku_rd_action.target_month || 0;
+      }catch(e){}
+      try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
+
+      const btnEl = document.getElementById("rdActionBtn");
+      if(btnEl){
+        btnEl.disabled = !(window.__ku_rd_permissions.can_submit || window.__ku_rd_permissions.can_edit);
+      }
+    }catch(e){}
+
+}
 
   function showReadingModal_(targetYear, targetMonth, existingEnd){
     const m = document.createElement("div");
     m.className="modal"; m.id="rdModal";
     const L = rdLang_();
-    const title = "Ввод показания";
+    const title = (L==="et") ? "Näidu sisestus" : (L==="en" ? "Enter reading" : "Ввод показания");
     const btnCancel = (L==="et") ? "Sulge" : (L==="en" ? "Close" : "Закрыть");
     const btnSave = (L==="et") ? "Salvesta" : (L==="en" ? "Save" : "Сохранить");
     m.innerHTML = `
@@ -3271,7 +3360,7 @@ msg && (msg.textContent="");
       const chk=validate(inp?inp.value:"");
       if(!chk.ok){ msg.textContent=(L==="et")?"Kontrolli väärtust":(L==="en"?"Check the value":"Проверьте значение"); return; }
       msg.textContent=(L==="et")?"Salvestan…":(L==="en"?"Saving…":"Сохраняю…");
-      // v1.309: lock all controls during save
+      // v1.321: lock all controls during save
       m.classList.add("busy");
       const toDisable = [];
       try{
@@ -3298,9 +3387,34 @@ msg && (msg.textContent="");
         try{ updateInputPanel_(); }catch(e){}
         close();
 
+        // v1.323: re-enable controls after SUCCESS (tabs/menu/year selector)
+        try{ m.classList.remove("busy"); }catch(e){}
+        try{ (toDisable||[]).forEach(el=>{ try{ el.disabled=false; }catch(e){} }); }catch(e){}
+        try{ const ys=document.getElementById("readingsYearSelect"); if(ys) ys.disabled=false; }catch(e){}
+        try{ const backdrop=m.querySelector("#rdModalClose"); if(backdrop) backdrop.style.pointerEvents=""; }catch(e){}
+
         // v1.274: refresh selector/table in background (do not block UX)
         (async ()=>{
           try{
+// v1.334: clear UI before post-save reload so users don't confuse old rows with new data
+try{
+  const sel0 = $("readingsYearSelect");
+  if(sel0){
+    sel0.innerHTML = '<option value="" disabled selected hidden>—</option>';
+    sel0.value = "";
+    sel0.disabled = true;
+  }
+  // clear table immediately (loading state should show empty table)
+  try{ renderRows_([]); }catch(e){}
+  try{
+    window.__ku_rd_lastRows = [];
+    window.__ku_rd_lastYear = 0;
+    window.__ku_rd_action = window.__ku_rd_action || { target_year:0, target_month:0, can_act:false, phase:"submit" };
+    window.__ku_rd_action.can_act = false;
+  }catch(e){}
+  try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
+}catch(e){}
+
             const sel = $("readingsYearSelect");
             if(sel){
               await loadYears_();
@@ -3313,7 +3427,7 @@ msg && (msg.textContent="");
         msg.textContent=String(err||"Ошибка");
         saveBtn.disabled=false;
       
-        // v1.309: unlock controls after failure
+        // v1.321: unlock controls after failure
         try{ m.classList.remove("busy"); }catch(e){}
         try{ (toDisable||[]).forEach(el=>{ try{ el.disabled=false; }catch(e){} }); }catch(e){}
 // v1.272: re-enable controls after failure
@@ -3367,6 +3481,15 @@ msg && (msg.textContent="");
     const token = getToken();
     if(!token) return;
 
+    // v1.330: if token changed (user switched), clear readings UI immediately before async reload
+    try{
+      const lastTok = String(window.__ku_rd_token_last || "");
+      if(lastTok !== String(token||"")){
+        window.__ku_rd_token_last = String(token||"");
+        resetReadingsState_("token_change");
+      }
+    }catch(e){}
+
     loadYears_().catch(()=>{});
   }
 
@@ -3409,6 +3532,24 @@ msg && (msg.textContent="");
 /* v1.293: right visual panel logic (safe, runs after app init) */
 (function(){
   const RU_MONTHS=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+  const PANEL_I18N = {
+    ru: { title:"Ввод показаний за", submit:"Ввести", edit:"Редактировать", openNow:"Ввод показаний открыт", willOpen:"Ввод откроется:", saved:"Показания сохранены успешно.", editUntil:"Редактирование возможно до" },
+    et: { title:"Näidu sisestus", submit:"Sisesta", edit:"Muuda", openNow:"Näidu sisestus on avatud", willOpen:"Sisestus avaneb:", saved:"Näidud salvestatud.", editUntil:"Muutmine võimalik kuni" },
+    en: { title:"Enter readings for", submit:"Enter", edit:"Edit", openNow:"Reading input is open", willOpen:"Opens at:", saved:"Readings saved successfully.", editUntil:"Editing possible until" },
+  };
+  const MONTHS_BY_LANG = {
+    ru: RU_MONTHS,
+    et: ["Jaanuar","Veebruar","Märts","Aprill","Mai","Juuni","Juuli","August","September","Oktoober","November","Detsember"],
+    en: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+  };
+  function getPanelLang_(){
+    try{
+      const L = (typeof getLang === "function") ? String(getLang()) : "";
+      const l = (L || localStorage.getItem("ku_lang") || "ru").toLowerCase();
+      return (l==="et"||l==="en"||l==="ru") ? l : "ru";
+    }catch(e){ return "ru"; }
+  }
+
 
   function fmtOpenAt(s){
     // "YYYY-MM-DD HH:MM:SS" -> "DD.MM HH:MM"
@@ -3494,15 +3635,19 @@ msg && (msg.textContent="");
     }catch(e){}
 
     const monthEl=panel.querySelector("#rdVisMonth");
-    if(monthEl) monthEl.textContent = RU_MONTHS[showM-1]+" "+showY;
+    if(monthEl){ const Lp=getPanelLang_(); const arr=MONTHS_BY_LANG[Lp]||MONTHS_BY_LANG.ru; monthEl.textContent=(arr[showM-1]||"")+" "+showY; }
     const action = (window.__ku_rd_action || {});
     const btn=panel.querySelector("#rdVisBtn");
     const foot=panel.querySelector("#rdVisFoot");
 
+    const Lp=getPanelLang_();
+    const pack=PANEL_I18N[Lp]||PANEL_I18N.ru;
+    try{ const tEl=panel.querySelector(".rd-vis-title"); if(tEl) tEl.textContent=pack.title; }catch(e){}
+
     let phase="submit";
     try{ if(action && action.phase) phase = String(action.phase); }catch(e){}
     if(btn){
-      btn.textContent = (phase==="edit") ? "Редактировать" : "Ввести";
+      btn.textContent = (phase==="edit") ? pack.edit : pack.submit;
       btn.disabled = !(action && action.can_act);
     }
 
@@ -3532,6 +3677,13 @@ msg && (msg.textContent="");
     const win=window.__ku_rd_window||null;
     const perms=window.__ku_rd_permissions||{};
 
+    // v1.330: if input window is closed (panel may show next month), button label must be "submit"
+    try{
+      if(btn && win && win.is_open_now===false){
+        btn.textContent = pack.submit;
+      }
+    }catch(e){}
+
     if(foot){
       foot.className="rd-vis-foot";
       if(win && win.is_open_now){
@@ -3540,16 +3692,18 @@ msg && (msg.textContent="");
         // - can_edit   => submitted, edit allowed until close_at
         // - neither    => submitted/edited and no further actions
         if(perms && perms.can_submit){
-          foot.textContent="Ввод показаний открыт";
+          foot.textContent=pack.openNow;
           foot.classList.add("open");
         } else if(perms && perms.can_edit){
+          foot.classList.add("saved");
           const until = fmtOpenAt(win.close_at || win.closeAt || "");
-          foot.innerHTML = `<span style="color:#333">Показания сохранены успешно.</span><br><span style="color:#808080">Редактирование возможно до ${until}</span>`;
+          foot.innerHTML = `<span class="savedline">${pack.saved}</span><br><span style="color:#808080">${pack.editUntil} ${until}</span>`;
         } else {
-          foot.textContent="Показания сохранены успешно.";
+          foot.classList.add("saved");
+          foot.textContent=pack.saved;
         }
       } else if(win) {
-        foot.innerHTML="<span style=\"font-style:italic; font-weight:600;\">Ввод откроется:</span><br><span style=\"font-weight:600; color:#333; font-size:14px\">"+fmtOpenAt(win.open_at)+"</span>";
+        foot.innerHTML=`<span style="font-style:italic; font-weight:600;">${pack.willOpen}</span><br><span class="date" style="font-weight:600; color:#333; font-size:14px">${fmtOpenAt(win.open_at)}</span>`;
       } else {
         foot.textContent="";
       }
