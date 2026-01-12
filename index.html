@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.334</title>
+  <title>Karusselli 4 KÜ — v1.347</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -150,11 +150,14 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* v1.334: move process indicator (Laadin andmeid...) */
-    #processPill{ position: relative; transform: translate(-400px, 201px); }
+    #processPill{ position: relative; transform: translate(-400px, 194px) !important; }
 
 
 
-    .btn{
+    
+/* v1.347 fine alignment: year selector down 3px */
+#page_readings .bills-year-row select{ position: relative; top: 3px !important; }
+.btn{
       border:1px solid var(--stroke);
       background:var(--pill);
       color:var(--muted);
@@ -932,6 +935,24 @@ margin: 0;
 
 /* v1.293: Readings input panel independent of year selector */
 #page_readings .rd-actionbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;margin:6px 0 10px 0;}
+/* v1.347: house meter scope toggle (shown only for house_meter_admin_apartment) */
+#page_readings .rd-scope-toggle{ display:flex; align-items:center; gap:8px; }
+#page_readings .rd-scope-toggle.hidden{ display:none !important; }
+#page_readings .rd-scope-btn{
+  border:1px solid var(--stroke);
+  background: var(--pill);
+  color: var(--text);
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  cursor:pointer;
+  font-size:12px;
+}
+#page_readings .rd-scope-btn.active{
+  background: rgba(37,99,235,.14);
+  border-color: rgba(37,99,235,.25);
+}
+
 #page_readings .rd-actionbar .rd-meta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:720px;}
 #page_readings .rd-actionbar .rd-meta b{color:var(--text);}
 #page_readings .rd-actionbar .btn{padding:8px 14px;border-radius:12px;}
@@ -1221,14 +1242,35 @@ body{
   text-overflow:ellipsis;
 }
 
-</style>
 
+/* v1.347: align year selector + process pill baseline + house-meter toggle on one line */
+#page_readings .bills-year-row.rd-topline{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+  flex-wrap:nowrap !important;
+}
+#page_readings .bills-year-row.rd-topline select{ flex:0 0 auto; }
+#page_readings .bills-year-row.rd-topline .rd-scope-toggle{ flex:0 0 auto; margin-left:auto; }
+
+
+/* v1.347: make readings scope toggle buttons equal width */
+#rdScopeToggleWrap .btn,
+#rdScopeToggleWrap button{
+  min-width: 64px !important;
+  width: 64px !important;
+  justify-content: center;
+  text-align: center;
+}
+
+</style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.334</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.347</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2609,66 +2651,51 @@ async function downloadInvoicePdf(invoiceId, btnEl){
       const token = getToken();
       if(!token || !invoiceId) return;
 
-      // Popup-safe: open a window synchronously (user gesture) BEFORE any await.
-      let popup = null;
-      try{
-        popup = window.open("about:blank", "_blank", "noopener,noreferrer");
-      }catch(e){
-        popup = null;
-      }
-
+      // v1.347: Fetch PDF as Blob and trigger download WITHOUT opening any new tab/window.
+      // Keep correct payload key: invoice_id.
       setProcessPill(_uiMsg("openingPdf"));
-      if(btnEl) { btnEl.disabled = true; btnEl.classList.add("is-busy"); }
+      if(btnEl){ btnEl.disabled = true; btnEl.classList.add("is-busy"); }
 
-      try{
-        const r = await fetch(API_BASE + "/invoicePdf", {
-          method: "POST",
-          headers: { "content-type":"application/json; charset=utf-8" },
-          body: JSON.stringify({ token, invoice_id: invoiceId })
-        });
+      (async ()=>{
+        let url = "";
+        try{
+          const ctrl = new AbortController();
+          const t = setTimeout(()=>ctrl.abort(), 25000);
 
-        if(!r.ok){
-          let j = null;
-          try { j = await r.json(); } catch {}
-          const msg = (j && j.error) ? String(j.error) : ("HTTP " + r.status);
+          const r = await fetch(API_BASE + "/invoicePdf", {
+            method: "POST",
+            headers: { "content-type":"application/json; charset=utf-8" },
+            body: JSON.stringify({ token, invoice_id: invoiceId }),
+            signal: ctrl.signal
+          });
 
-          if(popup && !popup.closed){
-            popup.document.title = "PDF error";
-            popup.document.body.innerHTML = "<pre style='font:14px/1.4 system-ui,Segoe UI,Arial;padding:16px;white-space:pre-wrap'>Не удалось открыть PDF: " + (msg||"") + "</pre>";
-          } else {
-            alert("Не удалось открыть PDF: " + msg);
+          clearTimeout(t);
+
+          if(!r.ok){
+            let j = null;
+            try{ j = await r.json(); }catch(e){}
+            const msg = (j && (j.error || j.details)) ? String(j.error || j.details) : ("HTTP " + r.status);
+            throw new Error(msg);
           }
-          return;
-        }
 
-        const blob = await r.blob();
-        const url = URL.createObjectURL(blob);
+          const blob = await r.blob();
+          url = URL.createObjectURL(blob);
 
-        if(popup && !popup.closed){
-          try{ popup.location = url; }catch(e){ /* ignore */ }
-        } else {
-          // fallback: direct download
           const a = document.createElement("a");
           a.href = url;
-          a.download = invoiceId + ".pdf";
+          a.download = (invoiceId + ".pdf").replace(/[^a-zA-Z0-9._-]/g, "_");
           document.body.appendChild(a);
           a.click();
           a.remove();
-        }
 
-        setTimeout(()=>URL.revokeObjectURL(url), 60_000);
-      }catch(e){
-        const emsg = String(e);
-        if(popup && !popup.closed){
-          popup.document.title = "PDF error";
-          popup.document.body.innerHTML = "<pre style='font:14px/1.4 system-ui,Segoe UI,Arial;padding:16px;white-space:pre-wrap'>Не удалось открыть PDF: " + emsg + "</pre>";
-        } else {
-          alert("Не удалось открыть PDF: " + emsg);
+          setProcessPill("");
+        }catch(err){
+          setProcessPill((_uiMsg("pdfFailed") || "PDF failed") + ": " + String(err));
+        }finally{
+          if(url){ setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 2000); }
+          if(btnEl){ btnEl.disabled = false; btnEl.classList.remove("is-busy"); }
         }
-      }finally{
-        setProcessPill("");
-        if(btnEl) { btnEl.disabled = false; btnEl.classList.remove("is-busy"); }
-      }
+      })();
     }
 
 
@@ -3000,15 +3027,13 @@ document.addEventListener("keydown", (e) => {
     const wrap = document.createElement("div");
     wrap.className = ""; // no outer card border
     wrap.innerHTML = `
-      <div class="rd-actionbar">
-  <div class="rd-meta" id="rdWindowMeta"></div>
-  </div>
-<div class="muted" id="readingsStatusMsg" style="margin-top:2px"></div>
+      <div class="muted" id="readingsStatusMsg" style="margin-top:2px"></div>
 
-      <div class="bills-year-row">
+      <div class="bills-year-row rd-topline">
         <select id="readingsYearSelect" aria-label="Year">
           <option value="" disabled selected hidden>—</option>
         </select>
+        <div id="rdScopeToggleWrap" class="rd-scope-toggle hidden"></div>
       </div>
 
       <div style="margin-top:12px; overflow:auto">
@@ -3030,6 +3055,108 @@ document.addEventListener("keydown", (e) => {
     host.prepend(wrap);
     try{ updateReadingsTexts_(); }catch(_){ }
   }
+
+  // v1.347: house meter scope (apartment=0) toggle for configured admin apartment
+  function getUserSafe_(){
+    try{ const s=localStorage.getItem("ku_user"); if(!s) return null; return JSON.parse(s); }catch(e){ return null; }
+  }
+  function getHouseAdminApt_(){
+    try{
+      const cfg = window.__ku_admin_config || window.__ku_rd_admin_config || null;
+      const n = cfg ? Number(cfg.house_meter_admin_apartment||0) : 0;
+      return isFinite(n) ? n : 0;
+    }catch(e){ return 0; }
+  }
+  function getScope_(){
+    try{ return String(window.__ku_rd_scope || "apt"); }catch(e){ return "apt"; }
+  }
+  function setScope_(scope){
+    try{ window.__ku_rd_scope = (scope==="house" ? "house" : "apt"); }catch(e){}
+  }
+  function getEffectiveApartment_(){
+    const u = getUserSafe_();
+    const myApt = u ? Number(u.apartment||0) : 0;
+    if(getScope_()==="house") return 0;
+    return myApt;
+  }
+  function isHouseScopeAllowed_(){
+    const u = getUserSafe_();
+    const myApt = u ? Number(u.apartment||0) : 0;
+    const adminApt = getHouseAdminApt_();
+    return !!(adminApt && myApt && myApt===adminApt);
+  }
+
+  function updateScopeToggleUI_(){
+    const wrap = document.getElementById("rdScopeToggleWrap");
+    if(!wrap) return;
+
+    if(!isHouseScopeAllowed_()){
+      wrap.classList.add("hidden");
+      // always force personal scope if not allowed
+      setScope_("apt");
+      return;
+    }
+
+    // Build buttons once
+    if(!wrap.__built){
+      wrap.__built = true;
+      wrap.innerHTML = `
+        <button type="button" class="rd-scope-btn" id="rdScopeBtnApt"></button>
+        <button type="button" class="rd-scope-btn" id="rdScopeBtnHouse"></button>
+      `;
+      wrap.addEventListener("click", async (e)=>{
+        const b = e.target && e.target.closest ? e.target.closest("button") : null;
+        if(!b) return;
+        const id = b.id || "";
+        const next = (id==="rdScopeBtnHouse") ? "house" : "apt";
+        if(getScope_()===next) return;
+
+        // switch scope -> hard clear UI (like post-save) and reload years+current year
+        setScope_(next);
+        try{ clearReadingsViewForReload_(); }catch(_){}
+        try{ await loadYears_(); }catch(_){}
+        try{
+          const sel = document.getElementById("readingsYearSelect");
+          if(sel && sel.value) await loadYear_(String(sel.value));
+        }catch(_){}
+        try{ updateScopeToggleUI_(); }catch(_){}
+      }, true);
+    }
+
+    // Set labels by language
+    const L = rdLang_();
+    const bA = document.getElementById("rdScopeBtnApt");
+    const bH = document.getElementById("rdScopeBtnHouse");
+    if(bA) bA.textContent = (L==="et" ? "Korter" : (L==="en" ? "Apartment" : "Квартира"));
+    if(bH) bH.textContent = (L==="et" ? "Maja" : (L==="en" ? "House" : "Дом"));
+
+    // Active state
+    if(bA) bA.classList.toggle("active", getScope_()!=="house");
+    if(bH) bH.classList.toggle("active", getScope_()==="house");
+    wrap.classList.remove("hidden");
+  }
+
+  function clearReadingsViewForReload_(){
+    try{
+      const sel = document.getElementById("readingsYearSelect");
+      if(sel){
+        sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+        sel.value = "";
+      }
+    }catch(_){}
+    try{ const body = document.getElementById("readingsMonthsBody"); if(body) body.innerHTML=""; }catch(_){}
+    try{ const meta = document.getElementById("rdWindowMeta"); if(meta) meta.textContent=""; }catch(_){}
+    try{ const msg = document.getElementById("readingsStatusMsg"); if(msg) msg.textContent=""; }catch(_){}
+    try{
+      window.__ku_rd_lastRows = [];
+      window.__ku_rd_lastYear = 0;
+      window.__ku_rd_window = null;
+      window.__ku_rd_permissions = { can_submit:false, can_edit:false };
+      window.__ku_rd_action = { target_year:0, target_month:0, can_act:false, phase:"submit" };
+    }catch(_){}
+    try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(_){}
+  }
+
 
   function monthName_(m){
     const mi = Number(m) || 0;
@@ -3105,7 +3232,8 @@ function updateReadingsTexts_(){
       if (window.__ku_readings_lastRows && Array.isArray(window.__ku_readings_lastRows)){
         renderRows_(window.__ku_readings_lastRows);
       }
-    }catch(_){}
+    }catch(_){}    try{ updateScopeToggleUI_(); }catch(_){ }
+
   }
 
   function renderRows_(rows){
@@ -3144,12 +3272,15 @@ if(!token){ msg && (msg.textContent="Сначала войдите"); return; }
 
 msg && (msg.textContent="");
 setProcessPill(_uiMsg("loadingYears"));
-const res = await callApi("readingYears", { token });
+const res = await callApi("readingYears", { token, apartment: getEffectiveApartment_() });
 setProcessPill("");
 if(!res || res.ok===false){
   msg && (msg.textContent = (res && res.error) ? String(res.error) : "ошибка");
   return;
 }
+
+try{ window.__ku_admin_config = (res.admin_config || res.admin || {}); }catch(_){ }
+try{ updateScopeToggleUI_(); }catch(_){ }
 
 
 // Годы из таблицы (если пусто — оставляем прочерк и ничего не грузим)
@@ -3200,7 +3331,7 @@ await loadYear_(sel.value);
     if(!token) return;
     msg && (msg.textContent="");
     setProcessPill(_uiMsg("loadingYears"));
-    const res = await callApi("readings", { token, year: Number(year) });
+    const res = await callApi("readings", { token, year: Number(year), apartment: getEffectiveApartment_() });
     setProcessPill("");
     if(!res || res.ok===false){ msg && (msg.textContent = (res && res.error) ? String(res.error) : "ошибка"); return; }
     const __rows = (res.rows || res.readings || []);
@@ -3217,6 +3348,9 @@ await loadYear_(sel.value);
     try{ window.__ku_readings_lastRows = __rows; window.__ku_readings_lastYear = Number(year)||0; }catch(_){ }
     renderRows_(__rows);
     try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
+
+try{ window.__ku_admin_config = (res.admin_config || res.admin || {}); }catch(_){ }
+try{ updateScopeToggleUI_(); }catch(_){ }
 
     try{ updateInputPanel_();
     try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
@@ -3452,7 +3586,7 @@ try{
 
     msg && (msg.textContent = (rdLang_()==="et" ? "Salvestan..." : (rdLang_()==="en" ? "Saving..." : "Сохранение...")));
 
-    const res = await callApi("saveReading", { token, year:Number(year), month:Number(month), end_m3: endValue });
+    const res = await callApi("saveReading", { token, year:Number(year), month:Number(month), end_m3: endValue, apartment: getEffectiveApartment_() });
     if(!res || res.ok===false){
       msg && (msg.textContent = (res && res.error) ? String(res.error) : (rdLang_()==="et" ? "Viga" : (rdLang_()==="en" ? "Error" : "ошибка")));
       return { ok:false, error: (res && res.error) ? String(res.error) : "error" };
