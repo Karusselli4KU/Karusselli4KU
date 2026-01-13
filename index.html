@@ -20,7 +20,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.352</title>
+  <title>Karusselli 4 KÜ — v1.354</title>
 <script>
 // v1.151: force default language to Estonian (ku_lang) before UI init
 try{ localStorage.setItem("ku_lang","et"); }catch(e){}
@@ -155,7 +155,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
 
 
     
-/* v1.352 fine alignment: year selector down 3px */
+/* v1.354 fine alignment: year selector down 3px */
 #page_readings .bills-year-row select{ position: relative; top: 3px !important; }
 .btn{
       border:1px solid var(--stroke);
@@ -935,7 +935,7 @@ margin: 0;
 
 /* v1.293: Readings input panel independent of year selector */
 #page_readings .rd-actionbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;margin:6px 0 10px 0;}
-/* v1.352: house meter scope toggle (shown only for house_meter_admin_apartment) */
+/* v1.354: house meter scope toggle (shown only for house_meter_admin_apartment) */
 #page_readings .rd-scope-toggle{ display:flex; align-items:center; gap:8px; }
 #page_readings .rd-scope-toggle.hidden{ display:none !important; }
 #page_readings .rd-scope-btn{
@@ -1243,7 +1243,7 @@ body{
 }
 
 
-/* v1.352: align year selector + process pill baseline + house-meter toggle on one line */
+/* v1.354: align year selector + process pill baseline + house-meter toggle on one line */
 #page_readings .bills-year-row.rd-topline{
   display:flex !important;
   align-items:center !important;
@@ -1255,7 +1255,7 @@ body{
 #page_readings .bills-year-row.rd-topline .rd-scope-toggle{ flex:0 0 auto; margin-left:auto; }
 
 
-/* v1.352: make readings scope toggle buttons equal width */
+/* v1.354: make readings scope toggle buttons equal width */
 #rdScopeToggleWrap .btn,
 #rdScopeToggleWrap button{
   min-width: 64px !important;
@@ -1270,7 +1270,7 @@ body{
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.352</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.354</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2167,7 +2167,9 @@ applyLang();
       renderDemoTables(user);
       attachBillsYearListener_();
       navigate("home");
-    }
+    
+      try{ setTimeout(loadHomeWaterStatus_, 0); }catch(e){}
+}
 
     function markActive(page){
       document.querySelectorAll("[data-page]").forEach(el=>{
@@ -2179,8 +2181,6 @@ applyLang();
     }
 
     function navigate(page){
-      try{ if(page==="home") loadHomeWaterStatus_(); }catch(e){}
-
       markActive(page);
       history.replaceState(null,"", "#"+page);
 
@@ -2193,7 +2193,10 @@ applyLang();
       }
 
       if(page==="bills") initBillsPage_();
-    }
+    
+      // v1.354: refresh Home water status after navigation render
+      try{ if(page==="home") setTimeout(loadHomeWaterStatus_, 0); }catch(e){}
+}
 
     function renderDemoTables(user){
       const t = I18N[getLang()] || I18N.ru;
@@ -2282,17 +2285,17 @@ async function apiPost(path, payload){
           data.http_status = res.status;
         }
 
-    // v1.352: Home Quick Status (Water) — fetch counts from GS and update UI (uses existing IDs)
+    // v1.354: Home Quick Status (Water) — fetch counts from GS and update UI (diagnostic visible)
     async function loadHomeWaterStatus_(){
       const titleEl = document.getElementById("qsCurrTitle");
       const okEl = document.getElementById("qsReadOk");
       const badEl = document.getElementById("qsReadBad");
 
+      const L = (getLang ? getLang() : (localStorage.getItem("ku_lang")||"et")).toLowerCase();
+      const prefix = (L==="ru") ? "Статус за " : ((L==="en") ? "Status for " : "Staatus: ");
+
       try{
         const token = getToken();
-        const L = (getLang ? getLang() : (localStorage.getItem("ku_lang")||"et")).toLowerCase();
-        const prefix = (L==="ru") ? "Статус за " : ((L==="en") ? "Status for " : "Staatus: ");
-
         if(!token){
           if(titleEl) titleEl.textContent = prefix + "—";
           return;
@@ -2301,11 +2304,11 @@ async function apiPost(path, payload){
         const res = await apiPost("/homeWaterStatus", { token });
 
         if(!res){
-          if(titleEl) titleEl.textContent = prefix + "⚠ нет ответа";
+          if(titleEl) titleEl.textContent = prefix + "⚠ no response";
           return;
         }
         if(!res.ok){
-          const err = (res.error || res.details || "unknown").toString();
+          const err = (res.error || res.details || res.http_status || "unknown").toString();
           if(titleEl) titleEl.textContent = prefix + "⚠ " + err;
           return;
         }
@@ -2319,14 +2322,9 @@ async function apiPost(path, payload){
         }
         if(titleEl) titleEl.textContent = prefix + periodLabel;
       }catch(e){
-        try{
-          const L = (getLang ? getLang() : (localStorage.getItem("ku_lang")||"et")).toLowerCase();
-          const prefix = (L==="ru") ? "Статус за " : ((L==="en") ? "Status for " : "Staatus: ");
-          if(titleEl) titleEl.textContent = prefix + "⚠ ошибка связи";
-        }catch(_){}
+        if(titleEl) titleEl.textContent = prefix + "⚠ fetch error";
       }
     }
-
         return data;
       }catch(err){
         const msg = (err && err.name === "AbortError") ? "Request timeout" : String(err);
@@ -2699,7 +2697,7 @@ async function downloadInvoicePdf(invoiceId, btnEl){
       const token = getToken();
       if(!token || !invoiceId) return;
 
-      // v1.352: Fetch PDF as Blob and trigger download WITHOUT opening any new tab/window.
+      // v1.354: Fetch PDF as Blob and trigger download WITHOUT opening any new tab/window.
       // Keep correct payload key: invoice_id.
       setProcessPill(_uiMsg("openingPdf"));
       if(btnEl){ btnEl.disabled = true; btnEl.classList.add("is-busy"); }
@@ -3104,7 +3102,7 @@ document.addEventListener("keydown", (e) => {
     try{ updateReadingsTexts_(); }catch(_){ }
   }
 
-  // v1.352: house meter scope (apartment=0) toggle for configured admin apartment
+  // v1.354: house meter scope (apartment=0) toggle for configured admin apartment
   function getUserSafe_(){
     try{ const s=localStorage.getItem("ku_user"); if(!s) return null; return JSON.parse(s); }catch(e){ return null; }
   }
