@@ -6,7 +6,13 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  
   <script>
+    // v1.349d0: early safety stubs for file:// so head scripts can't crash before main JS loads
+    var btnEl = null;
+    function setProcessPill(){}
+  </script>
+<script>
     // GitHub Pages hardening: ensure trailing slash for directory URLs.
     // Prevents broken relative assets when opening .../<repo> (without ending "/").
     (function(){
@@ -20,10 +26,12 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.349</title>
+  <title>Karusselli 4 KÜ — v1.352a0p74</title>
 <script>
-// v1.151: force default language to Estonian (ku_lang) before UI init
-try{ localStorage.setItem("ku_lang","et"); }catch(e){}
+// v1.151: set default language to Estonian (ku_lang) only if not set
+try{
+  if(!localStorage.getItem("ku_lang")) localStorage.setItem("ku_lang","et");
+}catch(e){}
 </script>
 
   <style>
@@ -149,13 +157,9 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* v1.334: move process indicator (Laadin andmeid...) */
-    #processPill{ position: relative; transform: translate(-400px, 194px) !important; }
-
-
-
-    
-/* v1.349 fine alignment: year selector down 3px */
+    /* v1.352a0p74: process pill positioning handled by layout slot (no transform hacks) */
+#processPill{ position: static !important; transform: none !important; }
+/* v1.349d0 fine alignment: year selector down 3px */
 #page_readings .bills-year-row select{ position: relative; top: 3px !important; }
 .btn{
       border:1px solid var(--stroke);
@@ -180,10 +184,8 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
 
     .wrap{max-width:1020px; margin:0 auto; padding:18px 16px 28px}
 
-    .auth-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
-    @media (max-width:900px){ .auth-grid{grid-template-columns:1fr} }
-    .card{
-      background:var(--card);
+    .auth-grid{display:grid; grid-template-columns: 1fr 1fr !important; gap:16px}
+    @media (max-width:900px){ .auth-grid{grid-template-columns: 1fr} } .card{ background:var(--card) !important;
       border:1px solid var(--stroke);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
@@ -207,9 +209,8 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
   box-shadow:0 0 0 5px rgba(107,124,255,.22);
   background:#eef4ff;
 }
-    .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
-    @media (max-width:520px){ .row{grid-template-columns:1fr} }
-    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .row{display:grid; grid-template-columns: 1fr 1fr !important; gap:12px}
+    @media (max-width:520px){ .row{grid-template-columns: 1fr} } .actions{display:flex !important; gap:10px; flex-wrap:wrap; margin-top:12px}
     .msg{margin-top:10px; font-size:13px}
     .msg.ok{color:var(--good)}
     .msg.err{color:#ff4d4d}
@@ -274,7 +275,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
   column-gap:24px;
 }
 @media (max-width:520px){
-  #authSection .register-grid .row{ grid-template-columns:1fr; }
+  #authSection .register-grid .row{ grid-template-columns: 1fr !important; }
   #authSection input, #authSection textarea{ width:100%; max-width: 320px; }
 }
 
@@ -347,7 +348,7 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
 
 /* === v1.151 HOME: Quick Status (final) === */
 #page_home .qs88{ display:flex; flex-direction:column; gap:14px; margin-top:8px; }
-#page_home .qs88-row{ display:grid; grid-template-columns: 56px 1fr; gap:14px; align-items:center; }
+#page_home .qs88-row{ display:grid; grid-template-columns: 76px 1fr !important; gap:14px; align-items:center; }
 #page_home .qs88-icon{ width:56px; height:56px; display:flex; align-items:center; justify-content:center; }
 #page_home .qs88-icon img{ width:56px; height:56px; display:block; }
 #page_home .qs88-water{ transform: scale(1.2); transform-origin:center; } /* water x1.2 */
@@ -359,12 +360,12 @@ try{ localStorage.setItem("ku_lang","et"); }catch(e){}
 #page_home .qs88-num.bad{ color: rgba(239,68,68,.95); }
 #page_home .qs88-lbl{ font-size:12px; color:var(--text); margin-top:6px; }
 @media (max-width:720px){
-  #page_home .qs88-row{ grid-template-columns:1fr; }
+  #page_home .qs88-row{ grid-template-columns: 1fr !important; }
   #page_home .qs88-icon{ display:none; }
 }
 
 /* APP */
-    .app-shell{display:grid; grid-template-columns: 1fr; gap:16px}
+    .app-shell{display:grid; grid-template-columns: 1fr !important; gap:16px}
     .main{padding:14px; background: var(--card)}
     .tabs{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-bottom:12px}
     .tab{
@@ -424,19 +425,17 @@ top:30px;
     }
     .house-wrap img{display:block;width:100%;height:100%;object-fit:cover;}
 
-    .bottom-grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:14px}
-    @media (max-width:900px){ .bottom-grid{grid-template-columns:1fr} }
-    .mini{
-      background: var(--card);
+    .bottom-grid{display:grid; grid-template-columns: 1fr 1fr !important; gap:16px; margin-top:14px}
+    @media (max-width:900px){ .bottom-grid{grid-template-columns: 1fr} } .mini{ background: var(--card) !important;
       border:1px solid var(--stroke);
       border-radius:18px;
       padding:14px;
-      min-height:150px;
+      min-height:180px;
     }
-    .mini h4{margin:0 0 8px; font-size:13px; font-weight:900}
+    .mini h4{margin:0 0 8px; font-size:12px; font-weight:900}
     .mini .muted{color:var(--muted); font-size:12px; line-height:1.45}
     ul{margin:10px 0 0 16px; color:var(--muted); font-size:12px; line-height:1.6}
-    .status-cards{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px}
+    .status-cards{display:grid; grid-template-columns: 1fr 1fr !important; gap:10px; margin-top:10px}
     .stat{
       border:1px solid var(--stroke);
       background: rgba(0,0,0,.015);
@@ -453,7 +452,7 @@ top:30px;
       background: rgba(0,0,0,.015);
       border:1px solid var(--stroke);
       padding:10px;
-      font-size:13px;
+      font-size:12px;
     }
     td:first-child{border-radius:12px 0 0 12px}
     td:last-child{border-radius:0 12px 12px 0}
@@ -466,11 +465,8 @@ top:30px;
     .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
     .modal-body{padding:14px}
     .iconbtn{border:1px solid var(--stroke); background:var(--pill); border-radius:10px; padding:8px 10px; cursor:pointer}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    @media (max-width:720px){.grid2{grid-template-columns:1fr}}
-
-textarea{
-  width:100%;
+    .grid2{display:grid; grid-template-columns: 1fr 1fr !important; gap:12px}
+    @media (max-width:720px){.grid2{grid-template-columns: 1fr}} textarea{ width:100% !important;
   padding:12px 14px;
   border-radius:12px;
   border:1px solid rgba(107,124,255,.55);
@@ -524,7 +520,17 @@ textarea:focus{
       justify-content:flex-end;
     }
 
-  /* === v1.151 language flag in selector === */
+  
+    /* v1.352a0p74: center slot for process pill in app menu row */
+    .app-center{
+      flex: 1 1 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 0;
+    }
+    .app-center .process{ max-width: 360px; }
+/* === v1.151 language flag in selector === */
 .langWrap{
   display:inline-flex;
   align-items:center;
@@ -569,7 +575,7 @@ textarea:focus{
   flex-direction:column;
   gap:4px;
 }
-#page_bills .bills-owner .lbl{ color: var(--muted); font-size:13px; }
+#page_bills .bills-owner .lbl{ color: var(--muted); font-size:12px; }
 #page_bills .bills-owner b{ font-weight:900; }
 
 #page_bills .bills-year-row,
@@ -609,7 +615,7 @@ textarea:focus{
   background:#fff;
   border:1px solid var(--stroke);
   padding: 2px 12px;  /* compact height */
-  font-size:13px;
+  font-size:12px;
   vertical-align:middle;
   line-height:1.15;
   text-align:left !important;
@@ -657,7 +663,7 @@ textarea:focus{
   background:#fff;
   border:1px solid var(--stroke);
   padding: 2px 12px;  /* compact height */
-  font-size:13px;
+  font-size:12px;
   vertical-align:middle;
   line-height:1.15;
   text-align:left !important;
@@ -811,7 +817,7 @@ margin: 0;
   background:#fff;
   border:1px solid var(--stroke);
   padding: 2px 12px;  /* compact height like bills */
-  font-size:13px;
+  font-size:12px;
   vertical-align:middle;
   line-height:1.15;
   text-align:left !important;
@@ -935,7 +941,7 @@ margin: 0;
 
 /* v1.293: Readings input panel independent of year selector */
 #page_readings .rd-actionbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;margin:6px 0 10px 0;}
-/* v1.349: house meter scope toggle (shown only for house_meter_admin_apartment) */
+/* v1.349d0: house meter scope toggle (shown only for house_meter_admin_apartment) */
 #page_readings .rd-scope-toggle{ display:flex; align-items:center; gap:8px; }
 #page_readings .rd-scope-toggle.hidden{ display:none !important; }
 #page_readings .rd-scope-btn{
@@ -978,9 +984,9 @@ body{
 }
 
 /* Keep desktop grids always */
-.auth-grid{ grid-template-columns: 1fr 1fr !important; }
-.bottom-grid{ grid-template-columns: 1fr 1fr !important; }
-.grid2{ grid-template-columns: 1fr 1fr !important; }
+.auth-grid{ grid-template-columns: 1fr 1fr !important !important; }
+.bottom-grid{ grid-template-columns: 1fr 1fr !important !important; }
+.grid2{ grid-template-columns: 1fr 1fr !important !important; }
 
 /* Prevent wrapping of top controls / tabs */
 .right-actions{ flex-wrap: nowrap !important; }
@@ -989,7 +995,7 @@ body{
 .app-navrow{ flex-wrap: nowrap !important; }
 
 /* Keep quick status icon visible and desktop layout */
-#page_home .qs88-row{ grid-template-columns: 56px 1fr !important; }
+#page_home .qs88-row{ grid-template-columns: 96px 1fr !important !important; }
 #page_home .qs88-icon{ display:flex !important; }
 
 /* Keep year selector behavior consistent (avoid mobile overrides) */
@@ -1028,7 +1034,7 @@ body{
 #page_readings .rd-vis-foot.saved .savedline{color:#1b7f2a;font-weight:700;}
 #page_readings .rd-vis-meter{
   margin: 18px auto 0 auto;
-  width: 150px;
+  width: 180px;
   height:auto;
   display:block;
 }
@@ -1076,9 +1082,15 @@ body{
 #rdModal.busy .modal-card{ pointer-events:none; opacity:0.92; }
 #rdModal.busy #rdModalMsg{ pointer-events:auto; }
 
-</style>
 
-<style>
+
+/* v1.352a0p74: while global process pill is active, keep Readings headers visible (hide only table body) */
+#page_readings.ku-busy #readingsMonthsBody{ display:none; }
+#page_readings.ku-busy .rd-vis-panel{ display:none !important; }
+
+/* v1.351b0p7: Admin tab already has a label in the top menu — hide duplicate page title */
+#page_admin .page-title{ display:none !important; }
+</style>
 
 <style>
 /* FIX: move the invoices table down so the year selector never overlaps the header */
@@ -1134,7 +1146,7 @@ body{
   background:#fff;
   border:1px solid var(--stroke);
   padding: 2px 12px;  /* compact height like bills */
-  font-size:13px;
+  font-size:12px;
   vertical-align:middle;
   line-height:1.15;
   text-align:left !important;
@@ -1243,7 +1255,7 @@ body{
 }
 
 
-/* v1.349: align year selector + process pill baseline + house-meter toggle on one line */
+/* v1.349d0: align year selector + process pill baseline + house-meter toggle on one line */
 #page_readings .bills-year-row.rd-topline{
   display:flex !important;
   align-items:center !important;
@@ -1255,7 +1267,7 @@ body{
 #page_readings .bills-year-row.rd-topline .rd-scope-toggle{ flex:0 0 auto; margin-left:auto; }
 
 
-/* v1.349: make readings scope toggle buttons equal width */
+/* v1.349d0: make readings scope toggle buttons equal width */
 #rdScopeToggleWrap .btn,
 #rdScopeToggleWrap button{
   min-width: 64px !important;
@@ -1265,12 +1277,565 @@ body{
 }
 
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+/* v1.351b0p7: CLEAN Admin Users table layout (single source of truth) */
+
+/* hide description line */
+#page_admin #adminUsersDesc{ display:none !important; }
+
+/* GRID: same for header + rows */
+#page_admin #adminUsersTable .au-row{
+  display: grid !important;
+  grid-template-columns:
+    70px
+    minmax(120px, 1.2fr)   /* Kasutaja */
+    minmax(230px, 3.2fr)   /* Omanik */
+    120px                  /* Roll */
+    90px                   /* Delete */
+  !important;
+  column-gap: 0 !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+
+  /* row height */
+  padding: 2px 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+#page_admin #adminUsersTable .au-row.au-head{
+  border-bottom: 1px solid rgba(0,0,0,0.18) !important;
+}
+
+/* CELLS */
+#page_admin #adminUsersTable .au-cell{
+  box-sizing: border-box !important;
+  min-width: 0 !important;             /* critical for grid alignment */
+  padding: 4px 8px !important;
+  text-align: left !important;
+  justify-self: stretch !important;
+  border-right: 1px solid rgba(0,0,0,0.08) !important;
+}
+#page_admin #adminUsersTable .au-cell:last-child{
+  border-right: none !important;
+}
+
+/* Header: centered text and bold, same size as values */
+#page_admin #adminUsersTable .au-row.au-head .au-cell{
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-align: center !important;
+}
+
+/* Body text size */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell{
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+
+/* Owner input: rectangular border same as row separator */
+#page_admin #adminUsersTable .au-cell.au-owner .au-inp{
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 4px 6px !important;
+}
+
+/* Role select: borderless, but align */
+#page_admin #adminUsersTable select.au-sel{
+  box-sizing: border-box !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 2px 4px !important;
+}
+
+/* Delete header label hidden only */
+#page_admin #adminUsersTable .au-row.au-head #adminHdrDelete{
+  visibility: hidden !important;
+}
+
+/* Delete button smaller */
+#page_admin #adminUsersTable button{
+  box-sizing: border-box !important;
+}
+#page_admin #adminUsersTable .admin-users-delete-btn,
+#page_admin #adminUsersTable .au-del button{
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  line-height: 1.2 !important;
+}
+
+/* Center Save button area */
+#page_admin #adminUsersActions{
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Save button style matches delete button, disabled by default */
+#adminUsersSaveBtn{
+  background: transparent !important;
+  border: 1px solid rgba(0,0,0,0.12) !important;
+  color: inherit !important;
+  padding: 6px 14px !important;
+}
+#adminUsersSaveBtn:disabled{
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+}
+</style>
+
+
+<style>
+/* v1.351b0p7: Admin Users table layout (final UI tweaks) */
+
+/* hide description line */
+#page_admin #adminUsersDesc{ display:none !important; }
+
+/* GRID: same for header + rows */
+#page_admin #adminUsersTable .au-row{
+  display: grid !important;
+  grid-template-columns:
+    70px
+    minmax(120px, 1.2fr)   /* Kasutaja */
+    minmax(230px, 3.2fr)   /* Omanik */
+    120px                  /* Roll */
+    90px                   /* Delete */
+  !important;
+  column-gap: 0 !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+
+  /* reduced row height */
+  padding: 0px 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+#page_admin #adminUsersTable .au-row.au-head{
+  border-bottom: 1px solid rgba(0,0,0,0.18) !important;
+}
+
+/* CELLS */
+#page_admin #adminUsersTable .au-cell{
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  padding: 2px 6px !important;
+  border-right: 1px solid rgba(0,0,0,0.08) !important;
+  justify-self: stretch !important;
+}
+
+/* Default: center all cells */
+#page_admin #adminUsersTable .au-cell{
+  text-align: center !important;
+}
+
+/* Owner column: left aligned */
+#page_admin #adminUsersTable .au-cell.au-owner{
+  text-align: left !important;
+}
+
+#page_admin #adminUsersTable .au-cell:last-child{
+  border-right: none !important;
+}
+
+/* Header: centered + bold (keep size as is) */
+#page_admin #adminUsersTable .au-row.au-head .au-cell{
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-align: center !important;
+}
+
+/* Body values size = 9px */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell{
+  font-size: 9px !important;
+  font-weight: 400 !important;
+}
+
+/* Owner input: borderless (back to previous look) */
+#page_admin #adminUsersTable .au-cell.au-owner .au-inp{
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 2px 4px !important;
+  font-size: 9px !important;
+}
+
+/* remove focus ring */
+#page_admin #adminUsersTable .au-cell.au-owner .au-inp:focus{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Role select: borderless */
+#page_admin #adminUsersTable select.au-sel{
+  box-sizing: border-box !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 1px 2px !important;
+  font-size: 9px !important;
+}
+
+/* Delete header label hidden only */
+#page_admin #adminUsersTable .au-row.au-head #adminHdrDelete{
+  visibility: hidden !important;
+}
+
+/* Delete button smaller */
+#page_admin #adminUsersTable .admin-users-delete-btn,
+#page_admin #adminUsersTable .au-del button{
+  font-size: 10px !important;
+  padding: 1px 6px !important;
+  line-height: 1.2 !important;
+}
+
+/* Center Save button area */
+#page_admin #adminUsersActions{
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+</style>
+
+
+<style>
+/* === FINAL ADMIN USERS STYLE (p9) ===
+   - column widths: 60 / 100 / 220 / 110 / 80 px
+   - font size 12px (headers + values)
+   - Omanik: bordered input, no shadow
+   - Role values centered
+*/
+
+/* Grid widths */
+#page_admin #adminUsersTable .au-row{
+  display:grid !important;
+  grid-template-columns: 60px 100px 220px 110px 80px !important;
+}
+
+/* Typography */
+#page_admin #adminUsersTable .au-cell{ font-size:12px !important; }
+#page_admin #adminUsersTable .au-row.au-head .au-cell{ font-size:12px !important; }
+
+/* Omanik (3rd cell) input */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3) .au-inp{
+  font-size:12px !important;
+  border:1px solid rgba(0,0,0,0.25) !important;
+  border-radius:6px !important;
+  padding:4px 6px !important;
+  background:#f4f7ff !important;
+  box-shadow:none !important;
+  outline:none !important;
+  width:100% !important;
+  max-width:none !important;
+}
+
+/* Neutralize global input styling inside admin table */
+#page_admin #adminUsersTable input.au-inp{
+  box-shadow:none !important;
+}
+
+/* Role (4th cell) centered */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4){
+  text-align:center !important;
+}
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4) select.au-sel{
+  font-size:12px !important;
+  text-align:center !important;
+  text-align-last:center !important;
+}
+</style>
+
+
+<style>
+/* === PATCH p10: tighten Korter + Kasutaja columns (make change visible) === */
+
+/* Grid widths: make first two columns narrower */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 90px 220px 110px 80px !important;
+}
+
+/* Reduce padding so narrow columns actually shrink visually */
+#page_admin #adminUsersTable .au-cell{
+  padding: 2px 6px !important;
+}
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(1),
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(2),
+#page_admin #adminUsersTable .au-row.au-head .au-cell:nth-child(1),
+#page_admin #adminUsersTable .au-row.au-head .au-cell:nth-child(2){
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+/* Prevent stretching by long text */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(2){
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+</style>
+
+
+<style>
+/* === PATCH p11: FORCE visible shrink for Korter + Kasutaja === */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 90px 220px 110px 80px !important;
+}
+
+/* Force cell widths for first two columns (wins even if grid fights) */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(1){
+  width:50px !important;
+  max-width:50px !important;
+  min-width:50px !important;
+}
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  width:90px !important;
+  max-width:90px !important;
+  min-width:90px !important;
+}
+
+/* Ensure text doesn't expand cells */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(1),
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-width: 0 !important;
+}
+
+/* Reduce padding in first two columns more */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(1),
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+</style>
+
+
+<style>
+/* === p18: remove fill inside Omanik input frames (OVERRIDE high-specificity rule) === */
+/* This overrides the earlier p9 rule:
+   #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3) .au-inp { background:#f4f7ff !important; }
+*/
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3) .au-inp,
+#page_admin #adminUsersTable .au-cell.au-owner .au-inp,
+#page_admin #adminUsersTable input.au-inp{
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+</style>
+
+
+<style>
+/* === p19: Make 'Salvesta muudatused' button background same as 'Kustuta' === */
+#page_admin button.save-btn,
+#page_admin .btn-save,
+#page_admin button[data-action="save"],
+#page_admin .au-save-btn,
+#page_admin button{
+  background: #f5f5f5 !important;
+  background-color: #f5f5f5 !important;
+  border: 1px solid #dcdcdc !important;
+  box-shadow: none !important;
+  color: #000 !important;
+}
+</style>
+
+
+<style>
+/* === p22: Omanik width -30px WITHOUT affecting centering (keep p19 grid) ===
+   p19 effective grid: 50px 90px 220px 110px 80px
+   Change ONLY Omanik: 220px -> 190px
+*/
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 90px 170px 90px 60px !important;
+}
+</style>
+
+
+<style>
+/* === p24: add Tel + KÜ Roll columns in Admin Users table === */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 70px 130px 85px 80px 80px 60px !important;
+}
+/* Inputs (Omanik + Tel) borderless like before */
+#page_admin #adminUsersTable input.au-inp{
+  width:100% !important;
+  max-width:none !important;
+  box-sizing:border-box !important;
+  border:none !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  outline:none !important;
+  padding:2px 4px !important;
+  font-size:12px !important;
+}
+
+
+/* Selects (KÜ roll + Saidi roll): keep same font size and centered like before */
+#page_admin #adminUsersTable select.au-sel{
+  font-size:12px !important;
+  text-align:center !important;
+  text-align-last:center !important;
+}
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(5),
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(6){
+  text-align:center !important;
+}
+
+/* Keep owner (Omanik) left aligned; phone input also left */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3),
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4){
+  text-align: left !important;
+}
+
+/* === p26: Inputs Omanik + E-mail + Tel should look identical (bordered) === */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3) input.au-inp,
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4) input.au-inp,
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(5) input.au-inp{
+  border:1px solid rgba(0,0,0,0.25) !important;
+  border-radius:6px !important;
+  padding:4px 6px !important;
+  background: transparent !important;
+  box-shadow:none !important;
+  outline:none !important;
+  font-size:12px !important;
+}
+</style>
+
+
+<style>
+/* p55: FIX Kasutaja control overflow after width reduction */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(2){
+  min-width:0 !important;
+}
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(2) *{
+  box-sizing:border-box !important;
+  max-width:100% !important;
+}
+</style>
+
+
+<style>
+/* p57: ENFORCE Kasutaja column width + prevent overflow/shift */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 70px 170px 85px 80px 80px 60px !important;
+}
+/* Force exact width on Kasutaja cells (header + body) */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  width:70px !important;
+  min-width:70px !important;
+  max-width:70px !important;
+  min-width:0 !important; /* allow shrink inside grid */
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+/* Ensure inner content can't push the cell */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) *{
+  box-sizing:border-box !important;
+  max-width:100% !important;
+}
+</style>
+
+
+<style>
+/* p58: ENFORCE Omanik column width -20px */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
+  width:130px !important;
+  min-width:180px !important;
+  max-width:180px !important;
+}
+</style>
+
+
+<style>
+/* p60: FINAL lock for Admin Users grid (prevents any earlier overrides) */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 70px 130px 210px 85px 80px 80px 60px 60px 60px!important
+}
+
+/* Kasutaja (2) exact width + ellipsis */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  width:70px !important;
+  min-width:70px !important;
+  max-width:70px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  min-width:0 !important;
+}
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) *{
+  box-sizing:border-box !important;
+  max-width:100% !important;
+}
+
+/* Omanik (3) exact width */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
+  width:130px !important;
+  min-width:130px !important;
+  max-width:130px !important;
+}
+
+
+/* E-mail (4) exact width */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(4){
+  width:210px !important;
+  min-width:210px !important;
+  max-width:210px !important;
+}
+/* Tel (5) exact width (fix: column looked wider due to earlier overrides) */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(5){
+  width:85px !important;
+  min-width:85px !important;
+  max-width:85px !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+}
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(5) input.au-inp{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+</style>
+
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.349</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.352a0p74</span>
         <small id="brandSub"></small>
       </div>
 
@@ -1398,7 +1963,9 @@ body{
             <button class="tab active" id="tab_home" data-page="home">Главная</button>
           <button class="tab" id="tab_readings" data-page="readings">Показания</button>
           <button class="tab" id="tab_bills" data-page="bills">Счета</button>
+          <button class="tab" id="tab_admin" data-page="admin" style="display:none">Site Administration</button>
           </div>
+          <div class="app-center" id="appCenterPillSlot"></div>
           <div class="nav-right" id="appRightControls"></div>
         </div>
 
@@ -1547,6 +2114,58 @@ body{
 
         </div>
 
+
+<!-- ADMIN -->
+        <div id="page_admin" class="hidden">
+          <div class="page-title" id="adminTitle" data-i18n="adminTitle">Site Administration</div>
+
+          <div class="bottom-grid">
+            <div class="mini">
+              <h4 id="adminUsersTitle" data-i18n="adminUsersTitle">User management</h4>
+              <div class="muted" id="adminUsersDesc" data-i18n="adminUsersDesc">Manage users, roles, and owner names.</div>
+              <div class="muted" id="adminUsersMsg" style="margin-top:10px"></div>
+
+              <div id="adminUsersTable" class="admin-users-table" style="margin-top:8px">
+                <div class="au-row au-head">
+                  <div class="au-cell" id="adminHdrApartment" data-i18n="adminHdrApartment">Квартира</div>
+                  <div class="au-cell" id="adminHdrUsername" data-i18n="adminHdrUsername">User</div>
+                  <div class="au-cell" id="adminHdrOwner" data-i18n="adminHdrOwner">Владелец</div>
+                  <div class="au-cell" id="adminHdrEmail" data-i18n="adminHdrEmail">E-mail</div>
+                  <div class="au-cell" id="adminHdrTel" data-i18n="adminHdrTel">Тел.</div>
+                  <div class="au-cell" id="adminHdrKuRole" data-i18n="adminHdrKuRole">KÜ Roll</div>
+                  <div class="au-cell" id="adminHdrRole" data-i18n="adminHdrRole">Saidi roll</div>
+                  <div class="au-cell" id="adminHdrMailing" data-i18n="adminHdrMailing">Mailing</div>
+                  <div class="au-cell" id="adminHdrCommonCounter" data-i18n="adminHdrCommonCounter">Common counter</div>
+                  <div class="au-cell au-del" id="adminHdrDelete" data-i18n="adminHdrDelete">Удалить</div>
+                </div>
+                <div id="adminUsersBody"></div>
+              </div>
+
+              <div class="actions" style="margin-top:10px">
+                <button class="btn primary" id="adminUsersSaveBtn" data-i18n="adminBtnSave">Сохранить</button>
+              </div>
+
+            </div>
+
+            <div class="mini">
+              <h4 id="adminConfigTitle" data-i18n="adminConfigTitle">Site settings (AdminConfig)</h4>
+              <div class="muted" id="adminConfigDesc" data-i18n="adminConfigDesc">Edit all parameters from AdminConfig.</div>
+              <div class="hint" style="margin-top:10px" data-i18n="adminReserved">Reserved — will be implemented next.</div>
+            </div>
+
+            <div class="mini">
+              <h4 id="adminStatsTitle" data-i18n="adminStatsTitle">Statistics</h4>
+              <div class="muted" id="adminStatsDesc" data-i18n="adminStatsDesc">Readings and invoices overview, charts.</div>
+              <div class="hint" style="margin-top:10px" data-i18n="adminReserved">Reserved — will be implemented next.</div>
+            </div>
+
+            <div class="mini">
+              <h4 id="adminInvoicesTitle" data-i18n="adminInvoicesTitle">Invoices</h4>
+              <div class="muted" id="adminInvoicesDesc" data-i18n="adminInvoicesDesc">Upload invoice PDF and link to apartment.</div>
+              <div class="hint" style="margin-top:10px" data-i18n="adminReserved">Reserved — will be implemented next.</div>
+            </div>
+          </div>
+        </div>
       </section>
     </section>
   </main>
@@ -1597,6 +2216,7 @@ body{
         tabHome: "Главная",
         tabReadings: "Показания",
         tabBills: "Счета",
+        tabAdmin: "Администрирование",
 
         contactTitle: "Контактная информация",
         boardMembersTitle: "Члены правления",
@@ -1612,6 +2232,17 @@ body{
         phBank: "[Swedbank / SEB / ..]",
 
         quickTitle: "Быстрый статус",
+        adminTitle: "Администрирование сайта",
+        adminUsersTitle: "Управление пользователями",
+        adminUsersDesc: "Пользователи, роли и имена владельцев.",
+        adminConfigTitle: "Управление сайтом (AdminConfig)",
+        adminConfigDesc: "Редактирование параметров из AdminConfig.",
+        adminStatsTitle: "Статистика",
+        adminStatsDesc: "Обзор показаний и счетов, графики.",
+        adminInvoicesTitle: "Счета",
+        adminInvoicesDesc: "Загрузка PDF счета и привязка к квартире.",
+        adminReserved: "Резерв — будет реализовано позже.",
+        adminReserved: "Резерв — будет внедрено позже.",
         quickSub: "Сводка по прошлому месяцу (демо-данные):",
         lblTotal: "квартир всего",
         lblDone: "сдали показания",
@@ -1671,7 +2302,21 @@ body{
       errEmailTaken: "Email уже используется.",
       errInvalidCreds: "Неверный логин или пароль.",
       errAccountLocked: "Слишком много попыток. Попробуйте позже.",
-      errResetFailed: "Не удалось сбросить пароль. Проверьте код и попробуйте снова."
+      errResetFailed: "Не удалось сбросить пароль. Проверьте код и попробуйте снова.",
+      adminHdrApartment: "Квартира",
+        adminHdrUsername: "Пользователь",
+        adminHdrOwner: "Владелец",
+        adminHdrEmail: "E-mail",
+        adminHdrMailing: "Mailing",
+        adminHdrCommonCounter: "Common counter",
+        adminHdrRole: "Роль сайта",
+        adminHdrDelete: "Удалить",
+        adminBtnSave: "Сохранить",
+        adminSaving: "Сохраняю…",
+        adminLoading: "Загружаю пользователей…",
+        adminSaved: "Сохранено",
+        adminDeleteConfirm: "Удалить пользователя?",
+
 },
 
       et: {
@@ -1712,6 +2357,18 @@ body{
         tabHome: "Avaleht",
         tabReadings: "Näidud",
         tabBills: "Arved",
+        tabAdmin: "Haldus",
+
+        adminTitle: "Saidi haldus",
+        adminUsersTitle: "Kasutajate haldus",
+        adminUsersDesc: "Kasutajad, rollid ja omanike nimed.",
+        adminConfigTitle: "Saidi seaded (AdminConfig)",
+        adminConfigDesc: "AdminConfig parameetrite muutmine.",
+        adminStatsTitle: "Statistika",
+        adminStatsDesc: "Näitude ja arvete ülevaade, graafikud.",
+        adminInvoicesTitle: "Arved",
+        adminInvoicesDesc: "Arve PDF-i üleslaadimine ja sidumine korteriga.",
+        adminReserved: "Reserveeritud — lisame hiljem.",
 
         contactTitle: "Kontaktinfo",
         boardMembersTitle: "Juhatuse liikmed",
@@ -1786,7 +2443,21 @@ body{
       errEmailTaken: "E-post on juba kasutusel.",
       errInvalidCreds: "Vale kasutajanimi või parool.",
       errAccountLocked: "Liiga palju katseid. Proovi hiljem uuesti.",
-      errResetFailed: "Parooli lähtestamine ebaõnnestus. Kontrolli koodi ja proovi uuesti."
+      errResetFailed: "Parooli lähtestamine ebaõnnestus. Kontrolli koodi ja proovi uuesti.",
+      adminHdrApartment: "Korter",
+        adminHdrUsername: "Kasutaja",
+        adminHdrOwner: "Omanik",
+        adminHdrEmail: "E-mail",
+        adminHdrMailing: "Mailing",
+        adminHdrCommonCounter: "Üldarvesti",
+        adminHdrRole: "Saidi roll",
+        adminHdrDelete: "Kustuta",
+        adminBtnSave: "Salvesta",
+        adminSaving: "Salvestan…",
+        adminLoading: "Laadin kasutajaid…",
+        adminSaved: "Salvestatud",
+        adminDeleteConfirm: "Kustuta kasutaja?",
+
 },
 
       en: {
@@ -1826,6 +2497,7 @@ body{
         tabHome: "Home",
         tabReadings: "Readings",
         tabBills: "Invoices",
+        tabAdmin: "Site Administration",
 
         contactTitle: "Contact info",
         boardMembersTitle: "Board members",
@@ -1841,6 +2513,17 @@ body{
         phBank: "[Swedbank / SEB / ..]",
 
         quickTitle: "Quick status",
+        adminTitle: "Site Administration",
+        adminUsersTitle: "User management",
+        adminUsersDesc: "Users, roles, and owner names.",
+        adminConfigTitle: "Site settings (AdminConfig)",
+        adminConfigDesc: "Edit all parameters from AdminConfig.",
+        adminStatsTitle: "Statistics",
+        adminStatsDesc: "Readings and invoices overview, charts.",
+        adminInvoicesTitle: "Invoices",
+        adminInvoicesDesc: "Upload invoice PDF and link to apartment.",
+        adminReserved: "Reserved — will be implemented next.",
+        adminReserved: "Reserved — will be implemented later.",
         quickSub: "Summary for last month (demo data):",
         lblTotal: "apartments total",
         lblDone: "submitted readings",
@@ -1900,9 +2583,55 @@ body{
       errEmailTaken: "Email is already in use.",
       errInvalidCreds: "Invalid username or password.",
       errAccountLocked: "Too many attempts. Please try again later.",
-      errResetFailed: "Password reset failed. Check the code and try again."
+      errResetFailed: "Password reset failed. Check the code and try again.",
+      adminHdrApartment: "Flat",
+        adminHdrUsername: "User",
+        adminHdrOwner: "Owner",
+        adminHdrEmail: "E-mail",
+        adminHdrMailing: "Mailing",
+        adminHdrCommonCounter: "Common counter",
+        adminHdrRole: "Site Role",
+        adminHdrDelete: "Delete",
+        adminBtnSave: "Save",
+        adminSaving: "Saving…",
+        adminLoading: "Loading users…",
+        adminSaved: "Saved",
+        adminDeleteConfirm: "Delete this user?",
+
 }
     };
+// === Admin Users UI text overrides (safe, does not touch auth/reset logic) ===
+try{
+  I18N.ru.adminUsersDesc = "";
+  I18N.et.adminUsersDesc = "";
+  I18N.en.adminUsersDesc = "";
+
+  I18N.ru.adminBtnSave = "Сохранить изменения";
+  I18N.et.adminBtnSave = "Salvesta muudatused";
+  I18N.en.adminBtnSave = "Save changes";
+
+  I18N.ru.adminOwnerPlaceholder = "Введите имя";
+  I18N.et.adminOwnerPlaceholder = "Sisesta nimi";
+  I18N.en.adminOwnerPlaceholder = "Enter name";
+
+  I18N.ru.adminPhonePlaceholder = "Введите тел.";
+  I18N.et.adminPhonePlaceholder = "Sisesta tel.";
+  I18N.en.adminPhonePlaceholder = "Enter phone";
+
+  I18N.ru.adminHdrTel = "Тел.";
+  I18N.et.adminHdrTel = "Tel.";
+  I18N.en.adminHdrTel = "Tel.";
+
+  I18N.ru.adminHdrKuRole = "Роль KÜ";
+  I18N.et.adminHdrKuRole = "KÜ roll";
+  I18N.en.adminHdrKuRole = "KÜ role";
+
+  // clarify existing header meaning
+  I18N.ru.adminHdrRole = "Роль сайта";
+  I18N.et.adminHdrRole = "Saidi roll";
+  I18N.en.adminHdrRole = "Site role";
+}catch(_){}
+
 
     function getLang(){
       const saved = localStorage.getItem("ku_lang");
@@ -2037,11 +2766,29 @@ function applyLang(){
       const _el_tab_home = document.getElementById("tab_home"); if(_el_tab_home) _el_tab_home.textContent = t.tabHome;
       const _el_tab_readings = document.getElementById("tab_readings"); if(_el_tab_readings) _el_tab_readings.textContent = t.tabReadings;
       const _el_tab_bills = document.getElementById("tab_bills"); if(_el_tab_bills) _el_tab_bills.textContent = t.tabBills;
+      const _el_tab_admin = document.getElementById("tab_admin"); if(_el_tab_admin) _el_tab_admin.textContent = (t.tabAdmin || "Site Administration");
 
       // page titles + blocks
       const _el_homeTitle = document.getElementById("homeTitle"); if(_el_homeTitle) _el_homeTitle.textContent = t.tabHome;
       const _el_readingsTitle = document.getElementById("readingsTitle"); if(_el_readingsTitle) _el_readingsTitle.textContent = t.tabReadings;
       const _el_billsTitle = document.getElementById("billsTitle"); if(_el_billsTitle) _el_billsTitle.textContent = t.tabBills;
+      const _el_adminTitle = document.getElementById("adminTitle"); if(_el_adminTitle) _el_adminTitle.textContent = (t.adminTitle || "Site Administration");
+
+      // admin users table headers (language binding)
+      safeSetText("adminHdrApartment", t.adminHdrApartment);
+      safeSetText("adminHdrUsername", t.adminHdrUsername);
+      safeSetText("adminHdrOwner", t.adminHdrOwner);
+      safeSetText("adminHdrTel", t.adminHdrTel);
+      safeSetText("adminHdrKuRole", t.adminHdrKuRole);
+      safeSetText("adminHdrRole", t.adminHdrRole);
+      safeSetText("adminHdrDelete", t.adminHdrDelete);
+
+      // admin placeholders + delete button labels when language changes
+      try{
+        document.querySelectorAll('#adminUsersBody input[data-field="display_name"]').forEach(inp=>{ inp.placeholder = tr("adminOwnerPlaceholder"); });
+        document.querySelectorAll('#adminUsersBody input[data-field="phone"]').forEach(inp=>{ inp.placeholder = tr("adminPhonePlaceholder"); });
+        document.querySelectorAll('#adminUsersBody button[data-del]').forEach(btn=>{ btn.textContent = tr("adminHdrDelete"); });
+      }catch(e){}
 
       const _el_contactTitle = document.getElementById("contactTitle"); if(_el_contactTitle) _el_contactTitle.textContent = t.contactTitle;
       const _el_boardMembersTitle = document.getElementById("boardMembersTitle"); if(_el_boardMembersTitle) _el_boardMembersTitle.textContent = t.boardMembersTitle;
@@ -2131,13 +2878,21 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     function mountControls(toApp){
       const top = document.getElementById("topRightActions");
       const app = document.getElementById("appRightControls");
+      const center = document.getElementById("appCenterPillSlot");
       if (!top || !app) return;
 
       const nodes = ["langControl","statusPill","btnTopLogout"].map(id=>document.getElementById(id)).filter(Boolean);
+      const pill = document.getElementById("processPill");
 
-      // place controls depending on current view
-      const target = toApp ? app : top;
-      nodes.forEach(n=>{ if (n.parentElement !== target) target.appendChild(n); });
+      // move right-side controls
+      const targetRight = toApp ? app : top;
+      nodes.forEach(n=>{ if (n.parentElement !== targetRight) targetRight.appendChild(n); });
+
+      // move process pill into the app center slot when app is visible; keep in header (right) on auth screen
+      if(pill){
+        const targetPill = (toApp && center) ? center : top;
+        if(pill.parentElement !== targetPill) targetPill.appendChild(pill);
+      }
     }
     function isAppVisible(){
       const app = document.getElementById("appSection");
@@ -2156,6 +2911,8 @@ applyLang();
     }
 
     function showApp(user){
+      try{ ensureDefaultScope_(); }catch(e){}
+
       document.getElementById("authSection").classList.add("hidden");
       document.getElementById("appSection").classList.remove("hidden");
       mountControls(true);
@@ -2163,6 +2920,13 @@ applyLang();
       const t = I18N[getLang()] || I18N.ru;
 
       setStatus(true, user.username, user.apartment, user.display_name);
+
+      // v1.351b0p7: Site Administration tab is visible only for admin role
+      try{
+        const role = String(user && user.site_role ? user.site_role : "member").toLowerCase();
+        const tabA = document.getElementById("tab_admin");
+        if(tabA) tabA.style.display = (role === "admin") ? "inline-block" : "none";
+      }catch(_){ }
 
       renderDemoTables(user);
       attachBillsYearListener_();
@@ -2173,12 +2937,29 @@ applyLang();
       document.querySelectorAll("[data-page]").forEach(el=>{
         el.classList.toggle("active", el.getAttribute("data-page") === page);
       });
-      ["home","readings","bills"].forEach(p=>{
+      ["home","readings","bills","admin"].forEach(p=>{
         document.getElementById("page_"+p).classList.toggle("hidden", p !== page);
       });
     }
 
+    // v1.349d0: rebuild Readings action state from window + permissions and refresh right panel button
+    function rebuildRdAction_(){
+      try{
+        const win = window.__ku_rd_window || {};
+        const perms = window.__ku_rd_permissions || {};
+        const ty = Number(win.target_year||0)||0;
+        const tm = Number(win.target_month||0)||0;
+        const openNow = !!win.is_open_now;
+        const canAct = openNow && !!(perms.can_submit || perms.can_edit);
+        const phase = perms.can_edit ? "edit" : "submit";
+        window.__ku_rd_action = { target_year: ty, target_month: tm, can_act: canAct, phase: phase };
+      }catch(e){}
+      try{ if(typeof window.__rdVisUpdate === "function") window.__rdVisUpdate(); }catch(e){}
+    }
+
     function navigate(page){
+      try{ if(page==="readings") ensureDefaultScope_(); }catch(e){}
+
       markActive(page);
       history.replaceState(null,"", "#"+page);
 
@@ -2191,38 +2972,13 @@ applyLang();
       }
 
       if(page==="bills") initBillsPage_();
+      if(page==="admin") initAdminPage_();
     }
 
     function renderDemoTables(user){
-      const t = I18N[getLang()] || I18N.ru;
-      const role = user.role || "member";
-      const apt = String(user.apartment || "");
-      const apartments = (role === "board") ? Array.from({length:24}, (_,i)=>String(i+1)) : [apt];
-
-      // readings demo
-      const rb = document.getElementById("readingsBody");
-      rb.innerHTML = "";
-      apartments.slice(0, role==="board" ? 10 : 1).forEach((a,i)=>{
-        const ok = (i % 3 !== 0);
-        rb.insertAdjacentHTML("beforeend", `
-          <tr>
-            <td><b>${esc(a)}</b></td>
-            <td class="${ok ? "ok":"warn"}">${ok ? esc(t.stSubmitted) : esc(t.stWaiting)}</td>
-            <td>${ok ? esc(t.commentDash) : esc(t.commentReminder)}</td>
-          </tr>
-        `);
-      });
-
-      // bills demo (Arved layout)
-      const bo = document.getElementById("billsOwnerName");
-      const ba = document.getElementById("billsAptNum");
-      if (bo) bo.textContent = user.fullname || user.username || "—";
-      if (ba) ba.textContent = String(user.apartment || "—");
-
-      const bb = document.getElementById("billsBody");
-      bb.innerHTML = "";
-      // bills demo removed (v1.174)
-}
+      // v1.349d0: demo tables disabled (they caused runtime errors and are not needed in production)
+      return;
+    }
 
     
     function _uiMsg(key){
@@ -2239,7 +2995,8 @@ applyLang();
       const pill = document.getElementById('processPill');
       const t = document.getElementById('processText');
       if(!pill || !t) return;
-      if(text){
+      const isBusy = !!text;
+      if(isBusy){
         t.textContent = String(text);
         pill.classList.add('is-active');
         pill.style.display = 'inline-flex';
@@ -2248,6 +3005,13 @@ applyLang();
         pill.classList.remove('is-active');
         pill.style.display = 'none';
       }
+      // v1.351b0p7: while pill is active, keep Readings table + right panel hidden
+      try{
+        const pr = document.getElementById('page_readings');
+        if(pr && pr.classList && !pr.classList.contains('hidden')){
+          pr.classList.toggle('ku-busy', isBusy);
+        }
+      }catch(e){}
     }
 
     function setBillsStatus(text){
@@ -2258,15 +3022,27 @@ applyLang();
     function setBillsBusy(isBusy, text){
       const yearSel = document.getElementById("billsYear");
       const table = document.querySelector("#page_bills .bills-table");
+      const tbody = document.getElementById("billsBody");
+      const lock = !!window.__ku_bills_tab_loading; // keep rows hidden during tab init sequence
       if(yearSel) yearSel.disabled = !!isBusy;
-      if(table) table.classList.toggle("is-busy", !!isBusy);
+      if(table){
+        table.classList.toggle("is-busy", !!isBusy);
+        // Keep headers visible; hide only rows while loading.
+        table.style.display = "table";
+      }
+      if(tbody){
+        tbody.style.display = (isBusy || lock) ? "none" : "table-row-group";
+      }
       // show noticeable process message near login status while bills operations run
       setProcessPill(isBusy ? (text || "") : "");
     }
 async function apiPost(path, payload){
       // Robust fetch with timeout to avoid hanging UI when Apps Script is slow/unreachable
       const ctrl = new AbortController();
-      const t = setTimeout(()=>ctrl.abort(), 20000); // 20s
+      // v1.352a0p74: longer timeout for Admin endpoints (Apps Script can be slower there)
+      const ms = (String(path||"").includes("adminUsers") ? 60000 : 20000);
+      const t = setTimeout(()=>ctrl.abort(), ms);
+// 20s
       try{
         const res = await fetch(API_BASE + path, {
           method:"POST",
@@ -2341,7 +3117,7 @@ else msg.textContent = t.errLogin;
         return;
       }
 
-      const user = { username:u, apartment:d.apartment, role:d.role || "member", display_name: d.display_name || "" };
+      const user = { username:u, apartment:d.apartment, site_role: d.site_role || "member", display_name: d.display_name || "" };
       localStorage.setItem("ku_user", JSON.stringify(user));
       localStorage.setItem("ku_token", d.token || "");
       msg.textContent = "";
@@ -2354,47 +3130,11 @@ else msg.textContent = t.errLogin;
       const bb = document.getElementById("billsBody");
       if(bb) bb.innerHTML = "";
       setProcessPill("");
-      // v1.330: ensure no stale readings UI from previous user session
-      try{ resetReadingsState_("login"); }catch(e){}
 
-      // v1.334: always start from Home after login (ignore previous session page/hash)
-      try{ markActive('home'); history.replaceState(null,'', "#home"); }catch(e){}
       showApp(user);
     }
 
     function getToken(){ return localStorage.getItem("ku_token") || ""; }
-
-
-// v1.330: hard reset Readings state/UI on user switch (prevents showing previous apartment data)
-function resetReadingsState_(reason){
-  try{
-    window.__ku_rd_window = null;
-    window.__ku_rd_permissions = { can_submit:false, can_edit:false };
-    window.__ku_rd_lastRows = [];
-    window.__ku_rd_lastYear = 0;
-    window.__ku_rd_targetYear = 0;
-    window.__ku_rd_targetMonth = 0;
-    window.__ku_rd_action = { target_year:0, target_month:0, can_act:false, phase:"submit" };
-    window.__ku_rd_token_last = "";
-  }catch(e){}
-  try{
-    const sel = document.getElementById("readingsYearSelect");
-    if(sel){
-      sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
-      sel.value = "";
-      sel.disabled = true;
-      sel.onchange = null;
-    }
-    const body = document.getElementById("readingsMonthsBody");
-    if(body) body.innerHTML = "";
-    const meta = document.getElementById("rdWindowMeta");
-    if(meta) meta.textContent = "";
-    const msg = document.getElementById("readingsStatusMsg");
-    if(msg) msg.textContent = "";
-  }catch(e){}
-  try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
-}
-
 
     function logout(){
       localStorage.removeItem("ku_user");
@@ -2409,11 +3149,6 @@ function resetReadingsState_(reason){
       const bb = document.getElementById("billsBody");
       if(bb) bb.innerHTML = "";
       setProcessPill("");
-      // v1.330: prevent stale readings table when switching accounts
-      try{ resetReadingsState_("logout"); }catch(e){}
-
-      // v1.334: force Home after logout as well
-      try{ markActive('home'); history.replaceState(null,'', "#home"); }catch(e){}
 
       showAuth();
     }
@@ -2481,7 +3216,7 @@ function resetReadingsState_(reason){
 
         (resp.invoices || []).forEach(inv=>{
           const period = `${monthName(Number(inv.month||0))}`;
-          const sum = `${Number(inv.amount||0).toFixed(3).replace(".", ",")} ${inv.currency||"€"}`;
+          const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
           const st = statusText(inv.status);
           const cls = statusCls(inv.status);
           const id = String(inv.invoice_id||"");
@@ -2583,7 +3318,7 @@ function rerenderBillsFromCache_(){
 
   (resp.invoices || []).forEach(inv=>{
     const period = `${monthName(Number(inv.month||0))}`;
-    const sum = `${Number(inv.amount||0).toFixed(3).replace(".", ",")} ${inv.currency||"€"}`;
+    const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
     const st = statusText(inv.status);
     const cls = statusCls(inv.status);
     const id = String(inv.invoice_id||"");
@@ -2622,80 +3357,444 @@ async function initBillsPage_(){
   const sel = document.getElementById("billsYear");
   if(!sel) return;
 
-  const years = await populateBillsYearsFromApi_();
+  // v1.352a0p74: On every tab click, hide bills table until ALL loading is finished
+  window.__ku_bills_tab_loading = true;
+  try{
+    // ensure hidden immediately even before first API call paints
+    try{
+      const table = document.querySelector("#page_bills .bills-table");
+      if(table) table.style.display = "none";
+    }catch(_){}
 
-  // If user did NOT manually select a year, always default to latest available year
-  // This also fixes "logout -> login -> invoices empty" (selector resets to blank).
-  if(!sel.__ku_userSelected){
-    const ys = (Array.isArray(years) && years.length)
-      ? years.map(Number).filter(Boolean)
-      : [...sel.options].map(o=>Number(o.value)).filter(Boolean);
+    const years = await populateBillsYearsFromApi_();
 
-    if(ys.length){
-      const lastYear = Math.max(...ys);
-      sel.value = String(lastYear);
-      await loadBillsFromApi(lastYear);
+    // If user did NOT manually select a year, always default to latest available year
+    // This also fixes "logout -> login -> invoices empty" (selector resets to blank).
+    if(!sel.__ku_userSelected){
+      const ys = (Array.isArray(years) && years.length)
+        ? years.map(Number).filter(Boolean)
+        : [...sel.options].map(o=>Number(o.value)).filter(Boolean);
+
+      if(ys.length){
+        const lastYear = Math.max(...ys);
+        sel.value = String(lastYear);
+        await loadBillsFromApi(lastYear);
+        return;
+      }
+
+      // no data -> keep empty
       return;
     }
 
-    // no data -> keep empty
+    // user already selected a year in this session: respect it
+    const y = Number(sel.value || 0);
+    if(y) await loadBillsFromApi(y);
+  } finally {
+    window.__ku_bills_tab_loading = false;
+    // re-apply visibility based on current busy state
+    try{ setBillsBusy(false, ""); }catch(e){}
+  }
+}
+
+
+// ===== Admin Users (v1.351b0p7) ===== (v1.351b0p7) =====
+let __ku_admin_users_cache = [];
+let __ku_admin_dirty = false;
+
+function setAdminDirty_(dirty){
+  __ku_admin_dirty = !!dirty;
+  const btn = document.getElementById("adminUsersSaveBtn");
+  if(btn) btn.disabled = !__ku_admin_dirty;
+}
+
+function markDirtyFromEl_(el){
+  if(!el) return;
+  const init = el.getAttribute("data-initial") || "";
+  const cur = (el && el.type==="checkbox") ? (el.checked ? "1" : "0") : String(el.value ?? "");
+  if(cur !== init) setAdminDirty_(true);
+  else recomputeAdminDirty_();
+}
+
+function recomputeAdminDirty_(){
+  const body = document.getElementById("adminUsersBody");
+  if(!body){ setAdminDirty_(false); return; }
+  let dirty = false;
+  body.querySelectorAll("[data-username][data-field]").forEach(el=>{
+    const init = el.getAttribute("data-initial") || "";
+    const cur = (el && el.type==="checkbox") ? (el.checked ? "1" : "0") : String(el.value ?? "");
+    if(cur !== init) dirty = true;
+  });
+  setAdminDirty_(dirty);
+}
+
+function setAdminMsg_(text, isErr){
+  const el = document.getElementById("adminUsersMsg");
+  if(!el) return;
+  el.textContent = text || "";
+  el.className = isErr ? "msg err" : "muted";
+}
+function getUserSafe_(){
+  try{ const s=localStorage.getItem("ku_user"); if(!s) return null; return JSON.parse(s); }catch(e){ return null; }
+}
+function renderAdminUsers_(rows){
+  const body = document.getElementById("adminUsersBody");
+  if(!body) return;
+  body.innerHTML = "";
+  const t = I18N[getLang()] || I18N.ru;
+
+  (rows||[]).forEach(r=>{
+    const row = document.createElement("div");
+    row.className = "au-row";
+    const apt = esc(r.apartment || "");
+    const uname = esc(r.username || "");
+    const owner = esc(r.display_name || "");
+    const phone = esc(r.phone || "");
+    const email = esc(r.email || "");
+    const opted = String(r.opted_in_email || "no").toLowerCase();
+    const mailChecked = (opted === "yes");
+    const counterChecked = !!(r.house_meter_admin === true || r.is_common_counter === true);
+    const kuRole = String(r.ku_role || "member").toLowerCase();
+    const role = String(r.site_role || "member").toLowerCase();
+
+    row.innerHTML = `
+      <div class="au-cell" title="${apt}">${apt}</div>
+      <div class="au-cell" title="${uname}">${uname}</div>
+      <div class="au-cell"><input class="au-inp" type="text" value="${owner}" data-username="${uname}" data-field="display_name"/></div>
+      <div class="au-cell"><input class="au-inp" type="text" value="${email}" data-username="${uname}" data-field="email"/></div>
+      <div class="au-cell"><input class="au-inp" type="text" value="${phone}" data-username="${uname}" data-field="phone"/></div>
+      <div class="au-cell">
+        <select class="au-sel" data-username="${uname}" data-field="ku_role">
+          <option value="member">member</option>
+          <option value="board">board</option>
+        </select>
+      </div>
+      <div class="au-cell">
+        <select class="au-sel" data-username="${uname}" data-field="site_role">
+          <option value="member">member</option>
+          <option value="admin">admin</option>
+        </select>
+      </div>
+      <div class="au-cell">
+        <input type="checkbox" data-username="${uname}" data-field="opted_in_email" ${mailChecked ? "checked" : ""}/>
+      </div>
+      <div class="au-cell">
+        <input type="checkbox" data-username="${uname}" data-field="common_counter" data-apartment="${apt}" ${counterChecked ? "checked" : ""}/>
+      </div>
+      <div class="au-cell au-del">
+        <button class="btn au-delbtn" type="button" data-del="${uname}">${tr("adminHdrDelete")}</button>
+      </div>
+    `;
+    body.appendChild(row);
+    // set role selection
+    try{
+      const selSite = row.querySelector('select[data-field="site_role"]');
+      if(selSite) selSite.value = (role==="admin"||role==="member") ? role : "member";
+
+      const selKu = row.querySelector('select[data-field="ku_role"]');
+      if(selKu) selKu.value = (kuRole==="board"||kuRole==="member") ? kuRole : "member";
+    }catch(e){}
+  
+
+// set initial values for dirty tracking + bind change listeners
+try{
+  const inpOwner = row.querySelector('input[data-field="display_name"]');
+  try{ if(inpOwner) inpOwner.placeholder = tr("adminOwnerPlaceholder"); }catch(e){}
+
+  const inpEmail = row.querySelector('input[data-field="email"]');
+
+  const inpPhone = row.querySelector('input[data-field="phone"]');
+
+  const chkMail = row.querySelector('input[type="checkbox"][data-field="opted_in_email"]');
+  const chkCounter = row.querySelector('input[type="checkbox"][data-field="common_counter"]');
+  try{ if(inpPhone) inpPhone.placeholder = tr("adminPhonePlaceholder"); }catch(e){}
+
+  const selKu = row.querySelector('select[data-field="ku_role"]');
+  const selSite = row.querySelector('select[data-field="site_role"]');
+
+  if(inpOwner){
+    inpOwner.setAttribute("data-initial", String(inpOwner.value||""));
+    inpOwner.addEventListener("input", ()=>markDirtyFromEl_(inpOwner));
+  }
+  if(inpEmail){
+    inpEmail.setAttribute("data-initial", String(inpEmail.value||""));
+    inpEmail.addEventListener("input", ()=>markDirtyFromEl_(inpEmail));
+  }
+  if(inpPhone){
+    inpPhone.setAttribute("data-initial", String(inpPhone.value||""));
+    inpPhone.addEventListener("input", ()=>markDirtyFromEl_(inpPhone));
+  }
+  if(selKu){
+    selKu.setAttribute("data-initial", String(selKu.value||"member"));
+    selKu.addEventListener("change", ()=>markDirtyFromEl_(selKu));
+  }
+  if(selSite){
+    selSite.setAttribute("data-initial", String(selSite.value||"member"));
+    selSite.addEventListener("change", ()=>markDirtyFromEl_(selSite));
+  }
+
+  if(chkMail){
+    chkMail.setAttribute("data-initial", chkMail.checked ? "1" : "0");
+    chkMail.addEventListener("change", ()=>markDirtyFromEl_(chkMail));
+  }
+
+  if(chkCounter){
+    chkCounter.setAttribute("data-initial", chkCounter.checked ? "1" : "0");
+    chkCounter.addEventListener("change", ()=>{
+      try{
+        if(chkCounter.checked){
+          body.querySelectorAll('input[type="checkbox"][data-field="common_counter"]').forEach(x=>{
+            if(x !== chkCounter) x.checked = false;
+          });
+        }else{
+          chkCounter.checked = true;
+        }
+      }catch(e){}
+      markDirtyFromEl_(chkCounter);
+    });
+  }
+}catch(e){}
+});
+
+  // bind delete buttons
+  body.querySelectorAll("button[data-del]").forEach(btn=>{
+    if(btn.__ku_bound) return;
+    btn.__ku_bound = true;
+    btn.addEventListener("click", async ()=>{
+      const uname = btn.getAttribute("data-del") || "";
+      if(!uname) return;
+      if(!confirm(tr("adminDeleteConfirm"))) return;
+      await adminDeleteUser_(uname);
+    });
+  });
+}
+
+async function adminLoadUsers_(){
+  const token = getToken();
+  if(!token){ setAdminMsg_("Сначала войдите", true); return; }
+  setAdminMsg_("");
+  setProcessPill(tr("adminLoading"));
+  const res = await apiPost("/adminUsers", { token });
+  setProcessPill("");
+  if(!res || res.ok===false){
+    setAdminMsg_((res && res.error) ? String(res.error) : "ошибка", true);
+    renderAdminUsers_([]);
+    __ku_admin_users_cache = [];
+    return;
+  }
+  const rows = Array.isArray(res.users) ? res.users : [];
+  __ku_admin_users_cache = rows;
+  renderAdminUsers_(rows);
+
+  setAdminDirty_(false);
+}
+
+function adminCollectEdits_(){
+  const body = document.getElementById("adminUsersBody");
+  if(!body) return [];
+  const map = {};
+  // seed from cache to preserve apartments/usernames
+  (__ku_admin_users_cache||[]).forEach(r=>{
+    const u = String(r.username||"");
+    if(!u) return;
+    map[u] = { username:u, apartment: String(r.apartment||""), display_name: String(r.display_name||""), email: String(r.email||""), phone: String(r.phone||""), ku_role: String(r.ku_role||"member"), site_role: String(r.site_role||"member"), opted_in_email: String(r.opted_in_email||"no"), is_common_counter: !!(r.house_meter_admin === true || r.is_common_counter === true), house_meter_admin: !!(r.house_meter_admin === true || r.is_common_counter === true) };
+  });
+  body.querySelectorAll("[data-username][data-field]").forEach(el=>{
+    const u = el.getAttribute("data-username") || "";
+    const f = el.getAttribute("data-field") || "";
+    if(!u || !map[u]) return;
+    if(f==="display_name") map[u].display_name = String(el.value||"");
+    if(f==="email") map[u].email = String(el.value||"");
+    if(f==="phone") map[u].phone = String(el.value||"");
+    if(f==="ku_role") map[u].ku_role = String(el.value||"member");
+    if(f==="site_role") map[u].site_role = String(el.value||"member");
+    if(f==="opted_in_email") map[u].opted_in_email = (el.checked ? "yes" : "no");
+    if(f==="common_counter"){ map[u].is_common_counter = !!el.checked; map[u].house_meter_admin = !!el.checked; }
+  });
+  return Object.values(map);
+}
+
+function adminCollectCommonCounterApt_(){
+  try{
+    const body = document.getElementById("adminUsersBody");
+    if(!body) return 0;
+    const chk = body.querySelector('input[type="checkbox"][data-field="common_counter"]:checked');
+    if(!chk) return 0;
+    const a = chk.getAttribute("data-apartment") || "";
+    const n = Number(String(a).replace(/[^0-9]/g,"")) || 0;
+    return n;
+  }catch(e){ return 0; }
+}
+
+async function adminSaveUsers_(){
+  const token = getToken();
+  if(!token) return;
+  setAdminMsg_("");
+  setProcessPill(tr("adminSaving"));
+  const payload = { token, users: adminCollectEdits_(), house_meter_admin_apartment: adminCollectCommonCounterApt_() };
+  const res = await apiPost("/adminUsersSave", payload);
+  setProcessPill("");
+  if(!res || res.ok===false){
+    setAdminMsg_((res && res.error) ? String(res.error) : "ошибка", true);
+    return;
+  }
+  setAdminMsg_(tr("adminSaved"), false);
+  const rows = Array.isArray(res.users) ? res.users : [];
+  __ku_admin_users_cache = rows;
+  renderAdminUsers_(rows);
+  setAdminDirty_(false);
+  // refresh data-initial after save
+  try{ recomputeAdminDirty_(); }catch(e){}
+
+  // v1.351b0p37: refresh top-right status indicator (Owner) after saving names
+  try{
+    const me = getUserSafe_();
+    if(me && Array.isArray(rows)){
+      const rme = rows.find(r=>String(r&&r.username||"")===String(me.username||""));
+      if(rme){
+        const dn = String(rme.display_name||"");
+        // keep other fields (apartment/site_role) as-is; only sync display_name
+        me.display_name = dn;
+        localStorage.setItem("ku_user", JSON.stringify(me));
+        setStatus(true, me.username, me.apartment, me.display_name);
+      }
+    }
+  }catch(e){}
+
+  setTimeout(()=>{ setAdminMsg_(""); }, 1200);
+}
+
+async function adminDeleteUser_(username){
+  const token = getToken();
+  if(!token) return;
+
+  // Determine if the target is the currently authorized user
+  let isSelf = false;
+  try{
+    const cur = JSON.parse(localStorage.getItem("ku_user")||"{}");
+    isSelf = String(cur.username||"") === String(username||"");
+  }catch(_){}
+
+  setAdminMsg_("");
+  setProcessPill(tr("adminLoading"));
+
+  // Always attempt delete. If deleting self, logout regardless of API response.
+  try{
+    await apiPost("/adminUsersDelete", { token, username });
+  }catch(e){
+    // ignore here; we will handle below (logout/self or refresh)
+  }finally{
+    setProcessPill("");
+    if(isSelf){
+      // Use the same logout flow as the top-right button
+      logout();
+      return;
+    }
+  }
+
+  // For non-self deletion: reload table
+  await adminLoadUsers_();
+  setAdminMsg_(tr("adminDeleted"), false);
+  setTimeout(()=>{ setAdminMsg_(""); }, 1200);
+}
+
+function initAdminPage_(){
+  // only for visible admin page
+  const page = document.getElementById("page_admin");
+  if(!page || page.classList.contains("hidden")) return;
+
+  const user = getUserSafe_();
+  if(!user || String(user.site_role||"").toLowerCase()!=="admin"){
+    setAdminMsg_("FORBIDDEN", true);
     return;
   }
 
-  // user already selected a year in this session: respect it
-  const y = Number(sel.value || 0);
-  if(y) loadBillsFromApi(y);
+  // v1.352a0p74: On every tab click, hide admin table until loading is finished
+  const tbl = document.getElementById("adminUsersTable");
+  if(tbl) tbl.style.display = "none";
+
+  const btn = document.getElementById("adminUsersSaveBtn");
+  try{ if(btn) btn.classList.remove("primary"); }catch(e){}
+  setAdminDirty_(false);
+
+  if(btn && !btn.__ku_bound){
+    btn.__ku_bound = true;
+    btn.addEventListener("click", (e)=>{ e.preventDefault(); adminSaveUsers_().catch(()=>{}); });
+  }
+
+  adminLoadUsers_().then(()=>{ 
+    try{ if(tbl) tbl.style.display = ""; }catch(e){}
+    // v1.351b0p38: when opening Haldus tab, sync Owner indicator from latest server data (same as login)
+    try{
+      const me = getUserSafe_();
+      const rows = (typeof __ku_admin_users_cache !== "undefined" && Array.isArray(__ku_admin_users_cache)) ? __ku_admin_users_cache : [];
+      if(me && rows.length){
+        const rme = rows.find(r=>String(r&&r.username||"")===String(me.username||""));
+        if(rme){
+          me.display_name = String(rme.display_name||"");
+          localStorage.setItem("ku_user", JSON.stringify(me));
+          setStatus(true, me.username, me.apartment, me.display_name);
+        }
+      }
+    }catch(e){}
+  }).catch(()=>{ 
+    try{ if(tbl) tbl.style.display = ""; }catch(e){}
+  });
 }
+
+// re-render header texts on language change (inputs keep values) on language change (inputs keep values)
+try{
+  const ls = document.getElementById("langSelect");
+  if(ls && !ls.__ku_admin_bound){
+    ls.__ku_admin_bound = true;
+    ls.addEventListener("change", ()=>{ setTimeout(()=>{ try{ renderAdminUsers_(__ku_admin_users_cache||[]); }catch(e){} },0); });
+  }
+}catch(_){}
+
 
 async function downloadInvoicePdf(invoiceId, btnEl){
       const token = getToken();
       if(!token || !invoiceId) return;
 
-      // v1.349: Fetch PDF as Blob and trigger download WITHOUT opening any new tab/window.
-      // Keep correct payload key: invoice_id.
       setProcessPill(_uiMsg("openingPdf"));
-      if(btnEl){ btnEl.disabled = true; btnEl.classList.add("is-busy"); }
+      if(btnEl) { btnEl.disabled = true; btnEl.classList.add("is-busy"); }
 
-      (async ()=>{
-        let url = "";
-        try{
-          const ctrl = new AbortController();
-          const t = setTimeout(()=>ctrl.abort(), 25000);
+      try{
+        const r = await fetch(API_BASE + "/invoicePdf", {
+          method: "POST",
+          headers: { "content-type":"application/json; charset=utf-8" },
+          body: JSON.stringify({ token, invoice_id: invoiceId })
+        });
 
-          const r = await fetch(API_BASE + "/invoicePdf", {
-            method: "POST",
-            headers: { "content-type":"application/json; charset=utf-8" },
-            body: JSON.stringify({ token, invoice_id: invoiceId }),
-            signal: ctrl.signal
-          });
+        if(!r.ok){
+          // try to show server error in a simple way
+          let j = null;
+          try { j = await r.json(); } catch {}
+          const msg = (j && j.error) ? String(j.error) : ("HTTP " + r.status);
+          alert("Не удалось открыть PDF: " + msg);
+          return;
+        }
 
-          clearTimeout(t);
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
 
-          if(!r.ok){
-            let j = null;
-            try{ j = await r.json(); }catch(e){}
-            const msg = (j && (j.error || j.details)) ? String(j.error || j.details) : ("HTTP " + r.status);
-            throw new Error(msg);
-          }
-
-          const blob = await r.blob();
-          url = URL.createObjectURL(blob);
-
+        const w = window.open(url, "_blank", "noopener,noreferrer");
+        if(!w){
           const a = document.createElement("a");
           a.href = url;
-          a.download = (invoiceId + ".pdf").replace(/[^a-zA-Z0-9._-]/g, "_");
+          a.download = invoiceId + ".pdf";
           document.body.appendChild(a);
           a.click();
           a.remove();
-
-          setProcessPill("");
-        }catch(err){
-          setProcessPill((_uiMsg("pdfFailed") || "PDF failed") + ": " + String(err));
-        }finally{
-          if(url){ setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 2000); }
-          if(btnEl){ btnEl.disabled = false; btnEl.classList.remove("is-busy"); }
         }
-      })();
+
+        // release later
+        setTimeout(()=>URL.revokeObjectURL(url), 60_000);
+      }catch(e){
+        alert("Не удалось открыть PDF: " + String(e));
+      }finally{
+        setProcessPill("");
+        if(btnEl) { btnEl.disabled = false; btnEl.classList.remove("is-busy"); }
+      }
     }
 
 
@@ -2743,10 +3842,7 @@ if(langSelect){
         if(user && user.username){ showApp(user); }
         else showAuth();
       }catch(_){
-        // v1.334: force Home after logout as well
-      try{ markActive('home'); history.replaceState(null,'', "#home"); }catch(e){}
-
-      showAuth();
+        showAuth();
       }
     })();
   
@@ -2781,9 +3877,20 @@ function showReset_() {
   const email = byId("resetEmail");
   const codeEl = byId("resetCode");
   const passEl = byId("resetNewPass");
+  // v1.351b0p7: reset modal must always start with empty input (same method as readings modal)
+  // Replace the identifier input node to avoid browser restoring previous value/autofill.
   if (email) {
-    email.type = "text";
-    email.value = "";
+    try{
+      email.type = "text";
+      const parent = email.parentNode;
+      const clone = email.cloneNode(true);
+      clone.type = "text";
+      clone.value = "";
+      try{ clone.setAttribute("autocomplete","off"); }catch(e){}
+      if (parent) parent.replaceChild(clone, email);
+    }catch(e){
+      try{ email.value = ""; }catch(e2){}
+    }
   }
   if (codeEl) codeEl.value = "";
   if (passEl) passEl.value = "";
@@ -2809,6 +3916,8 @@ function showReset_() {
   if (doBtn) doBtn.textContent = tr("continue");
 
   m.style.display = "block";
+  // v1.351b0p7: focus the identifier field
+  try{ const e = byId("resetEmail"); if(e){ e.value = ""; e.focus(); } }catch(e){}
 }
 
 function hideReset_() {
@@ -2926,10 +4035,10 @@ document.addEventListener("click", (e) => {
 
   if (e.target && e.target.id === "resetSendBtn") { e.preventDefault(); onSendCode_(); return; }
   if (e.target && e.target.id === "resetDoBtn") { e.preventDefault(); onVerifyCode_(); return; }
-  if (e.target && (e.target.id === "resetClose" || e.target.id === "resetX")) { e.preventDefault(); hideReset_(); return; }
 
-  // Close only when clicking on overlay background (not when switching windows)
-  if (e.target && e.target.id === "resetModal") { hideReset_(); return; }
+  // v1.351b0p7: like the Readings modal - do not allow closing by clicking the backdrop/background.
+  if (e.target && e.target.id === "resetClose") { e.preventDefault(); e.stopPropagation(); return; }
+  if (e.target && e.target.id === "resetX") { e.preventDefault(); hideReset_(); return; }
 });
 
 document.addEventListener("keydown", (e) => {
@@ -2945,14 +4054,14 @@ document.addEventListener("keydown", (e) => {
     <div class="modal-backdrop" id="resetClose"></div>
     <div class="modal-card">
       <div class="modal-head">
-        <div class="h2" data-i18n="reset_title">Password reset</div>
+        <div class="h2" id="resetTitle" data-i18n="reset_title">Password reset</div>
         <button class="iconbtn" id="resetX" aria-label="Close">✕</button>
       </div>
       <div class="modal-body">
-        <p class="muted" data-i18n="reset_desc">Enter the email used during registration. We will send a reset code.</p>
+        <p class="muted" id="resetHint" data-i18n="reset_desc">Enter the email used during registration. We will send a reset code.</p>
 
         <div class="field">
-          <label><span data-i18n="username_or_email">Username or email</span></label>
+          <label><span id="resetIdentifierLabel" data-i18n="username_or_email">Username or email</span></label>
           <input id="resetEmail" type="text" autocomplete="email" placeholder="name@example.com"/>
         </div>
 
@@ -2964,11 +4073,11 @@ document.addEventListener("keydown", (e) => {
         <div id="resetStep2" style="display:none; margin-top:14px">
           <div class="grid2">
             <div class="field">
-              <label><span data-i18n="code">Code</span></label>
+              <label><span id="resetCodeLabel" data-i18n="code">Code</span></label>
               <input id="resetCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"/>
             </div>
             <div class="field">
-              <label><span data-i18n="new_password">New password</span></label>
+              <label><span id="resetNewPassLabel" data-i18n="new_password">New password</span></label>
               <input id="resetNewPass" type="password" autocomplete="new-password" placeholder="••••••••"/>
             </div>
           </div>
@@ -2996,10 +4105,27 @@ document.addEventListener("keydown", (e) => {
     }catch(e){ return ""; }
   }
   async function callApi(action, payload){
+    // v1.349d0 debug trace: log outgoing saveReading payload + state
+    try{
+      if(dbgEnabled_() && String(action) === "saveReading"){
+        const u = (typeof getUserSafe_ === "function") ? getUserSafe_() : null;
+        const scope = (typeof getScope_ === "function") ? getScope_() : "(no-scope)";
+        const effApt = (typeof getEffectiveApartment_ === "function") ? getEffectiveApartment_() : null;
+        const win = window.__ku_rd_window || null;
+        const perms = window.__ku_rd_permissions || null;
+        const act = window.__ku_rd_action || null;
+        dbgLog_("[TRACE saveReading OUT]", {action, payload, user:u, scope, effApt, win, perms, act});
+        try{ window.__ku_dbg_last_saveReading_out = { ts: Date.now(), action, payload, user:u, scope, effApt, win, perms, act }; }catch(e){}
+      }
+    }catch(e){}
+
     // Prefer existing helper if available
     try{
       if (typeof apiFetch_ === "function"){
-        return await apiFetch_(action, payload || {});
+        const _resp = await apiFetch_(action, payload || {});
+      try{ if(dbgEnabled_() && String(action)==="saveReading") dbgLog_("[TRACE saveReading IN]", _resp); }catch(e){}
+      try{ if(dbgEnabled_() && String(action)==="saveReading") window.__ku_dbg_last_saveReading_in = { ts: Date.now(), resp: _resp }; }catch(e){}
+      return _resp;
       }
     }catch(e){}
     // Fallback
@@ -3036,7 +4162,7 @@ document.addEventListener("keydown", (e) => {
         <div id="rdScopeToggleWrap" class="rd-scope-toggle hidden"></div>
       </div>
 
-      <div style="margin-top:12px; overflow:auto">
+      <div id="rdTableWrap" style="margin-top:12px; overflow:auto">
         <table class="bills-table" style="margin-top:0">
           <thead>
             <tr>
@@ -3056,7 +4182,7 @@ document.addEventListener("keydown", (e) => {
     try{ updateReadingsTexts_(); }catch(_){ }
   }
 
-  // v1.349: house meter scope (apartment=0) toggle for configured admin apartment
+  // v1.349d0: house meter scope (apartment=0) toggle for configured admin apartment
   function getUserSafe_(){
     try{ const s=localStorage.getItem("ku_user"); if(!s) return null; return JSON.parse(s); }catch(e){ return null; }
   }
@@ -3070,14 +4196,46 @@ document.addEventListener("keydown", (e) => {
   function getScope_(){
     try{ return String(window.__ku_rd_scope || "apt"); }catch(e){ return "apt"; }
   }
-  function setScope_(scope){
+  
+  // v1.349d0: ensure scope defaults to apartment unless explicitly switched
+  function ensureDefaultScope_(){
+    try{
+      const cur = getScope_();
+      if(cur !== "apt" && cur !== "house"){
+        setScope_("apt");
+      }
+      const hasToggle = !!document.getElementById("rdScopeToggleWrap");
+      if(cur === "house" && !hasToggle){
+        setScope_("apt");
+      }
+    }catch(e){}
+  }
+function setScope_(scope){
     try{ window.__ku_rd_scope = (scope==="house" ? "house" : "apt"); }catch(e){}
   }
+  
   function getEffectiveApartment_(){
-    const u = getUserSafe_();
-    const myApt = u ? Number(u.apartment||0) : 0;
-    if(getScope_()==="house") return 0;
-    return myApt;
+    // v1.349d0: robust apartment resolution (prevents accidental apartment=0 in personal scope)
+    const scope = getScope_();
+    if(scope==="house") return 0;
+
+    let myApt = 0;
+    try{
+      const u = getUserSafe_();
+      myApt = u ? Number(u.apartment||0) : 0;
+    }catch(e){ myApt = 0; }
+
+    if(!myApt){
+      try{
+        const el = document.getElementById("userApt") || document.getElementById("billsAptNum") || document.getElementById("readingsAptNum");
+        if(el){
+          const t = String(el.textContent||"").replace(/[^0-9]/g,"");
+          const n = Number(t||0)||0;
+          if(n) myApt = n;
+        }
+      }catch(e){}
+    }
+    return myApt || 0;
   }
   function isHouseScopeAllowed_(){
     const u = getUserSafe_();
@@ -3340,6 +4498,7 @@ await loadYear_(sel.value);
     try{
       window.__ku_rd_window = win;
       window.__ku_rd_permissions = perms;
+    try{ rebuildRdAction_(); }catch(e){}
       window.__ku_rd_lastRows = __rows;
       window.__ku_rd_lastYear = Number(year)||0;
       window.__ku_rd_targetYear = (win ? Number(win.target_year||0) : 0);
@@ -3447,6 +4606,9 @@ msg && (msg.textContent="");
       }
     }catch(e){}
 
+
+    // v1.349d0: sync action + refresh right panel after updates
+    try{ rebuildRdAction_(); }catch(e){}
 }
 
   function showReadingModal_(targetYear, targetMonth, existingEnd){
@@ -3465,7 +4627,7 @@ msg && (msg.textContent="");
         </div>
         <div class="modal-body">
           <div class="field">
-            <input id="rdModalValue" type="text" inputmode="decimal" placeholder="0.000" value="${esc(existingEnd||"")}"/>
+            <input id="rdModalValue" type="text" inputmode="decimal" placeholder="0.000" value=""/>
                       </div>
           <div style="display:flex; gap:10px; align-items:center; margin-top:12px">
             <button class="btn" id="rdModalCancel">${esc(btnCancel)}</button>
@@ -3482,13 +4644,13 @@ msg && (msg.textContent="");
       if(!/^\d+(\.\d{1,3})?$/.test(s)) return {ok:false,val:null};
       return {ok:true,val:Number(s)};
     };
-    m.querySelector("#rdModalClose").addEventListener("click", close);
+    m.querySelector("#rdModalClose").addEventListener("click", function(e){e.preventDefault(); e.stopPropagation();});
     m.querySelector("#rdModalX").addEventListener("click", close);
     m.querySelector("#rdModalCancel").addEventListener("click",(e)=>{e.preventDefault(); close();});
     const inp=m.querySelector("#rdModalValue");
     const msg=m.querySelector("#rdModalMsg");
     const saveBtn=m.querySelector("#rdModalSave");
-    if(inp) inp.focus();
+    if(inp){ inp.value=""; inp.focus(); }
     saveBtn.addEventListener("click", async (e)=>{
       e.preventDefault();
       const chk=validate(inp?inp.value:"");
@@ -3857,5 +5019,68 @@ try{ window.__rdVisUpdate = function(){ try{ ensurePanel(); }catch(e){} }; }catc
 })();
 </script>
 
+
+
+
+
+
+<script>
+/* === p16: ONLY fix font-size in Korter + Kasutaja columns to match other columns ===
+   No layout/centering changes.
+*/
+(function(){
+  const TABLE_SEL = '#page_admin #adminUsersTable';
+  const FONT = '12px';
+  const LINE = '1.25';
+
+  function apply(table){
+    if(!table) return;
+    const selsBody = '.au-row:not(.au-head) .au-cell:nth-child(1), .au-row:not(.au-head) .au-cell:nth-child(2)';
+    table.querySelectorAll(selsBody).forEach(cell=>{
+      cell.style.setProperty('font-size', FONT, 'important');
+      cell.style.setProperty('line-height', LINE, 'important');
+      const inner = cell.firstElementChild;
+      if(inner){
+        inner.style.setProperty('font-size', FONT, 'important');
+        inner.style.setProperty('line-height', LINE, 'important');
+      }
+    });
+    const selsHead = '.au-row.au-head .au-cell:nth-child(1), .au-row.au-head .au-cell:nth-child(2)';
+    table.querySelectorAll(selsHead).forEach(cell=>{
+      cell.style.setProperty('font-size', FONT, 'important');
+      cell.style.setProperty('line-height', LINE, 'important');
+      const inner = cell.firstElementChild;
+      if(inner){
+        inner.style.setProperty('font-size', FONT, 'important');
+        inner.style.setProperty('line-height', LINE, 'important');
+      }
+    });
+  }
+
+  let last = null;
+  let mo = null;
+
+  function tick(){
+    const t = document.querySelector(TABLE_SEL);
+    if(!t) return;
+    if(t !== last){
+      last = t;
+      if(mo){ try{ mo.disconnect(); }catch(e){} }
+      apply(t);
+      mo = new MutationObserver(()=>apply(t));
+      mo.observe(t, {subtree:true, childList:true, attributes:true});
+    }else{
+      apply(t);
+    }
+  }
+
+  tick();
+  const domMo = new MutationObserver(()=>tick());
+  domMo.observe(document.documentElement, {subtree:true, childList:true});
+  setInterval(tick, 500);
+})();
+</script>
+
 </body>
 </html>
+
