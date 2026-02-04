@@ -26,7 +26,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.352a0p74</title>
+  <title>Karusselli 4 KÜ — v1.353a0p116</title>
 <script>
 // v1.151: set default language to Estonian (ku_lang) only if not set
 try{
@@ -35,6 +35,15 @@ try{
 </script>
 
   <style>
+/* AdminConfig compact UI font alignment */
+#adminConfigForm,
+#adminConfigForm label,
+#adminConfigForm input,
+#adminConfigForm select,
+#adminConfigForm button {
+  font-size: 13px;
+}
+
 
     :root{
       /* Palette D — Warm Light (v1.151) */
@@ -157,7 +166,7 @@ try{
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* v1.352a0p74: process pill positioning handled by layout slot (no transform hacks) */
+    /* v1.353a0p99: process pill positioning handled by layout slot (no transform hacks) */
 #processPill{ position: static !important; transform: none !important; }
 /* v1.349d0 fine alignment: year selector down 3px */
 #page_readings .bills-year-row select{ position: relative; top: 3px !important; }
@@ -521,7 +530,7 @@ textarea:focus{
     }
 
   
-    /* v1.352a0p74: center slot for process pill in app menu row */
+    /* v1.353a0p99: center slot for process pill in app menu row */
     .app-center{
       flex: 1 1 auto;
       display:flex;
@@ -1084,12 +1093,25 @@ body{
 
 
 
-/* v1.352a0p74: while global process pill is active, keep Readings headers visible (hide only table body) */
+/* v1.353a0p99: while global process pill is active, keep Readings headers visible (hide only table body) */
 #page_readings.ku-busy #readingsMonthsBody{ display:none; }
 #page_readings.ku-busy .rd-vis-panel{ display:none !important; }
 
+
+/* v1.353a0p99: ADMIN layout — bottom three blocks in ONE row with equal widths */
+#page_admin .bottom-grid{
+  grid-template-columns: 1fr 1fr 1fr !important;
+}
+#page_admin .bottom-grid > .mini:first-child{
+  grid-column: 1 / -1 !important; /* Users table spans full width */
+}
 /* v1.351b0p7: Admin tab already has a label in the top menu — hide duplicate page title */
 #page_admin .page-title{ display:none !important; }
+
+/* AdminConfig: match Users table font size */
+#adminConfigForm { font-size: 13px; }
+#adminConfigForm input, #adminConfigForm select, #adminConfigForm button, #adminConfigForm label { font-size: inherit; }
+
 </style>
 
 <style>
@@ -1830,12 +1852,74 @@ body{
 }
 </style>
 
+
+<style>
+/* v1.353a0p99: AdminConfig compact layout (matches Kasutajate haldus typography) */
+#page_admin #adminConfigForm.cfg-wrap{ margin-top:10px; }
+#page_admin #adminConfigForm .cfg-grid{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+#page_admin #adminConfigForm .cfg-row{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:10px;
+  align-items:center;
+}
+#page_admin #adminConfigForm .cfg-label{
+  font-size:12px;
+  font-weight:600;
+  color: var(--muted);
+  line-height:1.2;
+}
+#page_admin #adminConfigForm .cfg-control{ min-width:0; }
+#page_admin #adminConfigForm .cfg-input{
+  width:100%;
+  font-size:12px;
+  padding:4px 6px;
+  border:1px solid rgba(0,0,0,0.25);
+  border-radius:6px;
+  background: transparent;
+  box-shadow:none;
+  outline:none;
+}
+#page_admin #adminConfigForm select.cfg-input{
+  appearance:auto;
+}
+#page_admin #adminConfigForm .cfg-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:8px;
+}
+#page_admin #adminConfigForm #cfgSaveBtn{
+  padding:6px 14px;
+  border-radius:12px;
+}
+#page_admin #adminConfigForm #cfgSaveBtn:disabled{
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+#page_admin #adminConfigForm #cfgMsg{
+  font-size:12px;
+  color: var(--muted);
+  min-height:16px;
+  flex:1 1 auto;
+  text-align:right;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+</style>
+
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.352a0p74</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.353a0p99</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2149,11 +2233,60 @@ body{
 
             <div class="mini">
               <h4 id="adminConfigTitle" data-i18n="adminConfigTitle">Site settings (AdminConfig)</h4>
-              <div class="muted" id="adminConfigDesc" data-i18n="adminConfigDesc">Edit all parameters from AdminConfig.</div>
-              <div class="hint" style="margin-top:10px" data-i18n="adminReserved">Reserved — will be implemented next.</div>
-            </div>
+<div id="adminConfigForm" class="cfg-wrap">
+                <div class="cfg-grid">
+                  <div class="cfg-row">
+                    <div class="cfg-label" data-i18n="cfgDayModeLbl"></div>
+                    <div class="cfg-control">
+                      <select id="cfgDayMode" class="cfg-input">
+                        <option value="first_work_day" data-i18n="cfgDayModeFirstWork"></option>
+                        <option value="last_day" data-i18n="cfgDayModeLast"></option>
+                        <option value="custom_day" data-i18n="cfgDayModeCustom"></option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="cfg-row" id="cfgCustomDayRow" style="display:none">
+                    <div class="cfg-label" data-i18n="cfgCustomDayLbl"></div>
+                    <div class="cfg-control">
+                      <input id="cfgCustomDayDate" type="date" class="cfg-input"/>
+                    </div>
+                  </div>
 
-            <div class="mini">
+
+
+                  <div class="cfg-row">
+                    <div class="cfg-label" data-i18n="cfgOpenTimeLbl"></div>
+                    <div class="cfg-control">
+                      <input id="cfgOpenTime" type="time" class="cfg-input"/>
+                    </div>
+                  </div>
+
+                  <div class="cfg-row">
+                    <div class="cfg-label" data-i18n="cfgWindowValueLbl"></div>
+                    <div class="cfg-control">
+                      <input id="cfgWindowValue" type="number" min="0" step="1" class="cfg-input"/>
+                    </div>
+                  </div>
+
+                  <div class="cfg-row">
+                    <div class="cfg-label" data-i18n="cfgWindowUnitLbl"></div>
+                    <div class="cfg-control">
+                      <select id="cfgWindowUnit" class="cfg-input">
+                        <option value="minutes" data-i18n="cfgUnitMinutes"></option>
+                        <option value="hours" data-i18n="cfgUnitHours"></option>
+                        <option value="days" data-i18n="cfgUnitDays"></option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="cfg-actions">
+                    <button class="btn" id="cfgSaveBtn" data-i18n="adminBtnSave" disabled></button>
+                    <span class="muted" id="cfgMsg"></span>
+                  </div>
+                </div>
+              </div>
+</div>
+<div class="mini">
               <h4 id="adminStatsTitle" data-i18n="adminStatsTitle">Statistics</h4>
               <div class="muted" id="adminStatsDesc" data-i18n="adminStatsDesc">Readings and invoices overview, charts.</div>
               <div class="hint" style="margin-top:10px" data-i18n="adminReserved">Reserved — will be implemented next.</div>
@@ -2237,6 +2370,34 @@ body{
         adminUsersDesc: "Пользователи, роли и имена владельцев.",
         adminConfigTitle: "Управление сайтом (AdminConfig)",
         adminConfigDesc: "Редактирование параметров из AdminConfig.",
+
+        cfgExecModeLbl: "Режим выполнения",
+        cfgExecModeReal: "Реальный",
+        cfgExecModeTest: "Тест",
+
+        cfgRepDayLbl: "Отчётный день",
+        cfgRepDayFirst: "1-й рабочий день месяца",
+        cfgRepDayLast: "Последний день месяца",
+        cfgDayModeLbl: "День открытия (окно ввода)",
+        cfgCustomDayLbl: "Дата (debug)",
+        cfgDayModeFirstWork: "Первый рабочий день",
+        cfgDayModeLast: "Последний день",
+        cfgDayModeCurrent: "Текущий день",
+        cfgDayModeCustom: "Произвольный день",
+
+        cfgOpenTimeLbl: "Время открытия",
+        cfgWindowValueLbl: "Период (значение)",
+        cfgWindowUnitLbl: "Период (единицы)",
+        cfgUnitMinutes: "минуты",
+        cfgUnitHours: "часы",
+        cfgUnitDays: "дни",
+        cfgSaveBtn: "Сохранить",
+        cfgLoading: "Загружаю…",
+        cfgSaving: "Сохраняю…",
+        cfgSaved: "Сохранено",
+        cfgLoadErr: "Ошибка загрузки",
+        cfgSaveErr: "Ошибка сохранения",
+
         adminStatsTitle: "Статистика",
         adminStatsDesc: "Обзор показаний и счетов, графики.",
         adminInvoicesTitle: "Счета",
@@ -2307,8 +2468,8 @@ body{
         adminHdrUsername: "Пользователь",
         adminHdrOwner: "Владелец",
         adminHdrEmail: "E-mail",
-        adminHdrMailing: "Mailing",
-        adminHdrCommonCounter: "Common counter",
+        adminHdrMailing: "Рассылка",
+        adminHdrCommonCounter: "Общий счётчик",
         adminHdrRole: "Роль сайта",
         adminHdrDelete: "Удалить",
         adminBtnSave: "Сохранить",
@@ -2364,6 +2525,34 @@ body{
         adminUsersDesc: "Kasutajad, rollid ja omanike nimed.",
         adminConfigTitle: "Saidi seaded (AdminConfig)",
         adminConfigDesc: "AdminConfig parameetrite muutmine.",
+
+        cfgExecModeLbl: "Töörežiim",
+        cfgExecModeReal: "Reaalne",
+        cfgExecModeTest: "Test",
+
+        cfgRepDayLbl: "Aruandepäev",
+        cfgRepDayFirst: "Kuu 1. tööpäev",
+        cfgRepDayLast: "Kuu viimane päev",
+        cfgDayModeLbl: "Avamise päev",
+        cfgCustomDayLbl: "Kuupäev (debug)",
+        cfgDayModeFirstWork: "Esimene tööpäev",
+        cfgDayModeLast: "Viimane päev",
+        cfgDayModeCurrent: "Tänane päev",
+        cfgDayModeCustom: "Kohandatud päev",
+
+        cfgOpenTimeLbl: "Avamise aeg",
+        cfgWindowValueLbl: "Periood (väärtus)",
+        cfgWindowUnitLbl: "Periood (ühik)",
+        cfgUnitMinutes: "minutit",
+        cfgUnitHours: "tundi",
+        cfgUnitDays: "päeva",
+        cfgSaveBtn: "Salvesta",
+        cfgLoading: "Laadin…",
+        cfgSaving: "Salvestan…",
+        cfgSaved: "Salvestatud",
+        cfgLoadErr: "Laadimise viga",
+        cfgSaveErr: "Salvestamise viga",
+
         adminStatsTitle: "Statistika",
         adminStatsDesc: "Näitude ja arvete ülevaade, graafikud.",
         adminInvoicesTitle: "Arved",
@@ -2518,6 +2707,34 @@ body{
         adminUsersDesc: "Users, roles, and owner names.",
         adminConfigTitle: "Site settings (AdminConfig)",
         adminConfigDesc: "Edit all parameters from AdminConfig.",
+
+        cfgExecModeLbl: "Execution mode",
+        cfgExecModeReal: "Real",
+        cfgExecModeTest: "Test",
+
+        cfgRepDayLbl: "Reporting day",
+        cfgRepDayFirst: "1st working day of month",
+        cfgRepDayLast: "Last day of month",
+        cfgDayModeLbl: "Open day mode",
+        cfgCustomDayLbl: "Date (debug)",
+        cfgDayModeFirstWork: "First work day",
+        cfgDayModeLast: "Last day",
+        cfgDayModeCurrent: "Current day",
+        cfgDayModeCustom: "Custom day",
+
+        cfgOpenTimeLbl: "Submission time open",
+        cfgWindowValueLbl: "Submission period value",
+        cfgWindowUnitLbl: "Submission period units",
+        cfgUnitMinutes: "minutes",
+        cfgUnitHours: "hours",
+        cfgUnitDays: "days",
+        cfgSaveBtn: "Save",
+        cfgLoading: "Loading…",
+        cfgSaving: "Saving…",
+        cfgSaved: "Saved",
+        cfgLoadErr: "Load error",
+        cfgSaveErr: "Save error",
+
         adminStatsTitle: "Statistics",
         adminStatsDesc: "Readings and invoices overview, charts.",
         adminInvoicesTitle: "Invoices",
@@ -3037,9 +3254,10 @@ applyLang();
       setProcessPill(isBusy ? (text || "") : "");
     }
 async function apiPost(path, payload){
+
       // Robust fetch with timeout to avoid hanging UI when Apps Script is slow/unreachable
       const ctrl = new AbortController();
-      // v1.352a0p74: longer timeout for Admin endpoints (Apps Script can be slower there)
+      // v1.353a0p99: longer timeout for Admin endpoints (Apps Script can be slower there)
       const ms = (String(path||"").includes("adminUsers") ? 60000 : 20000);
       const t = setTimeout(()=>ctrl.abort(), ms);
 // 20s
@@ -3357,7 +3575,7 @@ async function initBillsPage_(){
   const sel = document.getElementById("billsYear");
   if(!sel) return;
 
-  // v1.352a0p74: On every tab click, hide bills table until ALL loading is finished
+  // v1.353a0p99: On every tab click, hide bills table until ALL loading is finished
   window.__ku_bills_tab_loading = true;
   try{
     // ensure hidden immediately even before first API call paints
@@ -3697,6 +3915,224 @@ async function adminDeleteUser_(username){
   setTimeout(()=>{ setAdminMsg_(""); }, 1200);
 }
 
+// ===== AdminConfig (v1.353a0p118) =====
+let __ku_cfg_baseline = null;
+let __ku_cfg_dirty = false;
+
+function cfgSetMsg_(txt, isErr){
+  const el = document.getElementById("cfgMsg");
+  if(!el) return;
+  el.textContent = txt || "";
+  el.style.color = isErr ? "#b00020" : "";
+}
+
+function cfgSetDirty_(dirty){
+  __ku_cfg_dirty = !!dirty;
+  const btn = document.getElementById("cfgSaveBtn");
+  if(btn) btn.disabled = !__ku_cfg_dirty;
+}
+
+// Defaults ONLY for empty/missing sheet values
+function cfgDefaults_(){
+  return {
+    use_last_day_of_month: "last_day",
+    custom_day_date: "",
+    open_time: "14:00",
+    window_duration_value: 5,
+    window_duration_unit: "days"
+  };
+}
+
+function cfgNormalize_(cfg){
+  const d = cfgDefaults_();
+  const out = {};
+
+  const dm = (v, def)=>{
+    if(v===true) return "last_day";   // backward-compat
+    if(v===false) return "custom_day"; // backward-compat
+    const s = String(v??"").toLowerCase().trim();
+    if(s==="first_work_day"||s==="last_day"||s==="current_day"||s==="custom_day") return s;
+    return def;
+  };
+  const em = (v, def)=>{
+    const s = String(v??"").toLowerCase().trim();
+    return (s==="real"||s==="test") ? s : def;
+  };
+  const rd = (v, def)=>{
+    const s = String(v??"").toLowerCase().trim();
+    if(s==="first_working_day") return "first_working_day";
+    if(s==="last_day") return "last_day";
+    return def;
+  };
+  const tm = (v, def)=>{
+    const s = String(v??"").trim();
+    if(!s) return def;
+    if(/^\d{2}:\d{2}$/.test(s)) return s;
+    return def;
+  };
+  const un = (v, def)=>{
+    const s = String(v??"").toLowerCase().trim();
+    return (s==="minutes"||s==="hours"||s==="days") ? s : def;
+  };
+  const num = (v, def)=>{
+    if(v===0) return 0;
+    const s = String(v??"").trim();
+    if(s==="") return def;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : def;
+  };
+
+  out.use_last_day_of_month = dm(cfg && cfg.use_last_day_of_month, d.use_last_day_of_month);  out.open_time = tm(cfg && cfg.open_time, d.open_time);
+  out.window_duration_value = num(cfg && cfg.window_duration_value, d.window_duration_value);
+  out.window_duration_unit = un(cfg && cfg.window_duration_unit, d.window_duration_unit);
+  
+  out.custom_day_date = String((cfg && cfg.custom_day_date) ?? d.custom_day_date).trim();
+return out;
+}
+
+
+function todayIso_(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function customDayUpdateUi_(){
+  const mode = (document.getElementById("cfgDayMode")||{}).value || "";
+  const row = document.getElementById("cfgCustomDayRow");
+  const inp = document.getElementById("cfgCustomDayDate");
+  const show = (mode === "custom_day");
+  if(row) row.style.display = show ? "" : "none";
+  if(show && inp){
+    // If server did not provide a saved custom date yet, default to today in UI.
+    const v = String(inp.value||"").trim();
+    if(!v) inp.value = (__ku_cfg_custom_day_date || todayIso_());
+  }
+}
+
+function cfgGetUi_(){
+
+  const day_mode = (document.getElementById("cfgDayMode")||{}).value || "last_day";
+  const open_time = (document.getElementById("cfgOpenTime")||{}).value || "";
+  const valRaw = (document.getElementById("cfgWindowValue")||{}).value;
+  const window_duration_value = (String(valRaw??"").trim()==="") ? "" : Number(valRaw);
+  const window_duration_unit = (document.getElementById("cfgWindowUnit")||{}).value || "days";
+
+  const custom_day_date = (day_mode === "custom_day") ? ((document.getElementById("cfgCustomDayDate")||{}).value || "") : "";
+
+  return cfgNormalize_({
+    use_last_day_of_month: day_mode,
+    custom_day_date,
+    open_time,
+    window_duration_value,
+    window_duration_unit
+  });
+}
+
+function cfgSame_(a,b){
+  if(!a || !b) return false;
+  const keys = ["use_last_day_of_month","custom_day_date","open_time","window_duration_value","window_duration_unit"];
+  for(const k of keys){
+    if(String(a[k]) !== String(b[k])) return false;
+  }
+  return true;
+}
+
+function cfgRecalcDirty_(){
+  const cur = cfgGetUi_();
+  cfgSetDirty_(!cfgSame_(__ku_cfg_baseline, cur));
+}
+
+function cfgBindDirty_(){
+  ["cfgExecMode","cfgRepDay","cfgDayMode","cfgCustomDayDate","cfgOpenTime","cfgWindowValue","cfgWindowUnit"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.__ku_bound_cfg) return;
+    el.__ku_bound_cfg = true;
+    el.addEventListener("change", ()=>{ if(id==="cfgCustomDayDate") __ku_cfg_custom_day_date = el.value; cfgRecalcDirty_(); });
+    el.addEventListener("input", ()=>{ if(id==="cfgCustomDayDate") __ku_cfg_custom_day_date = el.value; cfgRecalcDirty_(); });
+  });
+
+  const dm = document.getElementById("cfgDayMode");
+  if(dm && !dm.__ku_bound_custom_mode){
+    dm.__ku_bound_custom_mode = true;
+    dm.addEventListener("change", ()=>{
+      window.__ku_day_mode_current = dm.value;
+      customDayUpdateUi_();
+    });
+  }
+  customDayUpdateUi_();
+}
+
+function cfgApply_(cfg){
+  const c = cfgNormalize_(cfg || {});
+  const dayEl  = document.getElementById("cfgDayMode");
+  const openEl = document.getElementById("cfgOpenTime");
+  const valEl  = document.getElementById("cfgWindowValue");
+  const unitEl = document.getElementById("cfgWindowUnit");
+  if(dayEl){ dayEl.value = c.use_last_day_of_month; window.__ku_day_mode_current = dayEl.value; }
+  if(document.getElementById("cfgCustomDayDate")){
+    document.getElementById("cfgCustomDayDate").value = c.custom_day_date || "";
+    __ku_cfg_custom_day_date = c.custom_day_date || "";
+  }
+  customDayUpdateUi_();
+  if(openEl) openEl.value = c.open_time;
+  if(valEl) valEl.value = String(c.window_duration_value);
+  if(unitEl) unitEl.value = c.window_duration_unit;
+
+  __ku_cfg_baseline = cfgGetUi();
+  cfgSetDirty_(false);
+}
+
+// helper: avoid name collision with older code
+function cfgGetUi(){ return cfgGetUi_(); }
+
+async function adminConfigLoad_(){
+  const token = getToken();
+  if(!token) return;
+
+  setProcessPill(tr("cfgLoading"));
+  cfgSetMsg_("", false);
+  const res = await apiPost("/adminConfigGet", { token });
+
+  setProcessPill("");
+
+  if(!res || res.ok===false){
+    // Still show defaults, but baseline = defaults, Save stays disabled
+    cfgApply_({});
+    cfgSetMsg_(tr("cfgLoadErr") + (res && res.error ? (": " + String(res.error)) : ""), true);
+    return;
+  }
+
+  cfgApply_(res.config || {});
+  cfgSetMsg_("", false);
+}
+
+async function adminConfigSave_(){
+  if(!__ku_cfg_dirty) return;
+
+  const token = getToken();
+  if(!token) return;
+
+  setProcessPill(tr("cfgSaving"));
+  cfgSetMsg_("", false);
+  const payload = { token, config: cfgGetUi_() };
+
+  const res = await apiPost("/adminConfigSave", payload);
+
+  setProcessPill("");
+  if(!res || res.ok===false){
+    cfgSetMsg_(tr("cfgSaveErr") + (res && res.error ? (": " + String(res.error)) : ""), true);
+    return;
+  }
+
+  cfgApply_((res && res.config) ? res.config : payload.config);
+  cfgSetMsg_(tr("cfgSaved"), false);
+  setTimeout(()=>cfgSetMsg_("", false), 1200);
+}
+
+
 function initAdminPage_(){
   // only for visible admin page
   const page = document.getElementById("page_admin");
@@ -3708,7 +4144,7 @@ function initAdminPage_(){
     return;
   }
 
-  // v1.352a0p74: On every tab click, hide admin table until loading is finished
+  // v1.353a0p99: On every tab click, hide admin table until loading is finished
   const tbl = document.getElementById("adminUsersTable");
   if(tbl) tbl.style.display = "none";
 
@@ -3721,7 +4157,21 @@ function initAdminPage_(){
     btn.addEventListener("click", (e)=>{ e.preventDefault(); adminSaveUsers_().catch(()=>{}); });
   }
 
-  adminLoadUsers_().then(()=>{ 
+  // AdminConfig
+  try{
+    cfgBindDirty_();
+    const cbtn = document.getElementById("cfgSaveBtn");
+    if(cbtn && !cbtn.__ku_bound_cfgbtn){
+      cbtn.__ku_bound_cfgbtn = true;
+      cbtn.addEventListener("click", (e)=>{ e.preventDefault(); adminConfigSave_().catch(()=>{}); });
+    }
+    cfgSetDirty_(false);
+  }catch(e){}
+
+
+  adminLoadUsers_().then(()=>{
+    try{ adminConfigLoad_().catch(()=>{}); }catch(e){}
+ 
     try{ if(tbl) tbl.style.display = ""; }catch(e){}
     // v1.351b0p38: when opening Haldus tab, sync Owner indicator from latest server data (same as login)
     try{
@@ -4572,8 +5022,8 @@ msg && (msg.textContent="");
       const win = window.__ku_rd_window || {};
       const rows = window.__ku_rd_lastRows || [];
       const now = new Date();
-      const baseY = now.getFullYear();
-      const baseM = now.getMonth()+1; // 1..12
+      const baseY = Number(win.target_year||0) || now.getFullYear();
+      const baseM = Number(win.target_month||0) || (now.getMonth()+1); // 1..12
       let hasEnd = false;
       if (Number(window.__ku_rd_lastYear||0) === baseY){
         for (let k=0;k<rows.length;k++){
@@ -4829,8 +5279,8 @@ try{
 (function(){
   const RU_MONTHS=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
   const PANEL_I18N = {
-    ru: { title:"Ввод показаний за", submit:"Ввести", edit:"Редактировать", openNow:"Ввод показаний открыт", willOpen:"Ввод откроется:", saved:"Показания сохранены успешно.", editUntil:"Редактирование возможно до" },
-    et: { title:"Näidu sisestus", submit:"Sisesta", edit:"Muuda", openNow:"Näidu sisestus on avatud", willOpen:"Sisestus avaneb:", saved:"Näidud salvestatud.", editUntil:"Muutmine võimalik kuni" },
+    ru: { title:"Ввод показаний за", periodPrefix:"Период:", submit:"Ввести", edit:"Редактировать", openNow:"Ввод показаний открыт", willOpen:"Ввод откроется:", saved:"Показания сохранены успешно.", editUntil:"Редактирование возможно до" },
+    et: { title:"Näidu sisestus", periodPrefix:"Periood:", submit:"Sisesta", edit:"Muuda", openNow:"Näidu sisestus on avatud", willOpen:"Sisestus avaneb:", saved:"Näidud salvestatud.", editUntil:"Muutmine võimalik kuni" },
     en: { title:"Enter readings for", submit:"Enter", edit:"Edit", openNow:"Reading input is open", willOpen:"Opens at:", saved:"Readings saved successfully.", editUntil:"Editing possible until" },
   };
   const MONTHS_BY_LANG = {
@@ -4910,28 +5360,17 @@ try{
     let showY = now.getFullYear();
     let showM = now.getMonth() + 1; // 1..12
 
-    // If window is CLOSED and readings for the current month are already submitted,
-    // show NEXT month in the right panel (per spec).
+    // Right-panel period MUST follow server window meta (GS), not "current month" heuristics.
+    // Server returns target_year/target_month in 1..12 scale (Jan=1).
     try{
       const win = window.__ku_rd_window || null;
-      const rows = window.__ku_rd_lastRows || [];
-      const lastYear = Number(window.__ku_rd_lastYear || 0);
-
-      let hasEndForCurrent = false;
-      if(lastYear === showY && Array.isArray(rows)){
-        const row = rows.find(r => Number(r.month||0) === showM);
-        const endVal = row ? (row.end_m3 ?? row.end ?? "") : "";
-        hasEndForCurrent = (String(endVal).trim() !== "");
-      }
-
-      if(win && win.is_open_now === false && hasEndForCurrent){
-        showM += 1;
-        if(showM > 12){ showM = 1; showY += 1; }
-      }
+      const ty = win ? Number(win.target_year||0) : 0;
+      const tm = win ? Number(win.target_month||0) : 0;
+      if(ty && tm){ showY = ty; showM = tm; }
     }catch(e){}
 
     const monthEl=panel.querySelector("#rdVisMonth");
-    if(monthEl){ const Lp=getPanelLang_(); const arr=MONTHS_BY_LANG[Lp]||MONTHS_BY_LANG.ru; monthEl.textContent=(arr[showM-1]||"")+" "+showY; }
+    if(monthEl){ const Lp=getPanelLang_(); const arr=MONTHS_BY_LANG[Lp]||MONTHS_BY_LANG.ru; const pack=PANEL_I18N[Lp]||PANEL_I18N.ru; const pref=(pack && pack.periodPrefix)?(pack.periodPrefix+" "):""; monthEl.textContent=pref+(arr[showM-1]||"")+" "+showY; }
     const action = (window.__ku_rd_action || {});
     const btn=panel.querySelector("#rdVisBtn");
     const foot=panel.querySelector("#rdVisFoot");
