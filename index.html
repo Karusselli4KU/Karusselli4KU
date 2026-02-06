@@ -26,7 +26,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.353a0p116</title>
+  <title>Karusselli 4 KÜ — v1.353a0p165</title>
 <script>
 // v1.151: set default language to Estonian (ku_lang) only if not set
 try{
@@ -166,7 +166,7 @@ try{
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* v1.353a0p99: process pill positioning handled by layout slot (no transform hacks) */
+    /* v1.353a0p165: process pill positioning handled by layout slot (no transform hacks) */
 #processPill{ position: static !important; transform: none !important; }
 /* v1.349d0 fine alignment: year selector down 3px */
 #page_readings .bills-year-row select{ position: relative; top: 3px !important; }
@@ -435,6 +435,8 @@ top:30px;
     .house-wrap img{display:block;width:100%;height:100%;object-fit:cover;}
 
     .bottom-grid{display:grid; grid-template-columns: 1fr 1fr !important; gap:16px; margin-top:14px}
+    /* v1.353a0p165: Home Kontaktinfo card spans full row */
+    #contactInfoMini{grid-column:1 / -1;}
     @media (max-width:900px){ .bottom-grid{grid-template-columns: 1fr} } .mini{ background: var(--card) !important;
       border:1px solid var(--stroke);
       border-radius:18px;
@@ -444,6 +446,52 @@ top:30px;
     .mini h4{margin:0 0 8px; font-size:12px; font-weight:900}
     .mini .muted{color:var(--muted); font-size:12px; line-height:1.45}
     ul{margin:10px 0 0 16px; color:var(--muted); font-size:12px; line-height:1.6}
+/* v1.353a0p165: Home -> Kontaktinfo layout in 3 equal columns (desktop), stacked on small screens */
+.ci-grid{
+  display:grid;
+  width:100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 40px; /* equal spacing */
+  row-gap: 14px;
+  align-items:start;
+  margin-top:6px;
+}
+@media (max-width:900px){
+  .ci-grid{ grid-template-columns: 1fr; }
+}
+
+/* consistent indent: ~1 letter under section headers */
+.ci-body{ margin-top:6px; padding-left:6px; }
+ul.ci-body{
+  margin:6px 0 0 0;
+  padding-left:6px;
+  list-style:none;
+}
+.ci-line{ margin-left:6px; }
+
+/* board list rows: fixed icon columns so mail/phone icons align vertically */
+.ci-col{min-width:0;}
+.ci-col li{
+  display:grid;
+  width:100%;
+  grid-template-columns: 105px 18px minmax(220px, 1fr) 18px 86px;
+  column-gap:6px;
+  align-items:center;
+  white-space:nowrap;
+  min-width:0;
+  line-height:1.55;
+}
+.ci-li-name{ grid-column:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.ci-ico-mail{ grid-column:2; width:18px; text-align:center; }
+.ci-li-email{ grid-column:3; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ci-ico-phone{ grid-column:4; width:18px; text-align:center; }
+.ci-li-phone{ grid-column:5; white-space:nowrap; text-align:left; }
+
+/* generic small icon */
+.ci-ico{ display:inline-block; width:18px; text-align:center; }
+.ci-nowrap{ white-space:nowrap; }
+
+
     .status-cards{display:grid; grid-template-columns: 1fr 1fr !important; gap:10px; margin-top:10px}
     .stat{
       border:1px solid var(--stroke);
@@ -530,7 +578,7 @@ textarea:focus{
     }
 
   
-    /* v1.353a0p99: center slot for process pill in app menu row */
+    /* v1.353a0p139: center slot for process pill in app menu row */
     .app-center{
       flex: 1 1 auto;
       display:flex;
@@ -1093,12 +1141,12 @@ body{
 
 
 
-/* v1.353a0p99: while global process pill is active, keep Readings headers visible (hide only table body) */
+/* v1.353a0p139: while global process pill is active, keep Readings headers visible (hide only table body) */
 #page_readings.ku-busy #readingsMonthsBody{ display:none; }
 #page_readings.ku-busy .rd-vis-panel{ display:none !important; }
 
 
-/* v1.353a0p99: ADMIN layout — bottom three blocks in ONE row with equal widths */
+/* v1.353a0p139: ADMIN layout — bottom three blocks in ONE row with equal widths */
 #page_admin .bottom-grid{
   grid-template-columns: 1fr 1fr 1fr !important;
 }
@@ -1111,6 +1159,42 @@ body{
 /* AdminConfig: match Users table font size */
 #adminConfigForm { font-size: 13px; }
 #adminConfigForm input, #adminConfigForm select, #adminConfigForm button, #adminConfigForm label { font-size: inherit; }
+
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
+
+/* Shift middle 'Kontaktandmed' column right by 15ch (requested) */
+.ci-grid > .ci-col:nth-child(2){padding-left:15ch;}
+
+/* v1.353a0p165: shift phone icon + phone value left by 6ch within board list rows */
+.ci-ico-phone,
+.ci-li-phone{
+  position: relative;
+  left: -6ch;
+}
+
+
+/* v1.353a0p165: shift Pangaandmed column right by 7ch */
+.ci-grid > .ci-col:nth-child(3){
+  padding-left: 7ch;
+}
+
+
+/* v1.353a0p165: align body text exactly with header left edge */
+.ci-body,
+.ci-body ul,
+.ci-body li,
+.ci-body p,
+.ci-body div {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
 
 </style>
 
@@ -1298,6 +1382,14 @@ body{
   text-align: center;
 }
 
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1429,6 +1521,14 @@ body{
   opacity: 0.55 !important;
   cursor: not-allowed !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1547,6 +1647,14 @@ body{
   justify-content: center !important;
   align-items: center !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1595,6 +1703,14 @@ body{
   text-align:center !important;
   text-align-last:center !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1624,6 +1740,14 @@ body{
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1660,6 +1784,14 @@ body{
   padding-left: 2px !important;
   padding-right: 2px !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1675,6 +1807,14 @@ body{
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1691,6 +1831,14 @@ body{
   box-shadow: none !important;
   color: #000 !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1702,6 +1850,14 @@ body{
 #page_admin #adminUsersTable .au-row{
   grid-template-columns: 50px 90px 170px 90px 60px !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1754,6 +1910,14 @@ body{
   outline:none !important;
   font-size:12px !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1766,6 +1930,14 @@ body{
   box-sizing:border-box !important;
   max-width:100% !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1789,6 +1961,14 @@ body{
   box-sizing:border-box !important;
   max-width:100% !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1799,6 +1979,14 @@ body{
   min-width:180px !important;
   max-width:180px !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
@@ -1850,11 +2038,19 @@ body{
   max-width:100% !important;
   box-sizing:border-box !important;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 
 <style>
-/* v1.353a0p99: AdminConfig compact layout (matches Kasutajate haldus typography) */
+/* v1.353a0p139: AdminConfig compact layout (matches Kasutajate haldus typography) */
 #page_admin #adminConfigForm.cfg-wrap{ margin-top:10px; }
 #page_admin #adminConfigForm .cfg-grid{
   display:flex;
@@ -1912,6 +2108,14 @@ body{
   overflow:hidden;
   text-overflow:ellipsis;
 }
+
+/* v1.353a0p139 FIX: hide duplicate page title on Home */
+#page_home .page-title,
+#page_home h2.page-title,
+#page_home .content-title {
+  display: none !important;
+}
+
 </style>
 
 </head>
@@ -1919,7 +2123,7 @@ body{
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.353a0p99</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.353a0p165</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2068,70 +2272,34 @@ body{
           </div>
 
           <div class="bottom-grid">
-            <div class="mini">
+            <!-- v1.353a0p139: hide Contactinfo until fresh data load completes (prevents showing stale cached data) -->
+            <div class="mini" id="contactInfoMini" style="display:none">
               <h4 id="contactTitle">Контактная информация</h4>
-              <div class="muted"><b id="boardMembersTitle">Члены правления</b></div>
-              <ul>
-                <li><span id="chairmanTitle">Председатель</span>: <span id="phName1">[имя фамилия]</span> — <span id="phEmailPhone1">[email]/телефон</span></li>
-                <li><span id="boardMemberTitle">Член правления</span>: <span id="phName2">[имя фамилия]</span> — <span id="phEmailPhone2">[email]/телефон</span></li>
-              </ul>
-              <div class="muted" style="margin-top:10px"><b id="addressTitle">Адрес</b><br/><span id="addrLine">Karusselli 4, [город], Estonia</span></div>
-              <div class="muted" style="margin-top:10px"><b id="bankDetailsTitle">Банковские реквизиты</b><br/>
-                IBAN: <span id="phIban">[EE.. ..]</span><br/>
-                <span id="bankTitle">Банк</span>: <span id="phBank">[Swedbank / SEB / ..]</span><br/>
-                <span id="recipientTitle">Получатель</span>: Karusselli 4 KÜ
-              </div>
+
+<div class="ci-grid" id="contactInfoGrid">
+  <div class="ci-col">
+    <div class="muted"><b id="boardMembersTitle">Члены правления</b></div>
+    <ul id="boardList" class="ci-body"></ul>
+    <div class="muted" style="margin-top:10px"><b id="siteAdminTitle">Администратор сайта</b></div>
+    <div class="muted ci-body ci-nowrap" style="margin-top:6px"><span id="siteAdminBlock">—</span></div>
+  </div>
+
+  <div class="ci-col">
+    <div class="muted"><b id="contactInfoHeader">Kontaktandmed</b></div>
+    <div class="muted ci-body ci-nowrap ci-line" style="margin-top:6px"><span class="ci-ico">📍</span> <span id="addrLine">Karusselli 4, Pärnu, 80015, Estonia</span></div>
+    <div class="muted ci-body ci-nowrap ci-line" style="margin-top:6px"><span class="ci-ico">✉️</span> <span id="kuEmailValue">Karusselli4KU@gmail.com</span></div>
+  </div>
+
+  <div class="ci-col">
+    <div class="muted"><b id="bankDetailsTitle">Банковские реквизиты</b></div>
+    <div class="muted ci-body ci-nowrap ci-line" style="margin-top:6px"><span id="ibanLabel">IBAN:</span> <span id="phIban">EE622200221080142372</span></div>
+    <div class="muted ci-body ci-nowrap ci-line" style="margin-top:6px"><span id="bankTitle">Банк</span>: <span id="phBank">Swedbank</span></div>
+    <div class="muted ci-body ci-nowrap ci-line" style="margin-top:6px"><span id="recipientTitle">Получатель</span>: <span id="phRecipient">PÄRNU LINN, KARUSSELLI TN 4 KÜ</span></div>
+  </div>
+</div></div>
             </div>
 
-            <div class="mini">
-              <h4 id="quickTitle">Быстрый статус</h4>
-
-<!-- v1.151: New Quick Status layout (no totals, no legacy cards, no demo note) -->
-<div class="qs88">
-  <div class="qs88-row">
-    <div class="qs88-icon">
-      <img src="data:image/png;base64,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" alt="water" class="qs88-water">
-    </div>
-    <div class="qs88-col">
-      <div class="qs88-title" id="qsCurrTitle">Сводка по текущему месяцу</div>
-      <div class="qs88-cards">
-        <div class="qs88-card">
-          <div class="qs88-num ok" id="qsReadOk">4</div>
-          <div class="qs88-lbl" id="qsReadOkLbl">сдали показания</div>
-        </div>
-        <div class="qs88-card">
-          <div class="qs88-num bad" id="qsReadBad">1</div>
-          <div class="qs88-lbl" id="qsReadBadLbl">не сдали</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="qs88-row">
-    <div class="qs88-icon">
-      <img src="data:image/png;base64,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" alt="payment" class="qs88-pay">
-    </div>
-    <div class="qs88-col">
-      <div class="qs88-title" id="qsPrevTitle">Сводка по прошлому месяцу</div>
-      <div class="qs88-cards">
-        <div class="qs88-card">
-          <div class="qs88-num ok" id="qsPayOk">4</div>
-          <div class="qs88-lbl" id="qsPayOkLbl">оплатили счета</div>
-        </div>
-        <div class="qs88-card">
-          <div class="qs88-num bad" id="qsPayBad">1</div>
-          <div class="qs88-lbl" id="qsPayBadLbl">не оплатили счета</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-</div>
-</div>
-</div>
-              </div>
-</div>
+            
           </div>
         </div>
 
@@ -2351,7 +2519,8 @@ body{
         tabBills: "Счета",
         tabAdmin: "Администрирование",
 
-        contactTitle: "Контактная информация",
+        contactTitle: "",
+        contactInfoHeader: "Kontaktandmed",
         boardMembersTitle: "Члены правления",
         chairmanTitle: "Председатель",
         boardMemberTitle: "Член правления",
@@ -2361,6 +2530,9 @@ body{
         bankDetailsTitle: "Банковские реквизиты",
         bankTitle: "Банк",
         recipientTitle: "Получатель",
+        siteAdminTitle: "Администратор сайта",
+        kuAddressLabel: "Адрес KÜ:",
+        kuEmailLabel: "E-mail KÜ:",
         phIban: "[EE.. ..]",
         phBank: "[Swedbank / SEB / ..]",
 
@@ -2559,7 +2731,8 @@ body{
         adminInvoicesDesc: "Arve PDF-i üleslaadimine ja sidumine korteriga.",
         adminReserved: "Reserveeritud — lisame hiljem.",
 
-        contactTitle: "Kontaktinfo",
+        contactTitle: "",
+        contactInfoHeader: "Kontaktandmed",
         boardMembersTitle: "Juhatuse liikmed",
         chairmanTitle: "Esimees",
         boardMemberTitle: "Juhatuse liige",
@@ -2569,6 +2742,9 @@ body{
         bankDetailsTitle: "Pangaandmed",
         bankTitle: "Pank",
         recipientTitle: "Saaja",
+        siteAdminTitle: "Saidi administraator",
+        kuAddressLabel: "KÜ aadress:",
+        kuEmailLabel: "KÜ e-mail:",
         phIban: "[EE.. ..]",
         phBank: "[Swedbank / SEB / ..]",
 
@@ -2688,7 +2864,8 @@ body{
         tabBills: "Invoices",
         tabAdmin: "Site Administration",
 
-        contactTitle: "Contact info",
+        contactTitle: "",
+        contactInfoHeader: "Contact info",
         boardMembersTitle: "Board members",
         chairmanTitle: "Chairman",
         boardMemberTitle: "Board member",
@@ -2698,6 +2875,9 @@ body{
         bankDetailsTitle: "Bank details",
         bankTitle: "Bank",
         recipientTitle: "Recipient",
+        siteAdminTitle: "Site administrator",
+        kuAddressLabel: "KÜ address:",
+        kuEmailLabel: "KÜ e-mail:",
         phIban: "[EE.. ..]",
         phBank: "[Swedbank / SEB / ..]",
 
@@ -2891,7 +3071,114 @@ function getLangSafe(){
       if (fallback && Object.prototype.hasOwnProperty.call(fallback, key)) return fallback[key];
       return key;
     }
-    function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    
+// v1.353a0p139: Home → Contact info (board members, address, bank)
+function loadPublicInfo_(){
+  try{
+    if(window.__ku_public_info) return window.__ku_public_info;
+    const s = localStorage.getItem("ku_public_info");
+    if(!s) return null;
+    const o = JSON.parse(s);
+    window.__ku_public_info = o;
+    return o;
+  }catch(e){ return null; }
+}
+
+// v1.353a0p139: show/hide Contactinfo card (Avaleht) to avoid showing stale cached data while loading
+function setHomeContactVisible_(show){
+  try{
+    const el = document.getElementById('contactInfoMini');
+    if(!el) return;
+    el.style.display = show ? '' : 'none';
+  }catch(e){}
+}
+
+function applyPublicInfo_(){
+  const info = loadPublicInfo_();
+  // Board members list
+  try{
+    const ul = document.getElementById("boardList");
+    if(ul){
+      ul.innerHTML = "";
+      const arr = (info && Array.isArray(info.board)) ? info.board : [];
+      arr.forEach((p, idx)=>{
+        const li = document.createElement("li");
+        const isChair = !!(p && (p.is_chair || p.isChair));
+        const roleLabel = isChair ? tr("chairmanTitle") : tr("boardMemberTitle");
+        const name = String(p && (p.display_name || p.name) || "").trim();
+        const email = String(p && p.email || "").trim();
+        const phone = String(p && p.phone || "").trim();
+        // v1.353a0p165: Visualize board member contact with aligned icon columns
+        li.innerHTML = "";
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "ci-li-name";
+        nameSpan.textContent = (name || "") + ((email || phone) ? "," : "");
+        li.appendChild(nameSpan);
+
+        if(email){
+          const icoMail = document.createElement("span");
+          icoMail.className = "ci-ico ci-ico-mail";
+          icoMail.textContent = "✉️";
+          const mailVal = document.createElement("span");
+          mailVal.className = "ci-li-email";
+          mailVal.textContent = email;
+          li.appendChild(icoMail);
+          li.appendChild(mailVal);
+        }
+        if(phone){
+          const icoPhone = document.createElement("span");
+          icoPhone.className = "ci-ico ci-ico-phone";
+          icoPhone.textContent = "📞";
+          const phoneVal = document.createElement("span");
+          phoneVal.className = "ci-li-phone";
+          phoneVal.textContent = phone;
+          li.appendChild(icoPhone);
+          li.appendChild(phoneVal);
+        }
+        ul.appendChild(li);
+      });
+    }
+  }catch(e){}
+
+  // Address + bank (address is hardcoded in HTML; just fill bank/recipient if backend provides)
+  try{
+    if(info && info.bank){
+      const iban = document.getElementById("phIban");
+      const bank = document.getElementById("phBank");
+      const rec = document.getElementById("phRecipient");
+      if(iban && info.bank.iban) iban.textContent = String(info.bank.iban);
+      if(bank && info.bank.bank) bank.textContent = String(info.bank.bank);
+      if(rec && info.bank.recipient) rec.textContent = String(info.bank.recipient);
+    }
+  }catch(e){}
+
+
+  // Site administrators list
+  try{
+    const el = document.getElementById("siteAdminBlock");
+    if(el){
+      const admins = (info && Array.isArray(info.site_admins)) ? info.site_admins : [];
+      if(!admins.length){
+        el.textContent = "—";
+      }else{
+        el.innerHTML = "";
+        let added = 0;
+        admins.forEach(p=>{
+          const name = String(p && (p.display_name || p.name) || "").trim();
+          if(!name) return;
+          const line = document.createElement("div");
+          line.textContent = name;
+          el.appendChild(line);
+          added++;
+        });
+        if(!added) el.textContent = "—";
+      }
+    }
+  }catch(e){}
+}
+
+
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     function setStatus(isIn, username, apartment, displayName){
       const dot = document.getElementById("statusDot");
@@ -3021,8 +3308,10 @@ function applyLang(){
       const _el_bankDetailsTitle = document.getElementById("bankDetailsTitle"); if(_el_bankDetailsTitle) _el_bankDetailsTitle.textContent = t.bankDetailsTitle;
       const _el_bankTitle = document.getElementById("bankTitle"); if(_el_bankTitle) _el_bankTitle.textContent = t.bankTitle;
       const _el_recipientTitle = document.getElementById("recipientTitle"); if(_el_recipientTitle) _el_recipientTitle.textContent = t.recipientTitle;
-      const _el_phIban = document.getElementById("phIban"); if(_el_phIban) _el_phIban.textContent = t.phIban;
-      const _el_phBank = document.getElementById("phBank"); if(_el_phBank) _el_phBank.textContent = t.phBank;
+
+      safeSetText("siteAdminTitle", t.siteAdminTitle);
+      safeSetText("kuAddressLabel", t.kuAddressLabel);
+      safeSetText("kuEmailLabel", t.kuEmailLabel);
 
       safeSetText("quickTitle", t.quickTitle);
       safeSetText("quickSub", t.quickSub);
@@ -3089,7 +3378,10 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       const bEt=document.getElementById("lang_et"); if(bEt) bEt.classList.toggle("active", lang==="et");
       const bEn=document.getElementById("lang_en"); if(bEn) bEn.classList.toggle("active", lang==="en");
       const sel=document.getElementById("langSelect"); if(sel) sel.value = lang;
-      }
+      
+      // v1.353a0p139: re-apply Home public info strings (roles/bank) on language switch
+      try{ applyPublicInfo_(); }catch(e){}
+}
 
     
     function mountControls(toApp){
@@ -3137,6 +3429,12 @@ applyLang();
       const t = I18N[getLang()] || I18N.ru;
 
       setStatus(true, user.username, user.apartment, user.display_name);
+
+      // v1.353a0p139: do not show cached Kontaktinfo on initial entry; reveal only after fresh load completes
+      try{ window.__ku_home_publicinfo_fresh = false; }catch(e){}
+      try{ setHomeContactVisible_(false); }catch(e){}
+      // We can still pre-fill DOM from cache while hidden (will be revealed after whoami refresh)
+      try{ applyPublicInfo_(); }catch(e){}
 
       // v1.351b0p7: Site Administration tab is visible only for admin role
       try{
@@ -3188,9 +3486,67 @@ applyLang();
         try{ document.dispatchEvent(new Event("ku:navigate")); }catch(_){}
       }
 
+      if(page==="home") initHomePage_();
       if(page==="bills") initBillsPage_();
       if(page==="admin") initAdminPage_();
     }
+
+    // v1.353a0p139: Home refresh — re-fetch public info & display name from Sheets on every Avaleht click
+    async function initHomePage_(){
+      try{
+        const pageEl = document.getElementById("page_home");
+        if(!pageEl || pageEl.classList.contains("hidden")) return;
+
+        const token = getToken();
+        // if not logged in: just apply cached public info (if any)
+        if(!token){
+          try{ applyPublicInfo_(); }catch(e){}
+          return;
+        }
+
+        if(window.__ku_home_refresh_inflight) return;
+        window.__ku_home_refresh_inflight = true;
+
+        // v1.353a0p139: hide Contactinfo until we load fresh data
+        window.__ku_home_publicinfo_fresh = false;
+        try{ setHomeContactVisible_(false); }catch(e){}
+
+        // show process pill in center/header (same component used elsewhere)
+        try{ setProcessPill(_uiMsg("loadingYears")); }catch(e){}
+
+        const d = await apiPost("/whoami", { token });
+
+        if(d && d.ok){
+          // update cached user (display name, role, apt)
+          let user = {};
+          try{ user = JSON.parse(localStorage.getItem("ku_user") || "{}"); }catch(e){ user = {}; }
+          if(d.username) user.username = d.username;
+          if(d.apartment !== undefined) user.apartment = d.apartment;
+          if(d.site_role) user.site_role = d.site_role;
+          if(d.display_name !== undefined) user.display_name = d.display_name;
+
+          try{ localStorage.setItem("ku_user", JSON.stringify(user)); }catch(e){}
+          try{ setStatus(true, user.username, user.apartment, user.display_name); }catch(e){}
+
+          // update cached public info (contacts/bank) if provided
+          if(d.public_info){
+            try{
+              window.__ku_public_info = d.public_info;
+              localStorage.setItem("ku_public_info", JSON.stringify(d.public_info));
+            }catch(e){}
+            try{ applyPublicInfo_(); }catch(e){}
+            // mark as fresh (used by setProcessPill() to reveal Contactinfo)
+            try{ window.__ku_home_publicinfo_fresh = true; }catch(e){}
+          }
+        }
+      }catch(e){
+        // swallow errors; do not break navigation
+      }finally{
+        try{ setProcessPill(""); }catch(e){}
+        try{ window.__ku_home_refresh_inflight = false; }catch(e){}
+      }
+    }
+
 
     function renderDemoTables(user){
       // v1.349d0: demo tables disabled (they caused runtime errors and are not needed in production)
@@ -3229,6 +3585,16 @@ applyLang();
           pr.classList.toggle('ku-busy', isBusy);
         }
       }catch(e){}
+
+      // v1.353a0p139: while pill is active on Avaleht, hide Kontaktinfo (prevent stale cached content)
+      try{
+        const ph = document.getElementById('page_home');
+        const onHome = ph && !ph.classList.contains('hidden');
+        if(onHome){
+          const fresh = !!window.__ku_home_publicinfo_fresh;
+          setHomeContactVisible_(!isBusy && fresh);
+        }
+      }catch(e){}
     }
 
     function setBillsStatus(text){
@@ -3257,7 +3623,7 @@ async function apiPost(path, payload){
 
       // Robust fetch with timeout to avoid hanging UI when Apps Script is slow/unreachable
       const ctrl = new AbortController();
-      // v1.353a0p99: longer timeout for Admin endpoints (Apps Script can be slower there)
+      // v1.353a0p139: longer timeout for Admin endpoints (Apps Script can be slower there)
       const ms = (String(path||"").includes("adminUsers") ? 60000 : 20000);
       const t = setTimeout(()=>ctrl.abort(), ms);
 // 20s
@@ -3335,6 +3701,15 @@ else msg.textContent = t.errLogin;
         return;
       }
 
+
+
+      // v1.353a0p139: cache public (home) info from backend (board members, address, bank)
+      try{
+        if(d && d.public_info){
+          window.__ku_public_info = d.public_info;
+          localStorage.setItem("ku_public_info", JSON.stringify(d.public_info));
+        }
+      }catch(e){}
       const user = { username:u, apartment:d.apartment, site_role: d.site_role || "member", display_name: d.display_name || "" };
       localStorage.setItem("ku_user", JSON.stringify(user));
       localStorage.setItem("ku_token", d.token || "");
@@ -3575,7 +3950,7 @@ async function initBillsPage_(){
   const sel = document.getElementById("billsYear");
   if(!sel) return;
 
-  // v1.353a0p99: On every tab click, hide bills table until ALL loading is finished
+  // v1.353a0p139: On every tab click, hide bills table until ALL loading is finished
   window.__ku_bills_tab_loading = true;
   try{
     // ensure hidden immediately even before first API call paints
@@ -3915,7 +4290,7 @@ async function adminDeleteUser_(username){
   setTimeout(()=>{ setAdminMsg_(""); }, 1200);
 }
 
-// ===== AdminConfig (v1.353a0p118) =====
+// ===== AdminConfig (v1.353a0p139) =====
 let __ku_cfg_baseline = null;
 let __ku_cfg_dirty = false;
 
@@ -4144,7 +4519,7 @@ function initAdminPage_(){
     return;
   }
 
-  // v1.353a0p99: On every tab click, hide admin table until loading is finished
+  // v1.353a0p139: On every tab click, hide admin table until loading is finished
   const tbl = document.getElementById("adminUsersTable");
   if(tbl) tbl.style.display = "none";
 
