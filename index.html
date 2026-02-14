@@ -11,7 +11,9 @@
     // v1.349d0: early safety stubs for file:// so head scripts can't crash before main JS loads
     var btnEl = null;
     function setProcessPill(){}
-  </script>
+  
+window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
+</script>
 <script>
     // GitHub Pages hardening: ensure trailing slash for directory URLs.
     // Prevents broken relative assets when opening .../<repo> (without ending "/").
@@ -26,7 +28,7 @@
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.353a0p165</title>
+  <title>Karusselli 4 KÜ — v1.353a0p251</title>
 <script>
 // v1.151: set default language to Estonian (ku_lang) only if not set
 try{
@@ -166,7 +168,7 @@ try{
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* v1.353a0p165: process pill positioning handled by layout slot (no transform hacks) */
+    /* v1.353a0p251: process pill positioning handled by layout slot (no transform hacks) */
 #processPill{ position: static !important; transform: none !important; }
 /* v1.349d0 fine alignment: year selector down 3px */
 #page_readings .bills-year-row select{ position: relative; top: 3px !important; }
@@ -435,7 +437,7 @@ top:30px;
     .house-wrap img{display:block;width:100%;height:100%;object-fit:cover;}
 
     .bottom-grid{display:grid; grid-template-columns: 1fr 1fr !important; gap:16px; margin-top:14px}
-    /* v1.353a0p165: Home Kontaktinfo card spans full row */
+    /* v1.353a0p251: Home Kontaktinfo card spans full row */
     #contactInfoMini{grid-column:1 / -1;}
     @media (max-width:900px){ .bottom-grid{grid-template-columns: 1fr} } .mini{ background: var(--card) !important;
       border:1px solid var(--stroke);
@@ -446,7 +448,7 @@ top:30px;
     .mini h4{margin:0 0 8px; font-size:12px; font-weight:900}
     .mini .muted{color:var(--muted); font-size:12px; line-height:1.45}
     ul{margin:10px 0 0 16px; color:var(--muted); font-size:12px; line-height:1.6}
-/* v1.353a0p165: Home -> Kontaktinfo layout in 3 equal columns (desktop), stacked on small screens */
+/* v1.353a0p251: Home -> Kontaktinfo layout in 3 equal columns (desktop), stacked on small screens */
 .ci-grid{
   display:grid;
   width:100%;
@@ -519,7 +521,20 @@ ul.ci-body{
     .modal{position:fixed; inset:0; z-index:2000}
     .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.35)}
     .modal-card{position:relative; width:min(720px, 92vw); margin:8vh auto 0; background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow: var(--shadow); overflow:hidden}
-    .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
+    
+
+/* --- Pay modal sizing (bills payment confirmation) --- */
+#payModal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,.35);padding:24px 16px;z-index:9999;}
+/* v1.353a0p251: pay modal spacing */
+#payModal .modal-card{padding:18px 22px; box-sizing:border-box;}
+#payModal .modal-row{margin-top:10px;}
+#payModal .modal-footer{margin-top:16px; display:flex; justify-content:flex-end; gap:12px;}
+#payModal .modal-footer button{min-width:92px;}
+
+#payModal .modal-card{margin:0;width:min(480px,92vw);max-width:480px;max-height:80vh;overflow:auto;}
+#payModal .modal-body{padding:16px 18px;}
+#payModal .modal-title{margin-bottom:10px;}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
     .modal-body{padding:14px}
     .iconbtn{border:1px solid var(--stroke); background:var(--pill); border-radius:10px; padding:8px 10px; cursor:pointer}
     .grid2{display:grid; grid-template-columns: 1fr 1fr !important; gap:12px}
@@ -677,9 +692,92 @@ textarea:focus{
   line-height:1.15;
   text-align:left !important;
 }
+
+/* --- FIX: center Status column + center payment button in last column --- */
+#page_bills .bills-table th:nth-child(4),
+#page_bills .bills-table td:nth-child(4){
+  text-align:center !important;
+}
+
+#page_bills .bills-table th.pay-head,
+#page_bills .bills-table td.pay-col{
+  text-align:center !important;
+}
+
+#page_bills .bills-table td.pay-col{
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: none !important;
+  overflow: visible !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+#page_bills .bills-pay-btn{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  white-space:nowrap !important;
+  margin: 0 auto !important;
+}
+
+/* --- FIX: center Arve (PDF) column --- */
+#page_bills .bills-table th:nth-child(5),
+#page_bills .bills-table td:nth-child(5){
+  text-align:center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#page_bills .bills-table td:nth-child(5) .pdf-btn{
+  display:inline-block !important;
+  margin: 0 auto !important;
+  float:none !important;
+}
+
+#page_bills .bills-table th:nth-child(6),
+#page_bills .bills-table td:nth-child(6){
+  text-align:center !important;
+}
+
+/* --- END FIX --- */
 #page_bills .bills-table td + td{ border-left:0; }
 #page_bills .bills-table td:first-child{ border-radius:12px 0 0 12px; }
 #page_bills .bills-table td:last-child{ border-radius:0 12px 12px 0; }
+
+/* admin-only payment column + button (keep it deterministic, avoid browser auto-shrinking) */
+#page_bills .bills-table th.pay-head.hidden{ display:none; }
+#page_bills .bills-table.has-paycol th.pay-head{ display:table-cell; }
+
+#page_bills .bills-table.has-paycol td.pay-col,
+#page_bills .bills-table.has-paycol th.pay-head{
+  text-align:center !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+}
+
+#page_bills .bills-table.has-paycol td.pay-col{
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+#page_bills .bills-pay-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: #f7f7f7;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
 
 /* status: text-only, no background */
 #page_bills .st-paid{ color: var(--good); font-weight:900; background:transparent !important; }
@@ -928,8 +1026,8 @@ margin: 0;
 /* v1.254: bills table — center Summa and Staatus columns */
 #page_bills .bills-table th:nth-child(2),
 #page_bills .bills-table td:nth-child(2),
-#page_bills .bills-table th:nth-child(3),
-#page_bills .bills-table td:nth-child(3){
+#page_bills .bills-table th:nth-child(4),
+#page_bills .bills-table td:nth-child(4){
   text-align:center !important;
 }
 
@@ -952,10 +1050,10 @@ margin: 0;
 #page_bills .bills-table td:nth-child(1),
 #page_bills .bills-table th:nth-child(2),
 #page_bills .bills-table td:nth-child(2),
-#page_bills .bills-table th:nth-child(3),
-#page_bills .bills-table td:nth-child(3),
 #page_bills .bills-table th:nth-child(4),
-#page_bills .bills-table td:nth-child(4){
+#page_bills .bills-table td:nth-child(4),
+#page_bills .bills-table th:nth-child(5),
+#page_bills .bills-table td:nth-child(5){
   width:110px !important;
   max-width:110px !important;
 }
@@ -999,9 +1097,12 @@ margin: 0;
 /* v1.293: Readings input panel independent of year selector */
 #page_readings .rd-actionbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;margin:6px 0 10px 0;}
 /* v1.349d0: house meter scope toggle (shown only for house_meter_admin_apartment) */
-#page_readings .rd-scope-toggle{ display:flex; align-items:center; gap:8px; }
-#page_readings .rd-scope-toggle.hidden{ display:none !important; }
-#page_readings .rd-scope-btn{
+#page_readings .rd-scope-toggle,
+#page_bills .rd-scope-toggle{ display:flex; align-items:center; gap:8px; }
+#page_readings .rd-scope-toggle.hidden,
+#page_bills .rd-scope-toggle.hidden{ display:none !important; }
+#page_readings .rd-scope-btn,
+#page_bills .rd-scope-btn{
   border:1px solid var(--stroke);
   background: var(--pill);
   color: var(--text);
@@ -1011,7 +1112,8 @@ margin: 0;
   cursor:pointer;
   font-size:12px;
 }
-#page_readings .rd-scope-btn.active{
+#page_readings .rd-scope-btn.active,
+#page_bills .rd-scope-btn.active{
   background: rgba(37,99,235,.14);
   border-color: rgba(37,99,235,.25);
 }
@@ -1172,7 +1274,7 @@ body{
 /* Shift middle 'Kontaktandmed' column right by 15ch (requested) */
 .ci-grid > .ci-col:nth-child(2){padding-left:15ch;}
 
-/* v1.353a0p165: shift phone icon + phone value left by 6ch within board list rows */
+/* v1.353a0p251: shift phone icon + phone value left by 6ch within board list rows */
 .ci-ico-phone,
 .ci-li-phone{
   position: relative;
@@ -1180,13 +1282,13 @@ body{
 }
 
 
-/* v1.353a0p165: shift Pangaandmed column right by 7ch */
+/* v1.353a0p251: shift Pangaandmed column right by 7ch */
 .ci-grid > .ci-col:nth-child(3){
   padding-left: 7ch;
 }
 
 
-/* v1.353a0p165: align body text exactly with header left edge */
+/* v1.353a0p251: align body text exactly with header left edge */
 .ci-body,
 .ci-body ul,
 .ci-body li,
@@ -1209,9 +1311,8 @@ body{
   position: static !important;
   inset: auto !important;
   display: flex !important;
-  justify-content: flex-start !important;
+  justify-content: space-between !important; /* year left, apt buttons right */
   align-items: center !important;
-  gap: 10px !important;
   width: 100% !important;
   margin: 10px 0 12px 0 !important;
   padding: 0 !important;
@@ -1221,20 +1322,14 @@ body{
   margin: 0 !important;
 }
 
-#page_readings .bills-year-row{
-  position: static !important;
-  inset: auto !important;
-  display: flex !important;
-  justify-content: flex-start !important;
+/* Bills: admin apartment buttons aligned to the right (same concept as Readings toggle) */
+#page_bills #billsAptToggleWrap{
+  margin-left: auto !important;
+  display: inline-flex !important;
+  gap: 8px !important;
   align-items: center !important;
-  gap: 10px !important;
-  width: 100% !important;
-  margin: 10px 0 12px 0 !important;
-  padding: 0 !important;
 }
-#page_readings .bills-year-row select{
-  margin: 0 !important;
-}
+
 #page_bills .bills-table{
   margin-top: 0 !important;
 }
@@ -1321,10 +1416,10 @@ body{
 #page_bills table.bills-table td:nth-child(1),
 #page_bills table.bills-table th:nth-child(2),
 #page_bills table.bills-table td:nth-child(2),
-#page_bills table.bills-table th:nth-child(3),
-#page_bills table.bills-table td:nth-child(3),
 #page_bills table.bills-table th:nth-child(4),
-#page_bills table.bills-table td:nth-child(4){
+#page_bills table.bills-table td:nth-child(4),
+#page_bills table.bills-table th:nth-child(5),
+#page_bills table.bills-table td:nth-child(5){
   width:110px !important;
   max-width:110px !important;
 }
@@ -1336,10 +1431,10 @@ body{
 #page_bills .bills-table td:nth-child(1),
 #page_bills .bills-table th:nth-child(2),
 #page_bills .bills-table td:nth-child(2),
-#page_bills .bills-table th:nth-child(3),
-#page_bills .bills-table td:nth-child(3),
 #page_bills .bills-table th:nth-child(4),
-#page_bills .bills-table td:nth-child(4){
+#page_bills .bills-table td:nth-child(4),
+#page_bills .bills-table th:nth-child(5),
+#page_bills .bills-table td:nth-child(5){
   width:110px !important;
   max-width:110px !important;
 }
@@ -1371,6 +1466,17 @@ body{
 }
 #page_readings .bills-year-row.rd-topline select{ flex:0 0 auto; }
 #page_readings .bills-year-row.rd-topline .rd-scope-toggle{ flex:0 0 auto; margin-left:auto; }
+
+/* v1.353a0p251: align year selector + apartment buttons on one line (Bills) */
+#page_bills .bills-year-row.rd-topline{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:14px !important;
+  flex-wrap:nowrap !important;
+}
+#page_bills .bills-year-row.rd-topline select{ flex:0 0 auto; }
+#page_bills .bills-year-row.rd-topline .rd-scope-toggle{ flex:0 0 auto; margin-left:auto; }
 
 
 /* v1.349d0: make readings scope toggle buttons equal width */
@@ -1763,7 +1869,7 @@ body{
   max-width:50px !important;
   min-width:50px !important;
 }
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
   width:90px !important;
   max-width:90px !important;
   min-width:90px !important;
@@ -1771,7 +1877,7 @@ body{
 
 /* Ensure text doesn't expand cells */
 #page_admin #adminUsersTable .au-row .au-cell:nth-child(1),
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -1957,7 +2063,7 @@ body{
   text-overflow:ellipsis !important;
 }
 /* Ensure inner content can't push the cell */
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) *{
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3) *{
   box-sizing:border-box !important;
   max-width:100% !important;
 }
@@ -1993,11 +2099,25 @@ body{
 <style>
 /* p60: FINAL lock for Admin Users grid (prevents any earlier overrides) */
 #page_admin #adminUsersTable .au-row{
-  grid-template-columns: 50px 70px 130px 210px 85px 80px 80px 60px 60px 60px!important
+  grid-template-columns: 50px 85px 70px 130px 210px 85px 80px 80px 60px 60px 60px!important
 }
 
-/* Kasutaja (2) exact width + ellipsis */
+/* m² (2) exact width */
 #page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  width:85px !important;
+  min-width:85px !important;
+  max-width:85px !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+}
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) input.au-inp{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Kasutaja (3) exact width + ellipsis */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
   width:70px !important;
   min-width:70px !important;
   max-width:70px !important;
@@ -2006,37 +2126,59 @@ body{
   text-overflow:ellipsis !important;
   min-width:0 !important;
 }
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) *{
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3) *{
   box-sizing:border-box !important;
   max-width:100% !important;
 }
 
-/* Omanik (3) exact width */
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
+/* Omanik (4) exact width */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(4){
   width:130px !important;
   min-width:130px !important;
   max-width:130px !important;
 }
 
 
-/* E-mail (4) exact width */
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(4){
+/* E-mail (5) exact width */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(5){
   width:210px !important;
   min-width:210px !important;
   max-width:210px !important;
 }
-/* Tel (5) exact width (fix: column looked wider due to earlier overrides) */
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(5){
+/* Tel (6) exact width (fix: column looked wider due to earlier overrides) */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(6){
   width:85px !important;
   min-width:85px !important;
   max-width:85px !important;
   min-width:0 !important;
   overflow:hidden !important;
 }
-#page_admin #adminUsersTable .au-row .au-cell:nth-child(5) input.au-inp{
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(6) input.au-inp{
   width:100% !important;
   max-width:100% !important;
   box-sizing:border-box !important;
+}
+
+/* p61: m² input styled like Tel (same border/font/padding) */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(2) input.au-inp,
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4) input.au-inp,
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(5) input.au-inp,
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(6) input.au-inp{
+  border:1px solid rgba(0,0,0,0.25) !important;
+  border-radius:6px !important;
+  padding:4px 6px !important;
+  background: transparent !important;
+  box-shadow:none !important;
+  outline:none !important;
+  font-size:12px !important;
+}
+
+/* Keep m² + Omanik + E-mail + Tel left aligned */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(2),
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4),
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(5),
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(6){
+  text-align:left !important;
 }
 
 /* v1.353a0p139 FIX: hide duplicate page title on Home */
@@ -2118,12 +2260,60 @@ body{
 
 </style>
 
+
+<style>
+/* p169: FINAL single source of truth for Admin Users grid (wins over earlier PATCH blocks) */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 70px 70px 130px 210px 85px 80px 80px 60px 60px 60px !important;
+}
+/* Column widths (header + body) */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(1){
+  width:50px !important; min-width:50px !important; max-width:50px !important;
+}
+/* m² */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  width:70px !important; min-width:70px !important; max-width:70px !important;
+  min-width:0 !important; overflow:hidden !important;
+}
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) input.au-inp{
+  width:100% !important; max-width:100% !important; box-sizing:border-box !important;
+}
+/* Kasutaja */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
+  text-align:center !important;
+
+  width:70px !important; min-width:70px !important; max-width:70px !important;
+  white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important;
+  min-width:0 !important;
+}
+/* Omanik */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(4){
+  width:130px !important; min-width:130px !important; max-width:130px !important;
+}
+/* E-mail */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(5){
+  width:210px !important; min-width:210px !important; max-width:210px !important;
+}
+/* Tel */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(6){
+  width:85px !important; min-width:85px !important; max-width:85px !important;
+  min-width:0 !important; overflow:hidden !important;
+}
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(6) input.au-inp{
+  width:100% !important; max-width:100% !important; box-sizing:border-box !important;
+}
+
+/* m² placeholder "00.0" in light gray when empty */
+#page_admin #adminUsersTable input.au-inp[data-field="flat_square"]::placeholder{
+  color: rgba(0,0,0,0.35) !important;
+}
+</style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.353a0p165</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.353a0p251</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2339,16 +2529,18 @@ body{
           </div>
 
           <!-- year selector -->
-          <div class="bills-year-row">
+          <div class="bills-year-row rd-topline">
             <select id="billsYear" aria-label="Year">
               <option value="" disabled selected hidden>—</option>
             </select>
+            <div id="billsAptToggleWrap" class="rd-scope-toggle hidden"></div>
           </div>
           <div id="billsStatus" class="bills-status" aria-live="polite"></div>
 
           <table class="bills-table" style="margin-top:0">
             <thead>
               <tr>
+                <th id="thInvoiceNr"></th>
                                 <th id="thPeriod">Период</th>
                 <th id="thSum">Сумма</th>
                 <th id="thStatus2">Статус</th>
@@ -2380,6 +2572,7 @@ body{
               <div id="adminUsersTable" class="admin-users-table" style="margin-top:8px">
                 <div class="au-row au-head">
                   <div class="au-cell" id="adminHdrApartment" data-i18n="adminHdrApartment">Квартира</div>
+                  <div class="au-cell" id="adminHdrM2" data-i18n="adminHdrM2">m²</div>
                   <div class="au-cell" id="adminHdrUsername" data-i18n="adminHdrUsername">User</div>
                   <div class="au-cell" id="adminHdrOwner" data-i18n="adminHdrOwner">Владелец</div>
                   <div class="au-cell" id="adminHdrEmail" data-i18n="adminHdrEmail">E-mail</div>
@@ -2588,6 +2781,7 @@ body{
         thStatus: "Статус",
         thComment: "Комментарий",
         thBillDate: "Дата",
+        thInvoiceNr: "Счёт №",
         thPeriod: "Период",
         thSum: "Сумма",
         thBillPdf: "Счёт",
@@ -2598,11 +2792,12 @@ body{
         nextBills2: "и покажем счета только по квартире жильца.",
 
         stSubmitted: "✅ Сдано",
-        stWaiting: "⏳ Ожидается",
+        stWaiting: "⏳ В ожидании",
         commentDash: "—",
         commentReminder: "Напоминание: последний день месяца",
         billPaid: "Оплачено",
-        billPending: "Ожидает оплаты",
+        billPending: "В ожидании",
+        confirmPay: "Подтвердить оплату",
         billOverdue: "Просрочено",
         forgotPrompt: "Введите email или имя пользователя:",
         forgotSent: "Мы отправили код для сброса на ваш email. Проверьте входящие/спам.",
@@ -2637,6 +2832,7 @@ body{
       errAccountLocked: "Слишком много попыток. Попробуйте позже.",
       errResetFailed: "Не удалось сбросить пароль. Проверьте код и попробуйте снова.",
       adminHdrApartment: "Квартира",
+      adminHdrM2: "м²",
         adminHdrUsername: "Пользователь",
         adminHdrOwner: "Владелец",
         adminHdrEmail: "E-mail",
@@ -2650,6 +2846,12 @@ body{
         adminSaved: "Сохранено",
         adminDeleteConfirm: "Удалить пользователя?",
 
+
+  payTitle: "Подтверждение оплаты",
+  payDate: "Дата оплаты",
+  payAmount: "Сумма оплаты (€)",
+  cancel: "Отмена",
+  confirm: "Подтвердить",
 },
 
       et: {
@@ -2761,6 +2963,7 @@ body{
         thStatus: "Staatus",
         thComment: "Kommentaar",
         thBillDate: "Kuupäev",
+        thInvoiceNr: "Arve Nr.",
         thPeriod: "Periood",
         thSum: "Summa",
         thBillPdf: "Arve",
@@ -2775,7 +2978,8 @@ body{
         commentDash: "—",
         commentReminder: "Meeldetuletus: kuu viimane päev",
         billPaid: "Makstud",
-        billPending: "Ootab makset",
+        billPending: "Ootel",
+        confirmPay: "Kinnita makse",
         billOverdue: "Üle tähtaja",
         forgotPrompt: "Sisesta email või kasutajanimi:",
         forgotSent: "Saatsime parooli lähtestamise koodi sinu e-postile. Kontrolli ka spam-kausta.",
@@ -2810,6 +3014,7 @@ body{
       errAccountLocked: "Liiga palju katseid. Proovi hiljem uuesti.",
       errResetFailed: "Parooli lähtestamine ebaõnnestus. Kontrolli koodi ja proovi uuesti.",
       adminHdrApartment: "Korter",
+      adminHdrM2: "m²",
         adminHdrUsername: "Kasutaja",
         adminHdrOwner: "Omanik",
         adminHdrEmail: "E-mail",
@@ -2823,6 +3028,12 @@ body{
         adminSaved: "Salvestatud",
         adminDeleteConfirm: "Kustuta kasutaja?",
 
+
+  payTitle: "Maksekinnitamine",
+  payDate: "Makse kuupäev",
+  payAmount: "Makse summa (€)",
+  cancel: "Tühista",
+  confirm: "Kinnita",
 },
 
       en: {
@@ -2933,6 +3144,7 @@ body{
         thStatus: "Status",
         thComment: "Comment",
         thBillDate: "Date",
+        thInvoiceNr: "Invoice No.",
         thPeriod: "Period",
         thSum: "Amount",
         thBillPdf: "Invoice",
@@ -2947,7 +3159,8 @@ body{
         commentDash: "—",
         commentReminder: "Reminder: last day of month",
         billPaid: "Paid",
-        billPending: "Payment pending",
+        billPending: "Pending",
+        confirmPay: "Confirm payment",
         billOverdue: "Overdue",
         forgotPrompt: "Enter email or username:",
         forgotSent: "We sent a reset code to your email. Check inbox/spam.",
@@ -2982,6 +3195,7 @@ body{
       errAccountLocked: "Too many attempts. Please try again later.",
       errResetFailed: "Password reset failed. Check the code and try again.",
       adminHdrApartment: "Flat",
+      adminHdrM2: "m²",
         adminHdrUsername: "User",
         adminHdrOwner: "Owner",
         adminHdrEmail: "E-mail",
@@ -2995,6 +3209,12 @@ body{
         adminSaved: "Saved",
         adminDeleteConfirm: "Delete this user?",
 
+
+  payTitle: "Payment confirmation",
+  payDate: "Payment date",
+  payAmount: "Payment amount (€)",
+  cancel: "Cancel",
+  confirm: "Confirm",
 }
     };
 // === Admin Users UI text overrides (safe, does not touch auth/reset logic) ===
@@ -3047,6 +3267,7 @@ function getLangSafe(){
       updateLangFlag_();
 // if logged in — re-render invoices table texts in current language (no API call)
       rerenderBillsFromCache_();
+  updatePayI18n_();
       try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
 }
     const TEXT = (typeof I18N !== "undefined" ? I18N : {});
@@ -3108,7 +3329,7 @@ function applyPublicInfo_(){
         const name = String(p && (p.display_name || p.name) || "").trim();
         const email = String(p && p.email || "").trim();
         const phone = String(p && p.phone || "").trim();
-        // v1.353a0p165: Visualize board member contact with aligned icon columns
+        // v1.353a0p251: Visualize board member contact with aligned icon columns
         li.innerHTML = "";
         const nameSpan = document.createElement("span");
         nameSpan.className = "ci-li-name";
@@ -3280,6 +3501,7 @@ function applyLang(){
 
       // admin users table headers (language binding)
       safeSetText("adminHdrApartment", t.adminHdrApartment);
+      safeSetText("adminHdrM2", t.adminHdrM2 || "m²");
       safeSetText("adminHdrUsername", t.adminHdrUsername);
       safeSetText("adminHdrOwner", t.adminHdrOwner);
       safeSetText("adminHdrTel", t.adminHdrTel);
@@ -3338,6 +3560,7 @@ safeSetText("qsPayBadLbl", (t.qsPayBadLbl || (lang==="et" ? "ei maksnud" : (lang
       const _el_thComment = document.getElementById("thComment"); if(_el_thComment) _el_thComment.textContent = t.thComment;
       // bills table headers
       safeSetText("thBillDate", t.thBillDate);
+      const _el_thInvoiceNr = document.getElementById("thInvoiceNr"); if(_el_thInvoiceNr) _el_thInvoiceNr.textContent = (t.thInvoiceNr || "Arve Nr.");
       const _el_thPeriod = document.getElementById("thPeriod"); if(_el_thPeriod) _el_thPeriod.textContent = t.thPeriod;
       const _el_thSum = document.getElementById("thSum"); if(_el_thSum) _el_thSum.textContent = t.thSum;
       safeSetText("thBillPdf", t.thBillPdf);
@@ -3381,7 +3604,37 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       
       // v1.353a0p139: re-apply Home public info strings (roles/bank) on language switch
       try{ applyPublicInfo_(); }catch(e){}
+
+  updatePayI18n_();
+
+  updatePayI18n_();
 }
+
+function updatePayI18n_() {
+  const lang = getLang();
+  const t = (TEXT && TEXT[lang]) ? TEXT[lang] : (TEXT && TEXT.ru ? TEXT.ru : {});
+
+  // Pay button inside table
+  const label = t.confirmPay || t.payBtn || 'Confirm payment';
+  document.querySelectorAll('.bills-pay-btn').forEach(btn => { btn.textContent = label; });
+
+  // Modal texts
+  const titleEl = document.getElementById('payTitle');
+  if (titleEl) titleEl.textContent = t.payTitle || 'Payment confirmation';
+
+  const lblDate = document.getElementById('payLblDate');
+  if (lblDate) lblDate.textContent = t.payDate || 'Payment date';
+
+  const lblAmount = document.getElementById('payLblAmount');
+  if (lblAmount) lblAmount.textContent = t.payAmount || 'Payment amount (€)';
+
+  const btnCancel = document.getElementById('payCancel');
+  if (btnCancel) btnCancel.textContent = t.cancel || 'Cancel';
+
+  const btnConfirm = document.getElementById('payConfirm');
+  if (btnConfirm) btnConfirm.textContent = t.confirm || 'Confirm';
+}
+
 
     
     function mountControls(toApp){
@@ -3445,6 +3698,10 @@ applyLang();
 
       renderDemoTables(user);
       attachBillsYearListener_();
+
+  // v1.353a0p251: apartment buttons (admin only)
+  try{ if(__billsIsAdmin_()){ __billsSetSelectedApartment_(__billsGetSelectedApartment_()); } }catch(e){}
+  try{ __billsRenderAptButtons_(); }catch(e){}
       navigate("home");
     }
 
@@ -3760,7 +4017,9 @@ else msg.textContent = t.errLogin;
 
       setBillsBusy(true, _uiMsg("loadingBills"));
       try{
-        const resp = await apiPost("/invoices", { token, year });
+        const payload = { token, year };
+        try{ if(__billsIsAdmin_()) payload.apartment = __billsGetSelectedApartment_(); }catch(_){ }
+        const resp = await apiPost("/invoices", payload);
         if(!resp || !resp.ok){
           const bb = document.getElementById("billsBody");
           if(bb) bb.innerHTML = "";
@@ -3798,7 +4057,8 @@ else msg.textContent = t.errLogin;
           const code = String(s||"").toLowerCase();
           if(code==="paid") return t.billPaid || "Makstud";
           if(code==="overdue") return t.billOverdue || "Üle tähtaja";
-          return t.billPending || "Ootab makset";
+          // keep original pending label
+          return t.billPending || "Ootel";
         };
         const statusCls = (s)=> {
           const code = String(s||"").toLowerCase();
@@ -3807,20 +4067,62 @@ else msg.textContent = t.errLogin;
           return "st-pending";
         };
 
+        // Admin-only payment column (same visibility rule as apartment switcher)
+        const isAdmin = __billsIsAdmin_();
+        const thPay = document.getElementById('thPay');
+        const billsTable = document.querySelector('#page_bills .bills-table');
+        if(isAdmin){
+          if(thPay) thPay.classList.remove('hidden');
+          if(billsTable) billsTable.classList.add('has-paycol');
+        }else{
+          if(thPay) thPay.classList.add('hidden');
+          if(billsTable) billsTable.classList.remove('has-paycol');
+        }
+
         (resp.invoices || []).forEach(inv=>{
           const period = `${monthName(Number(inv.month||0))}`;
           const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
           const st = statusText(inv.status);
           const cls = statusCls(inv.status);
-          const id = String(inv.invoice_id||"");
+          const id = String(inv.bo||inv.invoice_id||inv.id||"");
+
+          const payCell = (()=>{
+            if(!isAdmin) return "";
+            const code = String(inv.status||"").toLowerCase();
+            if(code === "paid") return `<td class="pay-col"></td>`;
+            const btnLabel = (t.confirmPay || "Подтвердить оплату");
+            // keep it stable for GS: prefer invoice_id, fallback to composite key
+            const payload = {
+              invoice_id: id,
+              year: Number(inv.year||year||0),
+              month: Number(inv.month||0),
+              apartment: String(inv.apartment||resp.apartment||"")
+            };
+            payload.amount = (inv.amount != null ? Number(inv.amount) : "");
+            return `<td class="pay-col"><button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}' data-amount='${esc(String(inv.amount||""))}'>${esc(btnLabel)}</button></td>`;
+          })();
+
           bb.insertAdjacentHTML("beforeend", `
             <tr>
+              <td>${esc(id)}</td>
               <td>${esc(period)}</td>
               <td>${esc(sum)}</td>
               <td class="${esc(cls)}">${esc(st)}</td>
               <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
+              ${payCell}
             </tr>
           `);
+        });
+
+        // pay buttons
+        bb.querySelectorAll('.bills-pay-btn').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const payRaw = btn.getAttribute('data-pay') || '{}';
+            const amountRaw = btn.getAttribute('data-amount') || '';
+            let pay = {};
+            try{ pay = JSON.parse(payRaw); }catch(_){ pay = {}; }
+            openPayModal_(pay, amountRaw);
+          });
         });
 
         // pdf click
@@ -3846,7 +4148,9 @@ else msg.textContent = t.errLogin;
 
   setBillsBusy(true, _uiMsg("loadingYears"));
   try{
-    const resp = await apiPost("/invoiceYears", { token });
+    const payload = { token };
+    try{ if(__billsIsAdmin_()) payload.apartment = __billsGetSelectedApartment_(); }catch(_){ }
+    const resp = await apiPost("/invoiceYears", payload);
     if(resp && resp.ok && Array.isArray(resp.years) && resp.years.length){
       sel.disabled = false;
 const prev = sel.value;
@@ -3898,7 +4202,7 @@ function rerenderBillsFromCache_(){
     const code = String(s||"").toLowerCase();
     if(code === "paid") return t.billPaid || "Paid";
     if(code === "overdue") return t.billOverdue || "Overdue";
-    if(code === "pending") return t.billPending || "Pending";
+    if(code === "pending") return t.billPending || "Ootel";
     return code || "";
   };
   const statusCls = (s)=>{
@@ -3909,21 +4213,59 @@ function rerenderBillsFromCache_(){
     return "";
   };
 
+  // Admin-only payment column (cache re-render)
+  const isAdmin = __billsIsAdmin_();
+  try{
+    const thPay = document.getElementById('thPay');
+    const tbl = document.querySelector('#page_bills .bills-table');
+    if (isAdmin){
+      if (thPay) thPay.classList.remove('hidden');
+      if (tbl) tbl.classList.add('has-paycol');
+    } else {
+      if (thPay) thPay.classList.add('hidden');
+      if (tbl) tbl.classList.remove('has-paycol');
+    }
+  } catch(_e) {}
+
   (resp.invoices || []).forEach(inv=>{
     const period = `${monthName(Number(inv.month||0))}`;
     const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
     const st = statusText(inv.status);
     const cls = statusCls(inv.status);
     const id = String(inv.invoice_id||"");
+    const canPay = isAdmin && String(inv.status||"").toLowerCase() !== 'paid';
+    const payload = {
+      invoice_id: id,
+      year: Number(inv.year||year),
+      month: Number(inv.month||0),
+      apartment: Number(window.__ku_billsSelectedApartment || window.currentUser?.apartment || 0),
+      amount_due: Number(inv.amount||0),
+      currency: String(inv.currency||"€")
+    };
     bb.insertAdjacentHTML("beforeend", `
       <tr>
+        <td>${esc(id)}</td>
         <td>${esc(period)}</td>
         <td>${esc(sum)}</td>
         <td class="${esc(cls)}">${esc(st)}</td>
         <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
+        ${isAdmin ? `<td class="pay-col">${canPay ? `<button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}'>${esc(t.confirmPay || "Подтвердить оплату")}</button>` : ""}</td>` : ""}
       </tr>
     `);
   });
+
+  // bind confirm-payment buttons
+  if (isAdmin){
+    bb.querySelectorAll('.bills-pay-btn').forEach(btn=>{
+      btn.addEventListener('click', (ev)=>{
+        const el = ev.currentTarget;
+        const raw = el.getAttribute('data-pay') || "{}";
+        let payload;
+        try{ payload = JSON.parse(raw); }catch(_e){ payload = {}; }
+        openPayModal_(payload);
+      });
+    });
+  }
 
   bb.querySelectorAll(".pdf-btn").forEach(btn=>{
     btn.addEventListener("click", async ()=>{
@@ -3931,6 +4273,10 @@ function rerenderBillsFromCache_(){
       await downloadInvoicePdf(invoiceId, btn);
     });
   });
+
+  // ensure pay-button texts match current UI language
+  updatePayI18n_();
+
 }
 
 function attachBillsYearListener_(){
@@ -3941,6 +4287,166 @@ function attachBillsYearListener_(){
     sel.__ku_userSelected = true;
     const y = Number(sel.value || 0);
     if(y) loadBillsFromApi(y);
+  });
+}
+
+// --- Admin: confirm payment modal (writes to Invoices via GS endpoint invoiceMarkPaid) ---
+function openPayModal_(payload){
+  const modal = document.getElementById('payModal');
+  if (!modal) return;
+  window.__ku_pay_payload = payload || {};
+  const dateInp = document.getElementById('payDate');
+  const amtInp = document.getElementById('payAmount');
+  const msg = document.getElementById('payMsg');
+  if (msg) msg.textContent = '';
+
+  // defaults
+  try{
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth()+1).padStart(2,'0');
+    const dd = String(today.getDate()).padStart(2,'0');
+    if (dateInp) dateInp.value = `${yyyy}-${mm}-${dd}`;
+  }catch(e){}
+  if (amtInp){
+    const due = payload && payload.amount != null ? String(payload.amount) : '';
+    amtInp.value = due;
+  }
+  modal.style.display = 'flex';
+}
+
+function closePayModal_(){
+  const modal = document.getElementById('payModal');
+  if (modal) modal.style.display = 'none';
+  window.__ku_pay_payload = null;
+}
+
+function wirePayModal_(){
+  const cancel = document.getElementById('payCancelBtn');
+  if(cancel && !cancel.__wired){
+    cancel.__wired = true;
+    cancel.addEventListener('click', closePayModal_);
+  }
+  const confirm = document.getElementById('payConfirmBtn');
+  if(confirm && !confirm.__wired){
+    confirm.__wired = true;
+    confirm.addEventListener('click', confirmPayModal_);
+  }
+  const modal = document.getElementById('payModal');
+  if(modal && !modal.__wired){
+    modal.__wired = true;
+    // backdrop click disabled: do not auto-close modal
+  }
+}
+
+
+async function confirmPayModal_(){
+  const payload = window.__ku_pay_payload || {};
+  const msg = document.getElementById('payMsg');
+  const dateInp = document.getElementById('payDate');
+  const amtInp = document.getElementById('payAmount');
+  const datePaid = (dateInp && dateInp.value) ? String(dateInp.value) : '';
+  const amountPaidRaw = (amtInp && amtInp.value != null) ? String(amtInp.value) : '';
+  const amountPaid = Number(String(amountPaidRaw).replace(',','.'));
+
+  if (!datePaid || !isFinite(amountPaid)){
+    if (msg) msg.textContent = 'Укажите дату и сумму.';
+    return;
+  }
+
+  try{
+    if (msg) msg.textContent = '';
+    const body = {
+      token: getToken(),
+      invoice_id: payload.invoice_id || payload.id || '',
+      apartment: payload.apartment || __billsGetSelectedApartment_(),
+      year: payload.year || Number(document.getElementById('billsYear')?.value||0),
+      month: payload.month || payload.period || '',
+      date_paid: datePaid,
+      amount_paid: amountPaid
+    };
+
+    // Uses existing API helper
+    const res = await apiPost('/invoiceMarkPaid', body);
+    if (!res || res.ok !== true){
+      const err = (res && res.error) ? res.error : 'Ошибка сохранения';
+      if (msg) msg.textContent = err;
+      return;
+    }
+
+    closePayModal_();
+    // refresh current year
+    const y = Number(document.getElementById('billsYear')?.value||0);
+    if (y) await loadBillsFromApi(y);
+  }catch(e){
+    if (msg) msg.textContent = String(e && e.message ? e.message : e);
+  }
+}
+
+
+// v1.353a0p251: Bills apartment buttons for admin (UI-only; uses same concept as Readings scope toggle)
+function __billsIsAdmin_(){
+  try{
+    const u = JSON.parse(localStorage.getItem("ku_user")||"{}");
+    return String(u.site_role||"").toLowerCase()==="admin";
+  }catch(e){ return false; }
+}
+function __billsUserApartment_(){
+  try{
+    const u = JSON.parse(localStorage.getItem("ku_user")||"{}");
+    const a = Number(u.apartment||0);
+    return a||0;
+  }catch(e){ return 0; }
+}
+function __billsGetSelectedApartment_(){
+  try{
+    const v = Number(window.__ku_bills_selected_apartment||0);
+    return v||__billsUserApartment_();
+  }catch(e){ return __billsUserApartment_(); }
+}
+function __billsSetSelectedApartment_(apt){
+  try{ window.__ku_bills_selected_apartment = Number(apt||0)||__billsUserApartment_(); }catch(e){}
+}
+function __billsRenderAptButtons_(){
+  const wrap = document.getElementById("billsAptToggleWrap");
+  if(!wrap) return;
+  // show only for admin
+  if(!__billsIsAdmin_()){ wrap.classList.add("hidden"); wrap.innerHTML=""; return; }
+
+  wrap.classList.remove("hidden");
+  wrap.innerHTML = `
+    <button type="button" class="rd-scope-btn" data-apt="1">1</button>
+    <button type="button" class="rd-scope-btn" data-apt="2">2</button>
+    <button type="button" class="rd-scope-btn" data-apt="3">3</button>
+    <button type="button" class="rd-scope-btn" data-apt="4">4</button>
+    <button type="button" class="rd-scope-btn" data-apt="5">5</button>
+  `;
+
+  const activeApt = __billsGetSelectedApartment_();
+  wrap.querySelectorAll("[data-apt]").forEach(btn=>{
+    const a = Number(btn.getAttribute("data-apt")||0);
+    btn.classList.toggle("active", a===activeApt);
+    btn.addEventListener("click", async (e)=>{
+      e.preventDefault();
+      const apt = Number(btn.getAttribute("data-apt")||0);
+      if(!apt) return;
+      __billsSetSelectedApartment_(apt);
+      // update active state
+      wrap.querySelectorAll("[data-apt]").forEach(b=>{
+        const aa = Number(b.getAttribute("data-apt")||0);
+        b.classList.toggle("active", aa===apt);
+      });
+
+      // re-run existing Bills init flow (indicator -> load years -> load bills) without changing render logic
+      try{
+        const sel = document.getElementById("billsYear");
+        if(sel){
+          sel.__ku_userSelected = false; // allow default selection for new apartment
+          sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+        }
+      }catch(_){}
+      try{ await initBillsPage_(); }catch(_){}
+    }, { passive:false });
   });
 }
 
@@ -4031,9 +4537,13 @@ function getUserSafe_(){
 }
 function renderAdminUsers_(rows){
   const body = document.getElementById("adminUsersBody");
-  if(!body) return;
+  
+    try{ __fixAdminUsersGridM2__(); }catch(e){}
+if(!body) return;
   body.innerHTML = "";
-  const t = I18N[getLang()] || I18N.ru;
+  
+  try{ setTimeout(()=>{ try{ __fixAdminUsersGridM2__(); }catch(e){} },0); }catch(e){}
+const t = I18N[getLang()] || I18N.ru;
 
   (rows||[]).forEach(r=>{
     const row = document.createElement("div");
@@ -4043,6 +4553,10 @@ function renderAdminUsers_(rows){
     const owner = esc(r.display_name || "");
     const phone = esc(r.phone || "");
     const email = esc(r.email || "");
+    const flatSqRaw = esc((r.flat_square ?? r.flat_sq ?? r.m2 ?? "") || "");
+      const flatSq = (flatSqRaw !== "" && flatSqRaw !== null && flatSqRaw !== undefined)
+        ? (Number(flatSqRaw).toFixed(1))
+        : "";
     const opted = String(r.opted_in_email || "no").toLowerCase();
     const mailChecked = (opted === "yes");
     const counterChecked = !!(r.house_meter_admin === true || r.is_common_counter === true);
@@ -4051,6 +4565,7 @@ function renderAdminUsers_(rows){
 
     row.innerHTML = `
       <div class="au-cell" title="${apt}">${apt}</div>
+      <div class="au-cell"><input class="au-inp" type="text" inputmode="decimal" placeholder="00.0" value="${flatSq}" data-username="${uname}" data-field="flat_square" /></div>
       <div class="au-cell" title="${uname}">${uname}</div>
       <div class="au-cell"><input class="au-inp" type="text" value="${owner}" data-username="${uname}" data-field="display_name"/></div>
       <div class="au-cell"><input class="au-inp" type="text" value="${email}" data-username="${uname}" data-field="email"/></div>
@@ -4097,6 +4612,8 @@ try{
 
   const inpPhone = row.querySelector('input[data-field="phone"]');
 
+  const inpFlatSq = row.querySelector('input[data-field="flat_square"]');
+
   const chkMail = row.querySelector('input[type="checkbox"][data-field="opted_in_email"]');
   const chkCounter = row.querySelector('input[type="checkbox"][data-field="common_counter"]');
   try{ if(inpPhone) inpPhone.placeholder = tr("adminPhonePlaceholder"); }catch(e){}
@@ -4115,6 +4632,23 @@ try{
   if(inpPhone){
     inpPhone.setAttribute("data-initial", String(inpPhone.value||""));
     inpPhone.addEventListener("input", ()=>markDirtyFromEl_(inpPhone));
+  }
+
+  if(inpFlatSq){
+    // normalize to 1 decimal on blur, accept comma or dot
+    const normalize = ()=>{
+      try{
+        let s = String(inpFlatSq.value || "").trim();
+        if(!s){ return; }
+        s = s.replace(",", ".");
+        const n = Number(s);
+        if(!isFinite(n)) return;
+        inpFlatSq.value = (Math.round(n*10)/10).toFixed(1);
+      }catch(e){}
+    };
+    inpFlatSq.setAttribute("data-initial", String(inpFlatSq.value||""));
+    inpFlatSq.addEventListener("input", ()=>markDirtyFromEl_(inpFlatSq));
+    inpFlatSq.addEventListener("blur", ()=>{ normalize(); markDirtyFromEl_(inpFlatSq); });
   }
   if(selKu){
     selKu.setAttribute("data-initial", String(selKu.value||"member"));
@@ -4189,7 +4723,7 @@ function adminCollectEdits_(){
   (__ku_admin_users_cache||[]).forEach(r=>{
     const u = String(r.username||"");
     if(!u) return;
-    map[u] = { username:u, apartment: String(r.apartment||""), display_name: String(r.display_name||""), email: String(r.email||""), phone: String(r.phone||""), ku_role: String(r.ku_role||"member"), site_role: String(r.site_role||"member"), opted_in_email: String(r.opted_in_email||"no"), is_common_counter: !!(r.house_meter_admin === true || r.is_common_counter === true), house_meter_admin: !!(r.house_meter_admin === true || r.is_common_counter === true) };
+    map[u] = { username:u, apartment: String(r.apartment||""), display_name: String(r.display_name||""), email: String(r.email||""), phone: String(r.phone||""), flat_square: String((r.flat_square ?? r.flat_sq ?? r.m2 ?? "")||""), ku_role: String(r.ku_role||"member"), site_role: String(r.site_role||"member"), opted_in_email: String(r.opted_in_email||"no"), is_common_counter: !!(r.house_meter_admin === true || r.is_common_counter === true), house_meter_admin: !!(r.house_meter_admin === true || r.is_common_counter === true) };
   });
   body.querySelectorAll("[data-username][data-field]").forEach(el=>{
     const u = el.getAttribute("data-username") || "";
@@ -4198,6 +4732,7 @@ function adminCollectEdits_(){
     if(f==="display_name") map[u].display_name = String(el.value||"");
     if(f==="email") map[u].email = String(el.value||"");
     if(f==="phone") map[u].phone = String(el.value||"");
+    if(f==="flat_square") map[u].flat_square = String(el.value||"");
     if(f==="ku_role") map[u].ku_role = String(el.value||"member");
     if(f==="site_role") map[u].site_role = String(el.value||"member");
     if(f==="opted_in_email") map[u].opted_in_email = (el.checked ? "yes" : "no");
@@ -4587,7 +5122,7 @@ async function downloadInvoicePdf(invoiceId, btnEl){
         const r = await fetch(API_BASE + "/invoicePdf", {
           method: "POST",
           headers: { "content-type":"application/json; charset=utf-8" },
-          body: JSON.stringify({ token, invoice_id: invoiceId })
+          body: JSON.stringify((()=>{ const p={ token, invoice_id: invoiceId }; try{ if(__billsIsAdmin_()) p.apartment=__billsGetSelectedApartment_(); }catch(_){ } return p; })())
         });
 
         if(!r.ok){
@@ -4882,6 +5417,7 @@ document.addEventListener("keydown", (e) => {
         <div class="h2" id="resetTitle" data-i18n="reset_title">Password reset</div>
         <button class="iconbtn" id="resetX" aria-label="Close">✕</button>
       </div>
+
       <div class="modal-body">
         <p class="muted" id="resetHint" data-i18n="reset_desc">Enter the email used during registration. We will send a reset code.</p>
 
@@ -4914,6 +5450,27 @@ document.addEventListener("keydown", (e) => {
       </div>
     </div>
   </div>
+
+
+<!-- Admin: Confirm payment modal (Invoices: date_paid, amount_paid, status=paid, ettemaks) -->
+<div id="payModal" class="modal" style="display:none">
+  <div class="modal-card" style="max-width:420px; width:92%">
+    <div id="payTitle" style="font-weight:700; margin-bottom:10px">Подтверждение оплаты</div>
+    <div class="field">
+      <label id="payDateLbl">Дата оплаты</label>
+      <input id="payDate" type="date"/>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label id="payAmountLbl">Сумма оплаты (€)</label>
+      <input id="payAmount" type="text" inputmode="decimal" placeholder="0,00"/>
+    </div>
+    <div class="muted" id="payMsg" style="margin-top:10px; min-height:18px"></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
+      <button class="btn" id="payCancelBtn">Cancel</button>
+      <button class="btn primary" id="payConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
 
 
 <script>
@@ -5197,7 +5754,7 @@ function rdStatusLabel_(s){
     const v = String(s||"").trim().toLowerCase();
     if(!v) return "";
     if(v==="submitted" || v==="ok" || v==="done" || v==="esitatud") return (rdLang_()==="et" ? "Esitatud" : (rdLang_()==="en" ? "Submitted" : "Подано"));
-    if(v==="waiting" || v==="pending" || v==="expected" || v==="awaiting" || v==="ootel") return (rdLang_()==="et" ? "Ootel" : (rdLang_()==="en" ? "Waiting" : "Ожидается"));
+    if(v==="waiting" || v==="pending" || v==="expected" || v==="awaiting" || v==="ootel") return (rdLang_()==="et" ? "Ootel" : (rdLang_()==="en" ? "Pending" : "В ожидании"));
     if(v==="missing" || v==="not_submitted" || v==="not submitted" || v==="absent") return (rdLang_()==="et" ? "Esitamata" : (rdLang_()==="en" ? "Not submitted" : "Не подано"));
     return capFirst_(s);
   }
@@ -5895,6 +6452,227 @@ try{ window.__rdVisUpdate = function(){ try{ ensurePanel(); }catch(e){} }; }catc
 })();
 </script>
 
+
+<style>
+/* p171: ULTIMATE Admin Users grid override (placed at end of BODY to win) */
+#page_admin #adminUsersTable .au-row{
+  grid-template-columns: 50px 70px 70px 130px 210px 85px 80px 80px 60px 60px 60px !important;
+}
+
+/* Column 2: m² */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){
+  width:70px !important;
+  min-width:70px !important;
+  max-width:70px !important;
+  text-align:center !important;
+}
+#page_admin #adminUsersTable input.au-inp[data-field="flat_square"]{
+  text-align:center !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Column 3: Kasutaja */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(3){
+  width:70px !important;
+  min-width:70px !important;
+  max-width:70px !important;
+  text-align:center !important;
+  font-size:12px !important; /* same as Korter */
+  line-height:1.2 !important;
+}
+
+/* Ensure Kasutaja value itself isn't styled smaller by nested rules */
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3){
+  font-size:12px !important;
+}
+
+/* Header alignment for m² and Kasutaja */
+#page_admin #adminUsersTable .au-row.au-head .au-cell:nth-child(2),
+#page_admin #adminUsersTable .au-row.au-head .au-cell:nth-child(3){
+  text-align:center !important;
+}
+</style>
+
+<script>
+/* p172: enforce Admin Users grid after render (m² + centered Kasutaja) */
+function __fixAdminUsersGridM2__(){
+  try{
+    const table = document.querySelector('#page_admin #adminUsersTable');
+    if(!table) return;
+    const cols = '50px 42px 70px 130px 210px 85px 80px 80px 60px 60px 60px';
+    table.querySelectorAll('.au-row').forEach(row=>{
+      row.style.setProperty('grid-template-columns', cols, 'important');
+
+      const isHead = row.classList && row.classList.contains('au-head');
+
+      // m² col (2)
+      const c2 = row.children && row.children[1];
+      if(c2){
+        c2.style.setProperty('width','42px','important');
+        c2.style.setProperty('min-width','42px','important');
+        c2.style.setProperty('max-width','42px','important');
+        c2.style.setProperty('text-align','center','important');
+        c2.style.setProperty('padding-left','1px','important');
+        c2.style.setProperty('padding-right','1px','important');
+      }
+
+      // Kasutaja col (3)
+      const c3 = row.children && row.children[2];
+      if(c3){
+        c3.style.setProperty('width','70px','important');
+        c3.style.setProperty('min-width','70px','important');
+        c3.style.setProperty('max-width','70px','important');
+        c3.style.setProperty('text-align','center','important');
+        c3.style.setProperty('font-size','12px','important');
+        c3.style.setProperty('line-height','1.2','important');
+
+        // center header & body reliably
+        c3.style.setProperty('display','flex','important');
+        c3.style.setProperty('align-items','center','important');
+        c3.style.setProperty('justify-content','center','important');
+      }
+    });
+    // m² input centering
+    table.querySelectorAll('input.au-inp[data-field="flat_square"]').forEach(inp=>{
+      inp.style.setProperty('text-align','center','important');
+    });
+  }catch(e){}
+}
+
+// --- Pay modal wiring (safe) ---
+window.addEventListener('DOMContentLoaded', ()=>{
+  const c=document.getElementById('payCancelBtn');
+  if(c) c.addEventListener('click', ()=>{ try{ closePayModal_(); }catch(e){} });
+  const ok=document.getElementById('payConfirmBtn');
+  if(ok) ok.addEventListener('click', ()=>{ try{ confirmPayModal_(); }catch(e){} });
+  const m=document.getElementById('payModal');
+  // backdrop click disabled: do not auto-close modal
+});
+</script>
+
+<style>
+/* p172: tighten padding for m² + Kasutaja so narrow widths are visible */
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2){ padding-left:4px !important; padding-right:4px !important; }
+#page_admin #adminUsersTable .au-row .au-cell:nth-child(2) input.au-inp{ padding-left:4px !important; padding-right:4px !important; }
+#page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3){ text-align:center !important; }
+</style>
+
+<style>
+/* p173: ensure m² input can't force column wider */
+#page_admin #adminUsersTable input.au-inp[data-field="flat_square"]{ max-width:100% !important; }
+</style>
+
+<style>
+/* p174: make m² column visibly narrower by tightening input padding */
+#page_admin #adminUsersTable input.au-inp[data-field="flat_square"]{
+  padding-left:4px !important;
+  padding-right:4px !important;
+}
+</style>
+
+<style>
+/* p175: ultra-compact m² */
+#page_admin #adminUsersTable input.au-inp[data-field="flat_square"]{
+  padding-left:3px !important;
+  padding-right:3px !important;
+}
+</style>
+
+<style>
+/* p176: ultra-compact m² (42px) */
+#page_admin #adminUsersTable input.au-inp[data-field="flat_square"]{
+  padding-left:2px !important;
+  padding-right:2px !important;
+  font-size:12px !important;
+}
+
+/* v1.353a0p251: bills table deterministic shrink + fixed widths (NO AUTO STRETCH)
+   Goal: table width must shrink when columns shrink. */
+#page_bills table.bills-table{
+  table-layout: fixed !important;
+  width: max-content !important;     /* shrink-wrap */
+  display: inline-table !important;  /* make width based on content */
+}
+
+/* Center headers + values in ALL columns */
+#page_bills table.bills-table th,
+#page_bills table.bills-table td{
+  text-align:center !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+/* Slightly tighter paddings so total width is реально меньше */
+#page_bills table.bills-table th{ padding-left:6px !important; padding-right:6px !important; }
+#page_bills table.bills-table td{ padding-left:8px !important; padding-right:8px !important; }
+
+/* === FIXED column widths (px) === */
+/* 1: Arve Nr. (+10px) */
+#page_bills table.bills-table th:nth-child(1),
+#page_bills table.bills-table td:nth-child(1){
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+}
+/* 2: Periood */
+#page_bills table.bills-table th:nth-child(2),
+#page_bills table.bills-table td:nth-child(2){
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+}
+/* 3: Summa */
+#page_bills table.bills-table th:nth-child(3),
+#page_bills table.bills-table td:nth-child(3){
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+}
+/* 4: Staatus (+10px) */
+#page_bills table.bills-table th:nth-child(4),
+#page_bills table.bills-table td:nth-child(4){
+  width: 95px !important;
+  min-width: 95px !important;
+  max-width: 95px !important;
+}
+/* 5: Arve (PDF) */
+#page_bills table.bills-table th:nth-child(5),
+#page_bills table.bills-table td:nth-child(5){
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+  padding-left:0 !important;
+  padding-right:0 !important;
+}
+
+/* Admin pay column (6th) — shrink to content */
+#page_bills table.bills-table.has-paycol th.pay-head,
+#page_bills table.bills-table.has-paycol td.pay-col{
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding-left:6px !important;
+  padding-right:6px !important;
+  white-space: nowrap !important;
+}
+
+/* Buttons must be tight around text */
+#page_bills table.bills-table .bills-pay-btn{
+  width:auto !important;
+  min-width:0 !important;
+  max-width:none !important;
+  padding: 4px 10px !important;
+}
+#page_bills table.bills-table .pdf-btn{
+  width:auto !important;
+  min-width:0 !important;
+  max-width:none !important;
+  padding: 3px 8px !important;
+}
+
+
+</style>
 </body>
 </html>
 
