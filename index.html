@@ -11,6 +11,84 @@
     // v1.349d0: early safety stubs for file:// so head scripts can't crash before main JS loads
     var btnEl = null;
     function setProcessPill(){}
+
+// --- R15 Invoice generation: numeric helpers (must exist globally) ---
+if (typeof window.__parseNum_ !== "function") {
+  window.__parseNum_ = function(s){
+    const t = String(s ?? "").trim();
+    if(!t) return 0;
+    // support both comma and dot
+    const norm = t.replace(/\s+/g,"").replace(",",".");
+    const n = Number(norm);
+    return Number.isFinite(n) ? n : 0;
+  };
+}
+if (typeof window.__formatNum_Dot3_ !== "function") {
+  window.__formatNum_Dot3_ = function(v){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return "";
+    return n.toFixed(3);
+  };
+}
+if (typeof window.__formatMoney_Dot2_ !== "function") {
+  window.__formatMoney_Dot2_ = function(v){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return "";
+    return n.toFixed(2);
+  };
+}
+
+
+function __invEnsureMoneyHandlers_(){
+  if(__invCtx._moneyHandlersWired) return;
+  __invCtx._moneyHandlersWired = true;
+
+  const wireFmt = (el, fmtFn)=>{
+    if(!el) return;
+    const doFmt = ()=>{
+      const v = __parseNum_(el.value);
+      el.value = fmtFn(Number.isFinite(v) ? v : 0);
+    };
+
+    // grey -> black on first edit
+    // IMPORTANT: do NOT auto-format while the user is typing.
+    // Otherwise multi-digit input like "11" becomes "1.00" mid-typing.
+    // We only mark the field as edited here; formatting happens on blur/change/Enter
+    // and before action buttons via __invForceFormatAll_.
+    el.addEventListener("input", ()=>{ __invUnmarkPrefill_(el); });
+
+    // formatting moments
+    el.addEventListener("blur", doFmt);
+    el.addEventListener("change", doFmt);
+    el.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter"){ doFmt(); }
+    });
+    el.addEventListener("paste", ()=>setTimeout(doFmt, 0));
+  };
+
+  // Money fields (always 2 decimals)
+  const moneyIds = ["invF_hooldus_tariif","invF_hooldus_kogus","invF_ragn_amount","invF_parnu_amount","invF_enefit_amount","invF_ettemaks","invF_viivis"];
+  moneyIds.forEach(id=>wireFmt(document.getElementById(id), __formatMoney_Dot2_));
+
+  // Volume fields (m3) — 3 decimals
+  const m3Ids = ["invF_parnu_tariff"];
+  m3Ids.forEach(id=>wireFmt(document.getElementById(id), __formatNum_Dot3_));
+}
+
+function __invForceFormatAll_(){
+  // Apply display formats immediately (2dp money, 3dp m3) before any action/read.
+  try{ __invEnsureMoneyHandlers_();
+  try{
+    ["invEditSave","invEditPreview","invEditRegister","invEditSend"].forEach(id=>{ const b=byId(id); if(!b) return; if(b.dataset._fmtWired) return; b.dataset._fmtWired="1"; b.addEventListener("mousedown", ()=>{ try{ __invForceFormatAll_(); }catch(_e){} }); });
+  }catch(_e){}
+ }catch(_e){}
+  const fmt2 = (id)=>{ const el=byId(id); if(!el) return; const v=__parseNum_(el.value); el.value=__formatMoney_Dot2_(v); };
+  const fmt3 = (id)=>{ const el=byId(id); if(!el) return; const v=__parseNum_(el.value); el.value=__formatNum_Dot3_(v); };
+  ["invF_hooldus_tariif","invF_hooldus_kogus","invF_ragn_amount","invF_parnu_amount","invF_enefit_amount","invF_ettemaks","invF_viivis"].forEach(fmt2);
+  ["invF_parnu_tariff"].forEach(fmt3);
+}
+
+
   
 window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
 </script>
@@ -28,7 +106,17 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.353a0p251</title>
+  <title>Karusselli 4 KÜ — v1.485</title>
+  <script>
+    // v1.417: keep browser tab title in sync with visible version badge
+    document.addEventListener('DOMContentLoaded', function(){
+      try{
+        var vb = document.getElementById('versionBadge');
+        if(vb && vb.textContent) document.title = 'Karusselli 4 KÜ — ' + vb.textContent.trim();
+      }catch(e){}
+    });
+  </script>
+
 <script>
 // v1.151: set default language to Estonian (ku_lang) only if not set
 try{
@@ -168,7 +256,7 @@ try{
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* v1.353a0p251: process pill positioning handled by layout slot (no transform hacks) */
+    /* v1.359a0p285: process pill positioning handled by layout slot (no transform hacks) */
 #processPill{ position: static !important; transform: none !important; }
 /* v1.349d0 fine alignment: year selector down 3px */
 #page_readings .bills-year-row select{ position: relative; top: 3px !important; }
@@ -437,7 +525,7 @@ top:30px;
     .house-wrap img{display:block;width:100%;height:100%;object-fit:cover;}
 
     .bottom-grid{display:grid; grid-template-columns: 1fr 1fr !important; gap:16px; margin-top:14px}
-    /* v1.353a0p251: Home Kontaktinfo card spans full row */
+    /* v1.353a0p266: Home Kontaktinfo card spans full row */
     #contactInfoMini{grid-column:1 / -1;}
     @media (max-width:900px){ .bottom-grid{grid-template-columns: 1fr} } .mini{ background: var(--card) !important;
       border:1px solid var(--stroke);
@@ -448,7 +536,7 @@ top:30px;
     .mini h4{margin:0 0 8px; font-size:12px; font-weight:900}
     .mini .muted{color:var(--muted); font-size:12px; line-height:1.45}
     ul{margin:10px 0 0 16px; color:var(--muted); font-size:12px; line-height:1.6}
-/* v1.353a0p251: Home -> Kontaktinfo layout in 3 equal columns (desktop), stacked on small screens */
+/* v1.353a0p266: Home -> Kontaktinfo layout in 3 equal columns (desktop), stacked on small screens */
 .ci-grid{
   display:grid;
   width:100%;
@@ -518,14 +606,14 @@ ul.ci-body{
     .ok{color:var(--good); font-weight:900}
     .warn{color:var(--warn); font-weight:900}
   
-    .modal{position:fixed; inset:0; z-index:2000}
+    .modal{display:none; position:fixed; inset:0; z-index:2000; align-items:center; justify-content:center; background:rgba(0,0,0,.35); padding:24px 16px;}
     .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.35)}
-    .modal-card{position:relative; width:min(720px, 92vw); margin:8vh auto 0; background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow: var(--shadow); overflow:hidden}
+    .modal-card{position:relative; width:min(720px, 92vw); margin:0; background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow: var(--shadow); overflow:auto; max-height:80vh;}
     
 
 /* --- Pay modal sizing (bills payment confirmation) --- */
 #payModal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,.35);padding:24px 16px;z-index:9999;}
-/* v1.353a0p251: pay modal spacing */
+/* v1.353a0p266: pay modal spacing */
 #payModal .modal-card{padding:18px 22px; box-sizing:border-box;}
 #payModal .modal-row{margin-top:10px;}
 #payModal .modal-footer{margin-top:16px; display:flex; justify-content:flex-end; gap:12px;}
@@ -534,7 +622,81 @@ ul.ci-body{
 #payModal .modal-card{margin:0;width:min(480px,92vw);max-width:480px;max-height:80vh;overflow:auto;}
 #payModal .modal-body{padding:16px 18px;}
 #payModal .modal-title{margin-bottom:10px;}
+/* --- R15 invoice modals: match pay modal look --- */
+/* --- R15 invoice modals: form controls (match AdminConfig feel) --- */
+#invSelModal .field, #invEditModal .field{ margin-top:10px; }
+#invSelModal .field:first-of-type, #invEditModal .field:first-of-type{ margin-top:0; }
+#invSelModal .field label, #invEditModal .field label{
+  display:block;
+  font-size:12px;
+  font-weight:600;
+  color: var(--muted);
+  margin-bottom:4px;
+}
+#invSelModal select, #invEditModal input{
+  width:100%;
+  font-size:12px;
+  padding:6px 10px;
+  border:1px solid rgba(0,0,0,0.25);
+  border-radius:10px;
+  background: transparent;
+  box-shadow:none;
+  outline:none;
+}
+
+/* v1.427a: compact invoice manual-input layout */
+#invEditModal .subgrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+#invEditModal .subgrid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+#invEditModal .subcap{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color: var(--muted);
+  margin:8px 0 4px;
+}
+@media (max-width:720px){
+  #invEditModal .subgrid{ grid-template-columns: 1fr; }
+  #invEditModal .subgrid2{ grid-template-columns: 1fr 1fr; }
+}
+
+#invSelModal .modal-footer, #invExistsModal .modal-footer, #invEditModal .modal-footer, #invStubModal .modal-footer{
+  margin-top:16px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+#invSelModal .modal-card,
+#invExistsModal .modal-card{
+  padding:18px 22px;
+  box-sizing:border-box;
+  width:min(480px,92vw);
+  max-width:480px;
+}
+/* v1.432: Invoice edit modal — keep all action buttons in one row and equal width */
+
+/* v1.432: Invoice edit modal — consistent control sizing */
+#invEditModal input{ box-sizing:border-box !important; }
+#invEditModal .subfield{ width:100%; }
+
+#invEditModal .modal-card{width:min(840px, 98vw); max-width:840px;}
+
 .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
+.modal-head .headstack{display:flex; flex-direction:column; gap:4px;}
+#invEditInvoiceNoLine{font-size:16px; font-weight:600; color:var(--text);}
+.invEditInvoiceNoRow{display:flex; align-items:baseline; gap:8px; padding:6px 0 10px;}
+.invEditInvoiceNoLabel{font-size:14px; font-weight:600; color:var(--text); opacity:.9;}
+.invEditHeadRow{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+
     .modal-body{padding:14px}
     .iconbtn{border:1px solid var(--stroke); background:var(--pill); border-radius:10px; padding:8px 10px; cursor:pointer}
     .grid2{display:grid; grid-template-columns: 1fr 1fr !important; gap:12px}
@@ -670,8 +832,16 @@ textarea:focus{
   min-width: 110px;
 }
 
+/* v1.389: Bills table width follows column widths (no fixed table width)
+   - grows when columns grow
+   - shrinks when columns shrink
+   - keep inside card with horizontal scroll if needed */
+#page_bills{ overflow-x:auto; }
 #page_bills .bills-table{
-  width:100%;
+  width:max-content;
+  display:inline-table;
+  table-layout:auto;
+  max-width:none;
   border-collapse:separate;
   border-spacing:0 6px;
 }
@@ -681,7 +851,10 @@ textarea:focus{
   text-align:left !important;
   font-weight:600;
   padding: 0 10px 6px 10px;
-  white-space:nowrap;
+    /* v1.367: wrap header text */
+  white-space:normal !important;
+  word-break:break-word;
+  line-height:1.2;
 }
 #page_bills .bills-table td{
   background:#fff;
@@ -693,10 +866,21 @@ textarea:focus{
   text-align:left !important;
 }
 
+/* --- FIX: control key column widths --- */
+/* v1.389: Col 3 (Accrued) +5px vs previous rendering */
+#page_bills .bills-table th:nth-child(3),
+#page_bills .bills-table td:nth-child(3){
+  width: 75px !important;
+  min-width: 75px !important;
+}
+
 /* --- FIX: center Status column + center payment button in last column --- */
-#page_bills .bills-table th:nth-child(4),
-#page_bills .bills-table td:nth-child(4){
-  text-align:center !important;
+#page_bills .bills-table th:nth-child(7),
+#page_bills .bills-table td:nth-child(7){
+    /* v1.389: +10px */
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
 }
 
 #page_bills .bills-table th.pay-head,
@@ -722,14 +906,14 @@ textarea:focus{
 }
 
 /* --- FIX: center Arve (PDF) column --- */
-#page_bills .bills-table th:nth-child(5),
-#page_bills .bills-table td:nth-child(5){
+#page_bills .bills-table th:nth-child(8),
+#page_bills .bills-table td:nth-child(8){
   text-align:center !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
 
-#page_bills .bills-table td:nth-child(5) .pdf-btn{
+#page_bills .bills-table td:nth-child(8) .pdf-btn{
   display:inline-block !important;
   margin: 0 auto !important;
   float:none !important;
@@ -1019,6 +1203,9 @@ margin: 0;
 /* FIX: remove gray background inside readings table cells */
 #page_readings table.bills-table td,
 #page_readings table.bills-table th {
+      white-space: normal !important;
+      word-break: break-word;
+      line-height: 1.2;
     background: transparent !important;
 }
 
@@ -1026,8 +1213,8 @@ margin: 0;
 /* v1.254: bills table — center Summa and Staatus columns */
 #page_bills .bills-table th:nth-child(2),
 #page_bills .bills-table td:nth-child(2),
-#page_bills .bills-table th:nth-child(4),
-#page_bills .bills-table td:nth-child(4){
+#page_bills .bills-table th:nth-child(7),
+#page_bills .bills-table td:nth-child(7){
   text-align:center !important;
 }
 
@@ -1052,8 +1239,8 @@ margin: 0;
 #page_bills .bills-table td:nth-child(2),
 #page_bills .bills-table th:nth-child(4),
 #page_bills .bills-table td:nth-child(4),
-#page_bills .bills-table th:nth-child(5),
-#page_bills .bills-table td:nth-child(5){
+#page_bills .bills-table th:nth-child(8),
+#page_bills .bills-table td:nth-child(8){
   width:110px !important;
   max-width:110px !important;
 }
@@ -1274,7 +1461,7 @@ body{
 /* Shift middle 'Kontaktandmed' column right by 15ch (requested) */
 .ci-grid > .ci-col:nth-child(2){padding-left:15ch;}
 
-/* v1.353a0p251: shift phone icon + phone value left by 6ch within board list rows */
+/* v1.353a0p266: shift phone icon + phone value left by 6ch within board list rows */
 .ci-ico-phone,
 .ci-li-phone{
   position: relative;
@@ -1282,13 +1469,13 @@ body{
 }
 
 
-/* v1.353a0p251: shift Pangaandmed column right by 7ch */
+/* v1.353a0p266: shift Pangaandmed column right by 7ch */
 .ci-grid > .ci-col:nth-child(3){
   padding-left: 7ch;
 }
 
 
-/* v1.353a0p251: align body text exactly with header left edge */
+/* v1.353a0p266: align body text exactly with header left edge */
 .ci-body,
 .ci-body ul,
 .ci-body li,
@@ -1297,6 +1484,131 @@ body{
   margin-left: 0 !important;
   padding-left: 0 !important;
 }
+
+
+/* Debt / Advance colors */
+.debt-pos,.debt-neg{color:var(--text);font-weight:400;}
+
+/* Step 2 – Tasuda bold */
+table td:nth-child(6),
+table th:nth-child(6) {
+    font-weight: 700 !important;
+}
+
+
+/* Step 4 – Light grey font for columns 3,4,5 (body only) */
+table td:nth-child(3),
+table td:nth-child(4),
+table td:nth-child(5) {
+    color: #9a9a9a !important;
+}
+
+
+/* v1.445: invoice edit modal layout + bottom row aligned right + footer no-overlap */
+#invEditModal .modal-card{width:min(840px, 98vw); max-width:840px;}
+#invEditModal .invEditGrid2{
+  --invCtlW: 120px;
+  display:grid;
+  grid-template-columns: 170px auto;
+  gap:12px 26px;
+  align-items:center;
+}
+.invRowLabel{
+  padding-top:0;
+  color:#333;
+  align-self:center;
+  position:relative;
+  top:5px;
+}
+.invRowControls{min-width:0;}
+/* Keep controls compact like 'Kogus' */
+#invEditModal .invEditGrid2 input{
+  width: var(--invCtlW);
+  max-width: 100%;
+}
+#invEditModal .invEditGrid2 .subgrid2{
+  display:grid;
+  grid-template-columns: var(--invCtlW) var(--invCtlW);
+  gap:18px 26px;
+}
+#invEditModal .invEditGrid2 .subcap{margin:0 0 6px 0;}
+
+#invEditModal .invBlockHooldus{grid-area:hooldus;}
+#invEditModal .invBlockParnu{grid-area:parnu;}
+#invEditModal .invBlockRagn{grid-area:ragn;}
+#invEditModal .invBlockEnefit arve{grid-area:enefit;}
+
+#invEditModal .subfield{max-width:120px;}
+#invEditModal input:not(#invF_invoice_id){width:var(--invCtlW) !important;}
+#invEditModal #invF_invoice_id{width:auto; min-width:10ch; max-width:100%; display:inline-block;}
+#invEditModal .subgrid2{display:grid; grid-template-columns:120px 120px; gap:12px;}
+#invEditModal .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px 26px;}
+
+/* v1.445: compact Invoice ID + centered row labels + footer buttons auto width */
+#invEditModal .field > label{display:block;}
+#invEditModal #invF_invoice_id{padding-right:12px;}
+#invEditModal .modal-footer{display:flex; gap:12px; flex-wrap:nowrap; justify-content:flex-start; align-items:center;}
+#invEditModal .modal-footer .btn{flex:0 0 auto !important; width:auto !important; white-space:nowrap !important;}
+#invEditModal .modal-footer #invEditRegister{flex:0 0 auto !important; white-space:nowrap !important;}
+
+#invEditModal .grid2 .field{margin-top:0 !important;}
+#invEditModal .modal-footer #invEditRegister{flex:3;}
+
+
+/* v1.474: invoice edit modal - fix tariff parsing (do not turn 1.00 into 100) */
+#invEditModal input.invPrefill{
+  color:#9a9a9a !important;
+}
+#invEditModal.busy .modal-backdrop{
+  pointer-events:none;
+}
+#invEditModal.busy .iconbtn{
+  pointer-events:none;
+}
+#invEditModal .modal-foot button:disabled,
+#invEditModal .iconbtn:disabled{
+  color:#9a9a9a !important;
+}
+
+#invEditModal .modal-footer .btn:disabled{
+  color:#9a9a9a !important;
+  opacity:0.65;
+}
+#invEditModal .modal-footer .btn:disabled *{
+  color:#9a9a9a !important;
+}
+
+/* v1.474: invSelModal disabled buttons should look disabled (grey text) */
+#invSelModal.busy .modal-backdrop{ pointer-events:none; }
+#invSelModal.busy .iconbtn{ pointer-events:none; }
+#invSelModal .iconbtn:disabled{ color:#9a9a9a !important; }
+#invSelModal .modal-footer .btn:disabled{
+  color:#9a9a9a !important;
+  opacity:0.65;
+}
+#invSelModal .modal-footer .btn:disabled *{
+  color:#9a9a9a !important;
+}
+
+/* --- Pärnu Vesi PDF import (UI only) --- */
+.invInlineFile{ display:flex; align-items:center; gap:10px; }
+.invInlineFile input{ flex:1; min-width:0; width:auto; } /* prevent input overlaying button */
+.invPdfBtnSmall{
+  flex:0 0 auto;
+  width:32px; height:32px; padding:0;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.18);
+  background:#f6f6f6;
+  cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  user-select:none;
+  position:relative; z-index:2;
+  pointer-events:auto;
+}
+.invPdfBtnSmall:active{ transform:scale(.98); }
+.invPdfStatus{ margin-top:6px; font-size:12px; line-height:1.25; color:#b00020; }
+.invPdfStatus.ok{ color:#0a7a2f; }
+.invPdfStatus.warn{ color:#b00020; }
 
 </style>
 
@@ -1325,10 +1637,35 @@ body{
 /* Bills: admin apartment buttons aligned to the right (same concept as Readings toggle) */
 #page_bills #billsAptToggleWrap{
   margin-left: auto !important;
+  width: auto !important;
   display: inline-flex !important;
+  flex-direction: column !important; /* apt buttons row + action button under */
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+
+/* R15: keep apartment buttons in one row, and the action button under them */
+#page_bills #billsAptToggleWrap .bills-apt-row{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+
+/* v1.417: bills — "Loo arve" spans width of apt buttons 1–5 */
+#page_bills #billsAptToggleWrap .bills-apt-row{
+  display: flex !important;
   gap: 8px !important;
   align-items: center !important;
+  justify-content: flex-end !important;
 }
+#page_bills #billsAptToggleWrap #btnInvoiceCreate{
+  width: 100% !important;
+  text-align: center;
+}
+
+
+
 
 #page_bills .bills-table{
   margin-top: 0 !important;
@@ -1407,6 +1744,9 @@ body{
 /* FIX: remove gray background inside readings table cells */
 #page_readings table.bills-table td,
 #page_readings table.bills-table th {
+      white-space: normal !important;
+      word-break: break-word;
+      line-height: 1.2;
     background: transparent !important;
 }
 
@@ -1433,8 +1773,8 @@ body{
 #page_bills .bills-table td:nth-child(2),
 #page_bills .bills-table th:nth-child(4),
 #page_bills .bills-table td:nth-child(4),
-#page_bills .bills-table th:nth-child(5),
-#page_bills .bills-table td:nth-child(5){
+#page_bills .bills-table th:nth-child(8),
+#page_bills .bills-table td:nth-child(8){
   width:110px !important;
   max-width:110px !important;
 }
@@ -1467,7 +1807,7 @@ body{
 #page_readings .bills-year-row.rd-topline select{ flex:0 0 auto; }
 #page_readings .bills-year-row.rd-topline .rd-scope-toggle{ flex:0 0 auto; margin-left:auto; }
 
-/* v1.353a0p251: align year selector + apartment buttons on one line (Bills) */
+/* v1.353a0p266: align year selector + apartment buttons on one line (Bills) */
 #page_bills .bills-year-row.rd-topline{
   display:flex !important;
   align-items:center !important;
@@ -2308,12 +2648,155 @@ body{
   color: rgba(0,0,0,0.35) !important;
 }
 </style>
+
+<style>
+  /* v1.367: columns 3/4/5/6/9 same (narrow) width + allow overall table to shrink */
+  #page_bills .bills-table th:nth-child(3),
+  #page_bills .bills-table th:nth-child(4),
+  #page_bills .bills-table th:nth-child(5),
+  #page_bills .bills-table th:nth-child(6),
+  #page_bills .bills-table th:nth-child(9),
+  #page_bills .bills-table td:nth-child(3),
+  #page_bills .bills-table td:nth-child(4),
+  #page_bills .bills-table td:nth-child(5),
+  #page_bills .bills-table td:nth-child(6),
+  #page_bills .bills-table td:nth-child(9){
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
+  }
+</style>
+
+
+<style>
+  /* v1.367: reduce specific column widths and shrink table */
+  #page_bills .bills-table th:nth-child(7),
+  #page_bills .bills-table td:nth-child(7){
+    width: calc(100px - 50px);
+    min-width: calc(100px - 50px);
+    max-width: calc(100px - 50px);
+  }
+
+  #page_bills .bills-table th:nth-child(8),
+  #page_bills .bills-table td:nth-child(8){
+    width: calc(120px - 60px);
+    min-width: calc(120px - 60px);
+    max-width: calc(120px - 60px);
+  }
+
+  #page_bills .bills-table th:nth-child(10),
+  #page_bills .bills-table td:nth-child(10){
+    width: 75px !important;
+    min-width: 75px !important;
+    max-width: 75px !important;
+  }
+
+  /* ensure table shrinks */
+  #page_bills .bills-table{
+    width:auto;
+  }
+</style>
+
+
+<style>
+  /* v1.367: force narrower widths (with !important) so overall table width really shrinks */
+  #page_bills .bills-table th:nth-child(7),
+  #page_bills .bills-table td:nth-child(7){
+    width: 60px !important;
+    min-width: 75px !important;
+    max-width: 75px !important;
+  }
+
+  #page_bills .bills-table th:nth-child(8),
+  #page_bills .bills-table td:nth-child(8){
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+  }
+
+  #page_bills .bills-table th:nth-child(10),
+  #page_bills .bills-table td:nth-child(10){
+    width: 75px !important;
+    min-width: 75px !important;
+    max-width: 75px !important;
+  }
+
+  /* keep shrink-to-content */
+  #page_bills .bills-table{
+    width: auto !important;
+    display: inline-table !important;
+    table-layout: fixed !important;
+    max-width: 100% !important;
+  }
+</style>
+
+
+<style>
+  /* v1.389: make bills table truly auto-sized and responsive to column widths */
+  #page_bills .bills-table{
+    table-layout: auto !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: inline-table !important;
+  }
+
+  /* increase column widths */
+  #page_bills .bills-table th:nth-child(3),
+  #page_bills .bills-table td:nth-child(3){
+    width: 75px !important;
+    min-width: 75px !important;
+    max-width: 75px !important;
+  }
+
+  #page_bills .bills-table th:nth-child(7),
+  #page_bills .bills-table td:nth-child(7){
+    width: 85px !important;
+    min-width: 85px !important;
+    max-width: 85px !important;
+  }
+</style>
+
+
+<style>
+  /* v1.389: keep wrap, but make it readable (break at spaces/slash or soft-hyphen) */
+  #page_bills .bills-table th{
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: manual !important;
+    line-height: 1.15;
+  }
+</style>
+
+
+<style>
+  /* v1.389: +5px for column 7 */
+  #page_bills .bills-table th:nth-child(7),
+  #page_bills .bills-table td:nth-child(7){
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+  }
+</style>
+
+
+<style>
+  /* v1.389: additional +5px for column 7 (now 95px) */
+  #page_bills .bills-table th:nth-child(7),
+  #page_bills .bills-table td:nth-child(7){
+    width: 95px !important;
+    min-width: 95px !important;
+    max-width: 95px !important;
+  }
+</style>
+
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap">v1.353a0p251</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.485</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2541,10 +3024,16 @@ body{
             <thead>
               <tr>
                 <th id="thInvoiceNr"></th>
-                                <th id="thPeriod">Период</th>
-                <th id="thSum">Сумма</th>
+                <th id="thPeriod">Период</th>
+                <th id="thSum">Начисле­но</th>
+                <th id="thDebtAdvance">Võlg / Ettemaks</th>
+                <th id="thPenalty">Viivis</th>
+                <th id="thDue">К оплате</th>
                 <th id="thStatus2">Статус</th>
                 <th id="thBillPdf">Счёт</th>
+                <th id="thPaidAmount"></th>
+                <th id="thPaidDate"></th>
+                <th id="thPay" class="pay-col"></th>
               </tr>
             </thead>
             <tbody id="billsBody"></tbody>
@@ -2713,7 +3202,7 @@ body{
         tabAdmin: "Администрирование",
 
         contactTitle: "",
-        contactInfoHeader: "Kontaktandmed",
+        contactInfoHeader: "Контактные данные",
         boardMembersTitle: "Члены правления",
         chairmanTitle: "Председатель",
         boardMemberTitle: "Член правления",
@@ -2783,7 +3272,9 @@ body{
         thBillDate: "Дата",
         thInvoiceNr: "Счёт №",
         thPeriod: "Период",
-        thSum: "Сумма",
+        thSum: "Начисле­но",
+        penaltyHdr: "Пени",
+        dueHdr: "К оплате",
         thBillPdf: "Счёт",
 
         nextReadings1: "Следующий шаг: читать данные из листа",
@@ -2797,6 +3288,9 @@ body{
         commentReminder: "Напоминание: последний день месяца",
         billPaid: "Оплачено",
         billPending: "В ожидании",
+        paidAmountHdr: "Оплаченная сумма",
+        paidDateHdr: "Дата оплаты",
+        debtAdvanceHdr: "Долг / Предоплата",
         confirmPay: "Подтвердить оплату",
         billOverdue: "Просрочено",
         forgotPrompt: "Введите email или имя пользователя:",
@@ -2846,6 +3340,61 @@ body{
         adminSaved: "Сохранено",
         adminDeleteConfirm: "Удалить пользователя?",
 
+
+
+  // R15 invoice generation
+  invoiceCreateBtn: "Создать счёт",
+  invSelTitle: "Создать счёт",
+  invSelApt: "Квартира",
+  invSelMonth: "Месяц",
+  invSelYear: "Год",
+  invSelLoading: "Загрузка квартир…",
+  invSelChooseAll: "Выберите квартиру, месяц и год.",
+  invSelChecking: "Проверка…",
+  invSelCreatingDraft: "Создание счёта…",
+        invEditLoading: "Загрузка счёта…",
+  invEditSaving: "Сохранение…",
+  invEditSaved: "Сохранено.",
+  month_1: "Январь",
+  month_2: "Февраль",
+  month_3: "Март",
+  month_4: "Апрель",
+  month_5: "Май",
+  month_6: "Июнь",
+  month_7: "Июль",
+  month_8: "Август",
+  month_9: "Сентябрь",
+  month_10: "Октябрь",
+  month_11: "Ноябрь",
+  month_12: "Декабрь",
+  invExistsTitle: "Счёт уже существует",
+  invExistsText: "Вы хотите отредактировать данный счёт?",
+  invoiceEditTitle: "Инфо счёта",
+  invExistsYes: "Да",
+  invExistsNo: "Нет",
+  invEditTitle: "Счёт",
+  invEditCancel: "Отмена",
+  invEditSave: "Сохранить",
+  invEditPreview: "Предпросмотр",
+  invEditRegister: "Зарегистрировать счёт и создать PDF",
+  invEditSend: "Отправить счёт",
+  // Invoice edit modal labels
+  invDeletingDraft: "Удаление черновика…",
+  invPenaltyTitle: "Пени",
+  invDebtTitle: "Долг / Предоплата",
+  invHooldusTitle: "Обслуживание",
+  invParnuTitle: "Pärnu vesi счёт",
+  invRagnTitle: "Ragn and Sells счёт",
+  invEnefitTitle: "Enefit счёт",
+  invTariif: "Тариф",
+  invKogus: "Количество",
+  invSumma: "Сумма, €",
+  invHouseM3: "Потребление, m3",
+  invDebt: "Долг / Предоплата",
+  invPenalty: "Пени",
+  invStubTitle: "Отправить счёт",
+  invStubText: "эту часть еще нужно разработать",
+  ok: "OK",
 
   payTitle: "Подтверждение оплаты",
   payDate: "Дата оплаты",
@@ -2965,7 +3514,9 @@ body{
         thBillDate: "Kuupäev",
         thInvoiceNr: "Arve Nr.",
         thPeriod: "Periood",
-        thSum: "Summa",
+        thSum: "Arvesta­tud",
+        penaltyHdr: "Viivis",
+        dueHdr: "Tasuda",
         thBillPdf: "Arve",
 
         nextReadings1: "Järgmine samm: loeme andmed lehelt",
@@ -2979,6 +3530,9 @@ body{
         commentReminder: "Meeldetuletus: kuu viimane päev",
         billPaid: "Makstud",
         billPending: "Ootel",
+        paidAmountHdr: "Makstud summa",
+        paidDateHdr: "Makstud kuupäev",
+        debtAdvanceHdr: "Võlg / Ettemaks",
         confirmPay: "Kinnita makse",
         billOverdue: "Üle tähtaja",
         forgotPrompt: "Sisesta email või kasutajanimi:",
@@ -3029,6 +3583,61 @@ body{
         adminDeleteConfirm: "Kustuta kasutaja?",
 
 
+
+  // R15 invoice generation
+  invoiceCreateBtn: "Loo arve",
+  invSelTitle: "Loo arve",
+  invSelApt: "Korter",
+  invSelMonth: "Kuu",
+  invSelYear: "Aasta",
+  invSelLoading: "Korterite laadimine…",
+  invSelChooseAll: "Vali korter, kuu ja aasta.",
+  invSelChecking: "Kontrollin…",
+  invSelCreatingDraft: "Arve loomine…",
+        invEditLoading: "Arve laadimine…",
+  invEditSaving: "Salvestan…",
+  invEditSaved: "Salvestatud.",
+  month_1: "Jaanuar",
+  month_2: "Veebruar",
+  month_3: "Märts",
+  month_4: "Aprill",
+  month_5: "Mai",
+  month_6: "Juuni",
+  month_7: "Juuli",
+  month_8: "August",
+  month_9: "September",
+  month_10: "Oktoober",
+  month_11: "November",
+  month_12: "Detsember",
+  invExistsTitle: "Arve juba olemas",
+  invExistsText: "Kas soovid seda arvet muuta?",
+  invoiceEditTitle: "Arve info",
+  invExistsYes: "Jah",
+  invExistsNo: "Ei",
+  invEditTitle: "Arve",
+  invEditCancel: "Tühista",
+  invEditSave: "Salvesta",
+  invEditPreview: "Eelvaade",
+  invEditRegister: "Registreeri arve ja loo PDF",
+  invEditSend: "Saada arve",
+  // Invoice edit modal labels
+  invDeletingDraft: "Mustandi kustutamine…",
+  invPenaltyTitle: "Viivis",
+  invDebtTitle: "Võlg / Ettemaks",
+  invHooldusTitle: "Hoolduskulud",
+  invParnuTitle: "Pärnu vesi arve",
+  invRagnTitle: "Ragn and Sells arve",
+  invEnefitTitle: "Enefit arve",
+  invTariif: "Tariif",
+  invKogus: "Kogus",
+  invSumma: "Summa, €",
+  invHouseM3: "Tarbimine, m3",
+  invDebt: "Võlg / Etteplamata",
+  invPenalty: "Viivis",
+  invStubTitle: "Saada arve",
+  invStubText: "see osa vajab veel arendust",
+  ok: "OK",
+
   payTitle: "Maksekinnitamine",
   payDate: "Makse kuupäev",
   payAmount: "Makse summa (€)",
@@ -3076,7 +3685,7 @@ body{
         tabAdmin: "Site Administration",
 
         contactTitle: "",
-        contactInfoHeader: "Contact info",
+        contactInfoHeader: "Contact details",
         boardMembersTitle: "Board members",
         chairmanTitle: "Chairman",
         boardMemberTitle: "Board member",
@@ -3146,7 +3755,9 @@ body{
         thBillDate: "Date",
         thInvoiceNr: "Invoice No.",
         thPeriod: "Period",
-        thSum: "Amount",
+        thSum: "Accrued",
+        penaltyHdr: "Penalty",
+        dueHdr: "Total due",
         thBillPdf: "Invoice",
 
         nextReadings1: "Next step: read data from sheet",
@@ -3160,6 +3771,9 @@ body{
         commentReminder: "Reminder: last day of month",
         billPaid: "Paid",
         billPending: "Pending",
+        paidAmountHdr: "Paid amount",
+        paidDateHdr: "Paid date",
+        debtAdvanceHdr: "Debt / Advance",
         confirmPay: "Confirm payment",
         billOverdue: "Overdue",
         forgotPrompt: "Enter email or username:",
@@ -3209,6 +3823,61 @@ body{
         adminSaved: "Saved",
         adminDeleteConfirm: "Delete this user?",
 
+
+
+  // R15 invoice generation
+  invoiceCreateBtn: "Create invoice",
+  invSelTitle: "Create invoice",
+  invSelApt: "Apartment",
+  invSelMonth: "Month",
+  invSelYear: "Year",
+  invSelLoading: "Loading apartments…",
+  invSelChooseAll: "Select apartment, month and year.",
+  invSelChecking: "Checking…",
+  invSelCreatingDraft: "Creating invoice…",
+        invEditLoading: "Loading invoice…",
+  invEditSaving: "Saving…",
+  invEditSaved: "Saved.",
+  month_1: "January",
+  month_2: "February",
+  month_3: "March",
+  month_4: "April",
+  month_5: "May",
+  month_6: "June",
+  month_7: "July",
+  month_8: "August",
+  month_9: "September",
+  month_10: "October",
+  month_11: "November",
+  month_12: "December",
+  invExistsTitle: "Invoice already exists",
+  invExistsText: "Do you want to edit this invoice?",
+  invoiceEditTitle: "Invoice info",
+  invExistsYes: "Yes",
+  invExistsNo: "No",
+  invEditTitle: "Invoice",
+  invEditCancel: "Cancel",
+  invEditSave: "Save",
+  invEditPreview: "Preview",
+  invEditRegister: "Register invoice & make PDF",
+  invEditSend: "Send invoice",
+  // Invoice edit modal labels
+  invDeletingDraft: "Deleting draft…",
+  invPenaltyTitle: "Penalty",
+  invDebtTitle: "Debt / Prepayment",
+  invHooldusTitle: "Maintenance",
+  invParnuTitle: "Pärnu vesi invoice",
+  invRagnTitle: "Ragn and Sells invoice",
+  invEnefitTitle: "Enefit invoice",
+  invTariif: "Tariff",
+  invKogus: "Quantity",
+  invSumma: "Amount, €",
+  invHouseM3: "Consumption, m3",
+  invDebt: "Debt / Prepayment",
+  invPenalty: "Penalty",
+  invStubTitle: "Send invoice",
+  invStubText: "this part still needs to be developed",
+  ok: "OK",
 
   payTitle: "Payment confirmation",
   payDate: "Payment date",
@@ -3283,6 +3952,72 @@ function getLangSafe(){
       const name = arr[monthIndex] || "";
       return `${name} ${year}`;
     }
+  function __formatDate_DDMMYYYY(value){
+    if(value==null) return "";
+    const s = String(value).trim();
+    if(!s) return "";
+    if(/^\d{2}\.\d{2}\.\d{4}$/.test(s)) return s;
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return `${m[3]}.${m[2]}.${m[1]}`;
+    const m2 = s.match(/^(\d{2})-(\d{2})-(\d{4})/);
+    if(m2) return `${m2[1]}.${m2[2]}.${m2[3]}`;
+    return s;
+  }
+
+  // Format number with dot decimal separator and always 2 decimals (no currency symbol)
+  function __formatMoney_Dot2_(value){
+    const n = (value==null || value==="") ? 0 : Number(value);
+    if (!isFinite(n)) return String(value||"").trim();
+    return `${n.toFixed(2)}`.trim();
+  }
+
+  // Format money with currency suffix (for read-only tables/labels)
+  function __formatMoneyCur_Dot2_(value, currency){
+    const n = (value==null || value==="") ? 0 : Number(value);
+    const cur = currency || "€";
+    if (!isFinite(n)) return `${String(value)} ${cur}`.trim();
+    return `${n.toFixed(2)} ${cur}`.trim();
+  }
+
+  // v1.432: numeric helper — 3 decimals with dot separator (for m3)
+  function __formatNum_Dot3_(value){
+    const n = (value==null || value==="") ? 0 : Number(value);
+    if (!isFinite(n)) return String(value);
+    return n.toFixed(3);
+  }
+
+  // v1.389: UI display helper — dash only for empty; 0 must be shown as 0.00
+  function __displayMoneyOrDash(v){
+    if (v === "" || v === null || typeof v === "undefined") return "—";
+    const n = (typeof v === "number") ? v : Number(String(v).replace(",", "."));
+    if (Number.isNaN(n)) return "—";
+    return n.toFixed(2);
+  }
+
+
+  function __formatSignedMoney_Dot2_(value){
+    const n = (value==null || value==="") ? 0 : Number(value);
+    if (!isFinite(n)) return String(value||"");
+    if (n === 0) return "0.00";
+    const sign = n > 0 ? "+" : "-";
+    return `${sign}${Math.abs(n).toFixed(2)}`;
+  }
+
+  // Parse dd.mm.yyyy -> yyyy-mm-dd (returns "" if invalid)
+  function __parseDate_DDMMYYYY_toISO_(ddmmyyyy){
+    const s = String(ddmmyyyy||"").trim();
+    const m = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if(!m) return "";
+    const dd = Number(m[1]), mm = Number(m[2]), yyyy = Number(m[3]);
+    if(dd<1 || dd>31 || mm<1 || mm>12) return "";
+    const iso = `${String(yyyy).padStart(4,"0")}-${String(mm).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
+    const d = new Date(iso + "T00:00:00Z");
+    if(isNaN(d.getTime())) return "";
+    const rt = d.toISOString().slice(0,10);
+    return rt === iso ? iso : "";
+  }
+
+
 
     function tr(key){
       const lang = getLang();
@@ -3329,7 +4064,7 @@ function applyPublicInfo_(){
         const name = String(p && (p.display_name || p.name) || "").trim();
         const email = String(p && p.email || "").trim();
         const phone = String(p && p.phone || "").trim();
-        // v1.353a0p251: Visualize board member contact with aligned icon columns
+        // v1.353a0p266: Visualize board member contact with aligned icon columns
         li.innerHTML = "";
         const nameSpan = document.createElement("span");
         nameSpan.className = "ci-li-name";
@@ -3517,6 +4252,7 @@ function applyLang(){
       }catch(e){}
 
       const _el_contactTitle = document.getElementById("contactTitle"); if(_el_contactTitle) _el_contactTitle.textContent = t.contactTitle;
+      const _el_contactInfoHeader = document.getElementById("contactInfoHeader"); if(_el_contactInfoHeader) _el_contactInfoHeader.textContent = t.contactInfoHeader;
       const _el_boardMembersTitle = document.getElementById("boardMembersTitle"); if(_el_boardMembersTitle) _el_boardMembersTitle.textContent = t.boardMembersTitle;
       const _el_chairmanTitle = document.getElementById("chairmanTitle"); if(_el_chairmanTitle) _el_chairmanTitle.textContent = t.chairmanTitle;
       const _el_boardMemberTitle = document.getElementById("boardMemberTitle"); if(_el_boardMemberTitle) _el_boardMemberTitle.textContent = t.boardMemberTitle;
@@ -3564,7 +4300,13 @@ safeSetText("qsPayBadLbl", (t.qsPayBadLbl || (lang==="et" ? "ei maksnud" : (lang
       const _el_thPeriod = document.getElementById("thPeriod"); if(_el_thPeriod) _el_thPeriod.textContent = t.thPeriod;
       const _el_thSum = document.getElementById("thSum"); if(_el_thSum) _el_thSum.textContent = t.thSum;
       safeSetText("thBillPdf", t.thBillPdf);
+      safeSetText("thInvoiceNr", t.thInvoiceNr || t.invoiceNrHdr || "Arve Nr.");
+      safeSetText("thPaidAmount", t.paidAmountHdr || "Makstud summa");
+      safeSetText("thPaidDate", t.paidDateHdr || "Makstud kuupäev");
 
+      safeSetText("thDebtAdvance", t.debtAdvanceHdr || "Võlg / Ettemaks");
+      safeSetText("thPenalty", t.penaltyHdr || "Viivis");
+      safeSetText("thDue", t.dueHdr || (lang==="en" ? "Total due" : (lang==="et" ? "Tasuda" : "К оплате")));
       const _el_nextReadings1 = document.getElementById("nextReadings1"); if(_el_nextReadings1) _el_nextReadings1.textContent = t.nextReadings1;
       const _el_nextReadings2 = document.getElementById("nextReadings2"); if(_el_nextReadings2) _el_nextReadings2.textContent = t.nextReadings2;
       const _el_nextBills1 = document.getElementById("nextBills1"); if(_el_nextBills1) _el_nextBills1.textContent = t.nextBills1;
@@ -3605,9 +4347,84 @@ document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
       // v1.353a0p139: re-apply Home public info strings (roles/bank) on language switch
       try{ applyPublicInfo_(); }catch(e){}
 
+  try{ updateInvoiceI18n_(); }catch(e){}
   updatePayI18n_();
+}
 
-  updatePayI18n_();
+
+function updateInvoiceI18n_(){
+  try{
+    // Create invoice button (admin area)
+    const btnCreate = document.getElementById("btnInvoiceCreate");
+    if(btnCreate) btnCreate.textContent = tr("invoiceCreateBtn");
+
+    // Selector modal
+    const tSel = document.getElementById("invSelModalTitle"); if(tSel) tSel.textContent = tr("invSelTitle");
+    const lApt = document.getElementById("invSelAptLbl"); if(lApt) lApt.textContent = tr("invSelApt");
+    const lMon = document.getElementById("invSelMonthLbl"); if(lMon) lMon.textContent = tr("invSelMonth");
+    const lYear = document.getElementById("invSelYearLbl"); if(lYear) lYear.textContent = tr("invSelYear");
+    const bCancel = document.getElementById("invSelCancel"); if(bCancel) bCancel.textContent = tr("cancel");
+    const bCont = document.getElementById("invSelContinue"); if(bCont) bCont.textContent = tr("continue");
+
+    // Exists modal
+    const tEx = document.getElementById("invExistsModalTitle"); if(tEx) tEx.textContent = tr("invExistsTitle");
+    const txEx = document.getElementById("invExistsText"); if(txEx) txEx.textContent = tr("invExistsText");
+    const bNo = document.getElementById("invExistsNo"); if(bNo) bNo.textContent = tr("invExistsNo");
+    const bYes = document.getElementById("invExistsYes"); if(bYes) bYes.textContent = tr("invExistsYes");
+
+    // Edit modal buttons + title
+    const tEdit = document.getElementById("invEditModalTitle");
+    if(tEdit){
+      // keep invoice number in title when modal is open
+      try{
+        if (typeof __invSetEditTitle_ === "function" && window.__invCtx){
+          __invSetEditTitle_(__invCtx.data || {invoice_id: (byId("invF_invoice_id")?byId("invF_invoice_id").value:"")});
+        } else {
+          tEdit.textContent = tr("invoiceEditTitle");
+        }
+      }catch(_e){ tEdit.textContent = tr("invoiceEditTitle"); }
+    }
+    const bEC = document.getElementById("invEditCancel"); if(bEC) bEC.textContent = tr("invEditCancel");
+    const bES = document.getElementById("invEditSave"); if(bES) bES.textContent = tr("invEditSave");
+    const bEP = document.getElementById("invEditPreview"); if(bEP) bEP.textContent = tr("invEditPreview");
+    const bER = document.getElementById("invEditRegister"); if(bER) bER.textContent = tr("invEditRegister");
+    const bSend = document.getElementById("invEditSend"); if(bSend) bSend.textContent = tr("invEditSend");
+
+    // Stub modal
+    const tStub = document.getElementById("invStubModalTitle"); if(tStub) tStub.textContent = tr("invStubTitle");
+    const stubText = (function(){
+      const modal = document.getElementById("invStubModal");
+      if(!modal) return null;
+      return modal.querySelector(".modal-body .muted");
+    })();
+    if(stubText) stubText.textContent = tr("invStubText");
+    const bOk = document.getElementById("invStubOk"); if(bOk) bOk.textContent = tr("ok");
+    // Ensure all invoice modals' [data-i18n] texts refresh (invEditModal rows etc.)
+    try{
+      const root = document.getElementById("invEditModal");
+      if(root){
+        root.querySelectorAll("[data-i18n]").forEach(el=>{
+          const k = el.getAttribute("data-i18n");
+          if(!k) return;
+          el.textContent = tr(k);
+        });
+        root.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+          const k = el.getAttribute("data-i18n-placeholder");
+          if(!k) return;
+          el.setAttribute("placeholder", tr(k));
+        });
+      }
+      const rootSel = document.getElementById("invSelModal");
+      if(rootSel){
+        rootSel.querySelectorAll("[data-i18n]").forEach(el=>{
+          const k = el.getAttribute("data-i18n");
+          if(!k) return;
+          el.textContent = tr(k);
+        });
+      }
+    }catch(_e){}
+
+  }catch(_){}
 }
 
 function updatePayI18n_() {
@@ -3699,7 +4516,7 @@ applyLang();
       renderDemoTables(user);
       attachBillsYearListener_();
 
-  // v1.353a0p251: apartment buttons (admin only)
+  // v1.353a0p266: apartment buttons (admin only)
   try{ if(__billsIsAdmin_()){ __billsSetSelectedApartment_(__billsGetSelectedApartment_()); } }catch(e){}
   try{ __billsRenderAptButtons_(); }catch(e){}
       navigate("home");
@@ -3814,9 +4631,24 @@ applyLang();
     function _uiMsg(key){
       const l = getLang();
       const dict = {
-        ru: { loggingIn:"Выполняю вход…", loadingYears:"Загружаю данные…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…"},
-        et: { loggingIn:"Sisselogimine…", loadingYears:"Laadin andmeid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…"},
-        en: { loggingIn:"Signing in…", loadingYears:"Loading data…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…"}
+        ru: {
+          loggingIn:"Выполняю вход…", loadingYears:"Загружаю данные…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…",
+          bills_th_invoice_no:"Счёт №", bills_th_period:"Период", bills_th_amount:"Начисле­но", bills_th_debt_advance:"Долг/Предоплата",
+          bills_th_penalty:"Viivis", bills_th_due:"К оплате", bills_th_status:"Статус", bills_th_invoice:"Счёт",
+          bills_th_paid_amount:"Оплаченная сумма", bills_th_paid_date:"Дата оплаты", bills_th_pay:"Подтвердить"
+        },
+        et: {
+          loggingIn:"Sisselogimine…", loadingYears:"Laadin andmeid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…",
+          bills_th_invoice_no:"Arve nr.", bills_th_period:"Periood", bills_th_amount:"Arvesta­tud", bills_th_debt_advance:"Võlg / Ettemaks",
+          bills_th_penalty:"Viivis", bills_th_due:"Tasuda", bills_th_status:"Staatus", bills_th_invoice:"Arve",
+          bills_th_paid_amount:"Makstud summa", bills_th_paid_date:"Makstud kuupäev", bills_th_pay:"Kinnita"
+        },
+        en: {
+          loggingIn:"Signing in…", loadingYears:"Loading data…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…",
+          bills_th_invoice_no:"Invoice #", bills_th_period:"Period", bills_th_amount:"Accrued", bills_th_debt_advance:"Debt / Advance",
+          bills_th_penalty:"Penalty", bills_th_due:"Total due", bills_th_status:"Status", bills_th_invoice:"Invoice",
+          bills_th_paid_amount:"Paid amount", bills_th_paid_date:"Paid date", bills_th_pay:"Confirm"
+        }
       };
       return (dict[l] && dict[l][key]) || (dict.ru[key] || "");
     }
@@ -3881,7 +4713,11 @@ async function apiPost(path, payload){
       // Robust fetch with timeout to avoid hanging UI when Apps Script is slow/unreachable
       const ctrl = new AbortController();
       // v1.353a0p139: longer timeout for Admin endpoints (Apps Script can be slower there)
-      const ms = (String(path||"").includes("adminUsers") ? 60000 : 20000);
+      const p = String(path||"" );
+      const ms = (p.includes("adminUsers") ? 60000 : (
+        (p.includes("invoiceDraftCreate") || p.includes("invoiceSave") || p.includes("invoiceRegister") || p.includes("invoicePdf") || p.includes("invoiceSend")) ? 90000 :
+        (p.includes("invoiceCheck") || p.includes("invoiceApartments") || p.includes("invoices")) ? 45000 : 20000
+      ));
       const t = setTimeout(()=>ctrl.abort(), ms);
 // 20s
       try{
@@ -4081,15 +4917,48 @@ else msg.textContent = t.errLogin;
 
         (resp.invoices || []).forEach(inv=>{
           const period = `${monthName(Number(inv.month||0))}`;
-          const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
+          const sum = __formatMoneyCur_Dot2_(inv.amount, inv.currency||"€");
+          const debt = (inv.ettemaks!=null ? String(inv.ettemaks) : "");
+          const pen  = (inv.viivis!=null ? String(inv.viivis) : "");
+          const due  = (inv.payment_due!=null ? String(inv.payment_due) : "");
           const st = statusText(inv.status);
           const cls = statusCls(inv.status);
           const id = String(inv.bo||inv.invoice_id||inv.id||"");
 
+          const paidSumVal = (inv.amount_paid!=null ? String(inv.amount_paid) : "");
+          const paidSum = (paidSumVal.trim()==="") ? (t.commentDash || "—") : __formatMoneyCur_Dot2_(paidSumVal, inv.currency||"€");
+          const paidDateRaw = (inv.date_paid!=null && String(inv.date_paid)!=="") ? String(inv.date_paid) : "";
+          const paidDate = __formatDate_DDMMYYYY(paidDateRaw);
+          const paidDateDisp = (paidDate && String(paidDate).trim()!=='') ? paidDate : (t.commentDash || '—');
+          const debtRaw = debt;
+          // Penalty (viivis): show dash when empty or 0
+          const penVal = pen;
+          const penNum = Number(String(penVal).replace(",", "."));
+          const penTxt = (String(penVal).trim()==="") ? (t.commentDash || "—") : __formatMoneyCur_Dot2_(penNum, inv.currency||"€");
+
+          // Total due (payment_due): show dash when empty or 0
+          const dueVal = due;
+          const dueNum = Number(String(dueVal).replace(",", "."));
+          const dueTxt = (String(dueVal).trim()==="") ? (t.commentDash || "—") : __formatMoneyCur_Dot2_(dueNum, inv.currency||"€");
+          const debtNum = Number(String(debtRaw).replace(",", "."));
+          let debtTxt = (t.commentDash || "—");
+          let debtCls = "";
+          if(String(debtRaw).trim() !== "" && !isNaN(debtNum)){
+            if(debtNum === 0){
+              debtTxt = "0.00";
+              debtCls = "";
+            } else {
+            const fmt = Math.abs(debtNum).toFixed(2);
+            debtTxt = (debtNum > 0 ? "+" : "-") + fmt;
+            debtCls = (debtNum > 0) ? "debt-pos" : "debt-neg";
+            }
+          }
+
+
           const payCell = (()=>{
             if(!isAdmin) return "";
-            const code = String(inv.status||"").toLowerCase();
-            if(code === "paid") return `<td class="pay-col"></td>`;
+            const code = String(inv.status||"").toLowerCase().trim();
+            if(code !== "pending") return `<td class="pay-col"></td>`;
             const btnLabel = (t.confirmPay || "Подтвердить оплату");
             // keep it stable for GS: prefer invoice_id, fallback to composite key
             const payload = {
@@ -4098,8 +4967,16 @@ else msg.textContent = t.errLogin;
               month: Number(inv.month||0),
               apartment: String(inv.apartment||resp.apartment||"")
             };
-            payload.amount = (inv.amount != null ? Number(inv.amount) : "");
-            return `<td class="pay-col"><button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}' data-amount='${esc(String(inv.amount||""))}'>${esc(btnLabel)}</button></td>`;
+            // Show button ONLY when payment_due (Tasuda) exists in Excel (numeric, not empty)
+            const dueRaw = (inv.payment_due==null ? "" : String(inv.payment_due).trim());
+            const dueNum = Number(dueRaw.replace(",", "."));
+            const hasTasuda = (dueRaw !== "") && isFinite(dueNum);
+            if(!hasTasuda) return `<td class="pay-col"></td>`;
+
+            const modalAmount = dueRaw; // use ONLY payment_due, never fallback to amount
+            payload.amount = dueNum;
+
+            return `<td class="pay-col"><button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}' data-amount='${esc(String(modalAmount||""))}'>${esc(btnLabel)}</button></td>`;
           })();
 
           bb.insertAdjacentHTML("beforeend", `
@@ -4107,8 +4984,13 @@ else msg.textContent = t.errLogin;
               <td>${esc(id)}</td>
               <td>${esc(period)}</td>
               <td>${esc(sum)}</td>
+              <td class="${esc(debtCls)}">${esc(debtTxt)}</td>
+              <td>${esc(penTxt)}</td>
+              <td>${esc(dueTxt)}</td>
               <td class="${esc(cls)}">${esc(st)}</td>
               <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
+              <td>${esc(paidSum)}</td>
+              <td>${esc(paidDateDisp)}</td>
               ${payCell}
             </tr>
           `);
@@ -4182,41 +5064,22 @@ const prev = sel.value;
 
 
 function rerenderBillsFromCache_(){
-  const resp = window.__ku_lastBillsResp;
-  const year = window.__ku_lastBillsYear;
-  if(!resp || !resp.ok || !year) return;
-
+  // IMPORTANT: this must never throw — otherwise i18n/login/reset gets broken.
   const bb = document.getElementById("billsBody");
   if(!bb) return;
 
-  bb.innerHTML = "";
+  // Support both cache shapes (older + newer)
+  const resp = window.__ku_lastBillsResp || null;
+  const year = window.__ku_lastBillsYear || (window.__billsCache && window.__billsCache.year) || null;
+  const invoices = (resp && resp.ok && Array.isArray(resp.invoices)) ? resp.invoices :
+                   (window.__billsCache && Array.isArray(window.__billsCache.invoices)) ? window.__billsCache.invoices : [];
 
-  const t = I18N[getLang()] || I18N.ru;
-  const monthName = (m)=>{
-    const lang = getLang();
-    const arr = MONTHS[lang] || MONTHS.ru;
-    const i = Math.max(1, Math.min(12, Number(m||0)));
-    return arr[i-1] || "";
-  };
-  const statusText = (s)=>{
-    const code = String(s||"").toLowerCase();
-    if(code === "paid") return t.billPaid || "Paid";
-    if(code === "overdue") return t.billOverdue || "Overdue";
-    if(code === "pending") return t.billPending || "Ootel";
-    return code || "";
-  };
-  const statusCls = (s)=>{
-    const code = String(s||"").toLowerCase();
-    if(code === "paid") return "st-paid";
-    if(code === "overdue") return "st-overdue";
-    if(code === "pending") return "st-pending";
-    return "";
-  };
+  // Keep admin detection exactly as current live logic
+  const isAdmin = (typeof __billsIsAdmin_ === "function") ? !!__billsIsAdmin_() : false;
 
-  // Admin-only payment column (cache re-render)
-  const isAdmin = __billsIsAdmin_();
+  // Toggle admin-only pay column
   try{
-    const thPay = document.getElementById('thPay');
+    const thPay = document.getElementById("thPay");
     const tbl = document.querySelector('#page_bills .bills-table');
     if (isAdmin){
       if (thPay) thPay.classList.remove('hidden');
@@ -4225,31 +5088,110 @@ function rerenderBillsFromCache_(){
       if (thPay) thPay.classList.add('hidden');
       if (tbl) tbl.classList.remove('has-paycol');
     }
-  } catch(_e) {}
+  }catch(_e){}
 
-  (resp.invoices || []).forEach(inv=>{
-    const period = `${monthName(Number(inv.month||0))}`;
-    const sum = `${Number(inv.amount||0).toFixed(2).replace(".", ",")} ${inv.currency||"€"}`;
+  // Helpers using existing i18n + month lists
+  const t = I18N[getLang()] || I18N.et || I18N.ru;
+  const monthName = (m)=>{
+    const lang = getLang();
+    const arr = MONTHS[lang] || MONTHS.et || MONTHS.ru;
+    const i = Math.max(1, Math.min(12, Number(m||0)));
+    return arr[i-1] || "";
+  };
+
+  const fmt2 = (v)=>{
+    const n = Number(v);
+    if(!Number.isFinite(n)) return "";
+    // decimal separator MUST be dot per spec
+    return n.toFixed(2);
+  };
+
+  const money = (v, cur)=>{
+    const s = fmt2(v);
+    if(s==="") return "";
+    return s + " " + (cur || "€");
+  };
+
+  const statusText = (s)=>{
+    const code = String(s||"").trim().toLowerCase();
+    if(code === "paid") return t.billPaid || (getLang()==="et" ? "Makstud" : (getLang()==="en" ? "Paid" : "Оплачено"));
+    if(code === "overdue") return t.billOverdue || (getLang()==="et" ? "Üle tähtaja" : (getLang()==="en" ? "Overdue" : "Просрочено"));
+    if(code === "pending") return t.billPending || (getLang()==="et" ? "Ootel" : (getLang()==="en" ? "Pending" : "Ожидается"));
+    return s ? String(s) : "";
+  };
+
+  const statusCls = (s)=>{
+    const code = String(s||"").trim().toLowerCase();
+    if(code === "paid") return "st-paid";
+    if(code === "overdue") return "st-overdue";
+    if(code === "pending") return "st-pending";
+    return "";
+  };
+
+  const dash = (t && t.commentDash) ? t.commentDash : "—";
+
+  bb.innerHTML = "";
+
+  invoices.forEach(inv=>{
+    const id = String(inv.invoice_id||"");
+    const period = monthName(inv.month);
+    const currency = inv.currency || "€";
+
+    const accrued = money(inv.amount, currency);
+
+    // New columns (read-only): ettemaks, viivis, payment_due
+    const debtAdvanceVal = (inv.ettemaks==null ? "" : String(inv.ettemaks).trim());
+    const penaltyVal = (inv.viivis==null ? "" : String(inv.viivis).trim());
+    const dueVal = (inv.payment_due==null ? "" : String(inv.payment_due).trim());
+
+    const debtAdvanceTxt = (debtAdvanceVal==="" ? "" : money(inv.ettemaks, currency));
+    const penaltyTxt = (penaltyVal==="" ? "" : money(inv.viivis, currency));
+    const dueTxt = (dueVal==="" ? "" : money(inv.payment_due, currency));
+
+    // Paid amount + date: show dash when empty/0 (same UX as before, but dot decimals)
+    const paidRaw = (inv.amount_paid==null ? "" : String(inv.amount_paid).trim());
+    const paidNum = (paidRaw==="" ? NaN : Number(paidRaw));
+    const paidTxt = (paidRaw==="" ? "" : (Number.isFinite(paidNum) && paidNum===0 ? dash : money(paidNum, currency)));
+
+    const paidDateRaw = (inv.date_paid==null ? "" : String(inv.date_paid).trim());
+    const paidDateTxt = __formatDate_DDMMYYYY(paidDateRaw);
+
     const st = statusText(inv.status);
     const cls = statusCls(inv.status);
-    const id = String(inv.invoice_id||"");
-    const canPay = isAdmin && String(inv.status||"").toLowerCase() !== 'paid';
-    const payload = {
-      invoice_id: id,
-      year: Number(inv.year||year),
-      month: Number(inv.month||0),
-      apartment: Number(window.__ku_billsSelectedApartment || window.currentUser?.apartment || 0),
-      amount_due: Number(inv.amount||0),
-      currency: String(inv.currency||"€")
-    };
+
+    // PDF
+    const hasPdf = (inv.has_pdf===false) ? false : true; // default true
+    const pdfBtn = hasPdf ? `<button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button>` : "";
+
+    // Admin: show confirm button only for pending
+    let payCell = "";
+    if(isAdmin){
+      const statusNorm = String(inv.status||"").trim().toLowerCase();
+      const canPay = (statusNorm === "pending");
+      const payload = {
+        invoice_id: id,
+        year: Number(inv.year || year || 0),
+        month: Number(inv.month||0),
+        apartment: Number(window.__ku_billsSelectedApartment || window.currentUser?.apartment || 0),
+        amount_due: Number(inv.payment_due!=null ? inv.payment_due : inv.amount || 0),
+        currency: String(currency)
+      };
+      payCell = `<td class="pay-col">${canPay ? `<button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}'>${esc(t.confirmPay || "Подтвердить оплату")}</button>` : ""}</td>`;
+    }
+
     bb.insertAdjacentHTML("beforeend", `
       <tr>
         <td>${esc(id)}</td>
         <td>${esc(period)}</td>
-        <td>${esc(sum)}</td>
+        <td>${esc(accrued)}</td>
+        <td>${esc(debtAdvanceTxt)}</td>
+        <td>${esc(penaltyTxt)}</td>
+        <td>${esc(dueTxt)}</td>
         <td class="${esc(cls)}">${esc(st)}</td>
-        <td><button class="pdf-btn" type="button" data-invoice="${esc(id)}">${esc(t.pdf || "PDF")}</button></td>
-        ${isAdmin ? `<td class="pay-col">${canPay ? `<button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}'>${esc(t.confirmPay || "Подтвердить оплату")}</button>` : ""}</td>` : ""}
+        <td>${pdfBtn}</td>
+        <td>${esc(paidTxt)}</td>
+        <td>${esc(paidDateTxt)}</td>
+        ${isAdmin ? payCell : ""}
       </tr>
     `);
   });
@@ -4267,17 +5209,16 @@ function rerenderBillsFromCache_(){
     });
   }
 
+  // bind pdf buttons
   bb.querySelectorAll(".pdf-btn").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const invoiceId = btn.getAttribute("data-invoice") || "";
-      await downloadInvoicePdf(invoiceId, btn);
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-invoice");
+      if(id) downloadInvoicePdf(id, btn);
     });
   });
-
-  // ensure pay-button texts match current UI language
-  updatePayI18n_();
-
 }
+
+
 
 function attachBillsYearListener_(){
   const sel = document.getElementById("billsYear");
@@ -4299,6 +5240,15 @@ function openPayModal_(payload){
   const amtInp = document.getElementById('payAmount');
   const msg = document.getElementById('payMsg');
   if (msg) msg.textContent = '';
+  // v1.359a0p285: reset modal state on every open (prevents disabled buttons after previous save)
+  try{ modal.classList.remove("busy"); }catch(e){}
+  try{
+    const btnOk = document.getElementById('payConfirm');
+    const btnCancel = document.getElementById('payCancel');
+    if (btnOk) btnOk.disabled = false;
+    if (btnCancel) btnCancel.disabled = false;
+  }catch(e){}
+  try{ if(msg) msg.style.fontStyle = ""; }catch(e){}
 
   // defaults
   try{
@@ -4306,11 +5256,12 @@ function openPayModal_(payload){
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth()+1).padStart(2,'0');
     const dd = String(today.getDate()).padStart(2,'0');
-    if (dateInp) dateInp.value = `${yyyy}-${mm}-${dd}`;
+    if (dateInp) dateInp.value = `${dd}.${mm}.${yyyy}`;
   }catch(e){}
   if (amtInp){
-    const due = payload && payload.amount != null ? String(payload.amount) : '';
-    amtInp.value = due;
+    const raw = payload && payload.amount != null ? String(payload.amount) : '';
+    const n = Number(raw.replace(',', '.'));
+    amtInp.value = (raw==='' || !isFinite(n)) ? raw : n.toFixed(2);
   }
   modal.style.display = 'flex';
 }
@@ -4322,12 +5273,12 @@ function closePayModal_(){
 }
 
 function wirePayModal_(){
-  const cancel = document.getElementById('payCancelBtn');
+  const cancel = document.getElementById('payCancel');
   if(cancel && !cancel.__wired){
     cancel.__wired = true;
     cancel.addEventListener('click', closePayModal_);
   }
-  const confirm = document.getElementById('payConfirmBtn');
+  const confirm = document.getElementById('payConfirm');
   if(confirm && !confirm.__wired){
     confirm.__wired = true;
     confirm.addEventListener('click', confirmPayModal_);
@@ -4354,8 +5305,21 @@ async function confirmPayModal_(){
     return;
   }
 
+  // v1.359a0p285: show Saving... in modal during save (and block double-click)
+  const btnOk = document.getElementById('payConfirm');
+  const btnCancel = document.getElementById('payCancel');
+  const modal = document.getElementById('payModal');
+
   try{
-    if (msg) msg.textContent = '';
+    const L = (typeof getLang === "function") ? getLang() : (localStorage.getItem("ku_lang") || "ru");
+    const savingTxt = (L==="et") ? "Salvestan..." : (L==="en" ? "Saving..." : "Сохраняю...");
+    if (msg){
+      msg.textContent = savingTxt;
+      msg.style.fontStyle = "italic";
+    }
+    if (btnOk) btnOk.disabled = true;
+    if (btnCancel) btnCancel.disabled = true;
+
     const body = {
       token: getToken(),
       invoice_id: payload.invoice_id || payload.id || '',
@@ -4370,7 +5334,7 @@ async function confirmPayModal_(){
     const res = await apiPost('/invoiceMarkPaid', body);
     if (!res || res.ok !== true){
       const err = (res && res.error) ? res.error : 'Ошибка сохранения';
-      if (msg) msg.textContent = err;
+      if (msg){ msg.style.fontStyle = ""; msg.textContent = err; }
       return;
     }
 
@@ -4379,12 +5343,23 @@ async function confirmPayModal_(){
     const y = Number(document.getElementById('billsYear')?.value||0);
     if (y) await loadBillsFromApi(y);
   }catch(e){
-    if (msg) msg.textContent = String(e && e.message ? e.message : e);
+    if (msg){ msg.style.fontStyle = ""; msg.textContent = String(e && e.message ? e.message : e); }
+  }finally{
+    // re-enable only if modal is still open (in success we close it)
+    try{
+      const isVisible = !!(modal && modal.style.display && modal.style.display !== 'none');
+      if (isVisible){
+        if (btnOk) btnOk.disabled = false;
+        if (btnCancel) btnCancel.disabled = false;
+      }
+    }catch(_){}
   }
 }
 
 
-// v1.353a0p251: Bills apartment buttons for admin (UI-only; uses same concept as Readings scope toggle)
+
+
+// v1.353a0p266: Bills apartment buttons for admin (UI-only; uses same concept as Readings scope toggle)
 function __billsIsAdmin_(){
   try{
     const u = JSON.parse(localStorage.getItem("ku_user")||"{}");
@@ -4415,14 +5390,19 @@ function __billsRenderAptButtons_(){
 
   wrap.classList.remove("hidden");
   wrap.innerHTML = `
-    <button type="button" class="rd-scope-btn" data-apt="1">1</button>
-    <button type="button" class="rd-scope-btn" data-apt="2">2</button>
-    <button type="button" class="rd-scope-btn" data-apt="3">3</button>
-    <button type="button" class="rd-scope-btn" data-apt="4">4</button>
-    <button type="button" class="rd-scope-btn" data-apt="5">5</button>
+    <div class="bills-apt-row">
+      <button type="button" class="rd-scope-btn" data-apt="1">1</button>
+      <button type="button" class="rd-scope-btn" data-apt="2">2</button>
+      <button type="button" class="rd-scope-btn" data-apt="3">3</button>
+      <button type="button" class="rd-scope-btn" data-apt="4">4</button>
+      <button type="button" class="rd-scope-btn" data-apt="5">5</button>
+    </div>
+    <button type="button" class="btn" id="btnInvoiceCreate">Loo arve</button>
   `;
 
-  const activeApt = __billsGetSelectedApartment_();
+  
+  try{ updateInvoiceI18n_(); }catch(e){}
+const activeApt = __billsGetSelectedApartment_();
   wrap.querySelectorAll("[data-apt]").forEach(btn=>{
     const a = Number(btn.getAttribute("data-apt")||0);
     btn.classList.toggle("active", a===activeApt);
@@ -4448,6 +5428,13 @@ function __billsRenderAptButtons_(){
       try{ await initBillsPage_(); }catch(_){}
     }, { passive:false });
   });
+
+  // R15: Create invoice flow (admin only)
+  const createBtn = document.getElementById("btnInvoiceCreate");
+  if(createBtn){
+    createBtn.addEventListener("click", (e)=>{ e.preventDefault(); __invoiceOpenSelectorModal_(); });
+  }
+
 }
 
 async function initBillsPage_(){
@@ -5185,6 +6172,772 @@ function updateLangFlag_() {
   img.alt = v.toUpperCase();
 }
 
+
+/* ============================================================
+ * R15 Invoice Generation UI (v1.417)
+ * - Selector modal (apt/month/year)
+ * - Edit/Create invoice form modal with dirty-state Save
+ * - Register Invoice & make PDF
+ * - Send invoice stub (enabled only when drive_file_id exists)
+ * ============================================================ */
+
+const __invCtx = { apt:0, month:0, year:0, exists:false, drive_file_id:"", invoice_id:"", data:null, dirty:false };
+
+function __modalShow_(id){ const el=byId(id); if(!el) return; el.style.display = (el.classList && el.classList.contains("modal")) ? "flex" : "block"; }
+function __modalHide_(id){ const el=byId(id); if(el) el.style.display="none"; }
+
+// v1.427a: invoice modals - when status message is shown, lock ALL controls to prevent extra clicks.
+// When status message is cleared, restore previous enabled/disabled state (snapshot-based).
+function __invSetModalBusy_(modal, on){
+  try{
+    if(!modal) return;
+    const isOn = !!on;
+    if(isOn){
+      if(modal.dataset && modal.dataset.invBusy === "1") return;
+      if(modal.dataset) modal.dataset.invBusy = "1";
+      const snap = [];
+      // snapshot + disable all interactive controls inside modal
+      modal.querySelectorAll("button, input, select, textarea").forEach(ctrl=>{
+        const id = ctrl.id || "";
+        const was = ctrl.disabled ? "1" : "0";
+        snap.push(["ctrl", id, was]);
+        ctrl.disabled = true;
+      });
+      // snapshot + block backdrop clicks
+      modal.querySelectorAll(".modal-backdrop").forEach(bd=>{
+        const id = bd.id || "";
+        const pe = bd.style.pointerEvents || "";
+        snap.push(["bd", id, pe]);
+        bd.style.pointerEvents = "none";
+      });
+      if(modal.dataset) modal.dataset.invBusySnap = JSON.stringify(snap);
+      modal.classList.add("busy");
+    } else {
+      if(!(modal.dataset && modal.dataset.invBusy === "1")) return;
+      const snapRaw = (modal.dataset && modal.dataset.invBusySnap) ? modal.dataset.invBusySnap : "";
+      let snap = [];
+      try{ snap = JSON.parse(snapRaw||"[]") || []; }catch(e){ snap = []; }
+
+      // restore controls by id (only those with ids are restored)
+      snap.forEach(row=>{
+        try{
+          if(!row || !row.length) return;
+          if(row[0] === "ctrl"){
+            const id = row[1] || "";
+            if(!id) return;
+            const el = modal.querySelector("#" + (window.CSS && CSS.escape ? CSS.escape(id) : id.replace(/[^a-zA-Z0-9_-]/g,"\$&")));
+            if(el) el.disabled = (row[2] === "1");
+          } else if(row[0] === "bd"){
+            const id = row[1] || "";
+            if(!id) return;
+            const bd = modal.querySelector("#" + (window.CSS && CSS.escape ? CSS.escape(id) : id.replace(/[^a-zA-Z0-9_-]/g,"\$&")));
+            if(bd) bd.style.pointerEvents = row[2] || "";
+          }
+        }catch(e){}
+      });
+
+      modal.classList.remove("busy");
+      try{ delete modal.dataset.invBusy; delete modal.dataset.invBusySnap; }catch(e){
+        try{ if(modal.dataset){ modal.dataset.invBusy=""; modal.dataset.invBusySnap=""; } }catch(_e){}
+      }
+
+      // after restore, enforce business rules for invoice edit modal
+      try{
+        if(modal.id === "invEditModal"){
+          __invUpdateSendEnabled_();
+          __invSetDirty_(__invCtx && __invCtx.dirty);
+        }
+      }catch(e){}
+    }
+  }catch(e){}
+}
+
+function __invSetMsg_(id, txt){
+  const el = byId(id);
+  if(!el) return;
+  el.textContent = (txt == null) ? "" : String(txt);
+}
+
+// Status helper: when status message is shown, lock ALL controls; when cleared, restore.
+function __invSetStatus_(id, txt){
+  const el = byId(id);
+  if(!el) return;
+  const s = (txt == null) ? "" : String(txt);
+  el.textContent = s;
+  try{
+    const modal = el.closest ? el.closest(".modal") : null;
+    if(modal){
+      __invSetModalBusy_(modal, !!s.trim());
+    }
+  }catch(e){}
+}
+
+function __invNow_(){
+  const d = new Date();
+  return { month: d.getMonth()+1, year: d.getFullYear() };
+}
+
+function __invFillMonthSelect_(){
+  const sel = byId("invSelMonth");
+  if(!sel) return;
+  sel.innerHTML = "";
+  for(let m=1;m<=12;m++){
+    const opt = document.createElement("option");
+    opt.value = String(m);
+    // display localized month name, keep numeric value for backend
+    opt.textContent = tr("month_" + String(m));
+    sel.appendChild(opt);
+  }
+}
+
+function __invFillYearSelect_(baseYear){
+  const sel = byId("invSelYear");
+  if(!sel) return;
+  sel.innerHTML = "";
+  const y0 = Number(baseYear||new Date().getFullYear());
+  for(let y=y0-2; y<=y0+2; y++){
+    const opt = document.createElement("option");
+    opt.value = String(y);
+    opt.textContent = String(y);
+    sel.appendChild(opt);
+  }
+}
+
+async function __invLoadApartments_(){
+  const token = getToken();
+  const r = await apiPost("/invoiceApartments", { token });
+  if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "APARTMENTS_LOAD_FAILED");
+  const sel = byId("invSelApt");
+  if(!sel) return;
+  sel.innerHTML = "";
+  (r.apartments || []).forEach(a=>{
+    const opt = document.createElement("option");
+    opt.value = String(a);
+    opt.textContent = String(a);
+    sel.appendChild(opt);
+  });
+}
+
+function __invoiceOpenSelectorModal_(){
+  try{
+    if(!__billsIsAdmin_()) return;
+  }catch(e){ return; }
+
+  const now = __invNow_();
+  // Ensure modal texts match current language (even if language switch happened before init)
+  try{ updateInvoiceI18n_(); }catch(e){}
+  try{ const m=byId("invSelModal"); if(m){ m.querySelectorAll("[data-i18n]").forEach(el=>{ const k=el.getAttribute("data-i18n"); if(k) el.textContent = tr(k); }); } }catch(e){}
+
+  // Prepare UI immediately (do NOT wait for network)
+  __invFillMonthSelect_();
+  __invFillYearSelect_(now.year);
+
+  try{
+    const selM = byId("invSelMonth"); if(selM) selM.value = String(now.month);
+    const selY = byId("invSelYear"); if(selY) selY.value = String(now.year);
+  }catch(e){}
+
+  // Disable controls until apartments are loaded (do this BEFORE setting busy snapshot)
+  try{
+    const selA = byId("invSelApt"); if(selA) selA.disabled = true;
+    const btn = byId("invSelContinue"); if(btn) btn.disabled = true;
+  }catch(e){}
+
+  // Show status (locks modal controls)
+  __invSetStatus_("invSelMsg", tr("invSelLoading"));
+
+  __modalShow_("invSelModal");
+
+  // Load apartments async; enable controls once ready
+  __invLoadApartments_().then(()=>{
+    // Clear status first (restores snapshot), then enable controls
+    __invSetStatus_("invSelMsg", "");
+
+    const selA = byId("invSelApt");
+    if(selA){
+      selA.disabled = false;
+      if(selA.options.length){
+        // default: current bills selected apartment, else first
+        let defA = 0;
+        try{ defA = Number(__billsGetSelectedApartment_()||0); }catch(e){}
+        if(defA) selA.value = String(defA);
+        if(!selA.value) selA.selectedIndex = 0;
+      }
+    }
+
+    const btn = byId("invSelContinue"); if(btn) btn.disabled = false;
+  }).catch(err=>{
+    // unlock modal and show error
+    __invSetStatus_("invSelMsg", "");
+    __invSetMsg_("invSelMsg", String(err));
+    try{
+      const selA = byId("invSelApt"); if(selA) selA.disabled = true;
+      const btn = byId("invSelContinue"); if(btn) btn.disabled = true;
+    }catch(e){}
+  });
+}
+
+
+async function __invCheckExists_(apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceCheck", { token, apartment:apt, month, year });
+  if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "CHECK_FAILED");
+  return r;
+}
+
+function __invNum_(s){
+  const t = String(s||"").trim().replace(/\s+/g,"");
+  if(!t) return 0;
+  // support 1,23 and 1.23
+  const norm = t.replace(",",".");
+  const n = Number(norm);
+  return isFinite(n) ? n : 0;
+}
+
+function __invNum3_(s){
+  const n = __invNum_(s);
+  return Math.round(n*1000)/1000;
+}
+
+
+function __invComputeInvoiceNoFromId_(invoiceId){
+  const s = String(invoiceId||"").trim();
+  // Expected formats: "3_2026-02" or "3 2026-02"
+  const m = s.match(/^(\d+)[_\s]+(\d{4})-(\d{2})$/);
+  if(!m) return s;
+  const apt = String(m[1]);
+  const year = String(m[2]);
+  const mm = String(m[3]);
+  const yy = year.slice(-2);
+  const apt2 = apt.padStart(2,"0");
+  // Spec pattern used in template: "YY MM 01 AA"
+  // Spec: "YY MM DD KK" where DD is current day, KK is selected apartment.
+  return `${yy} ${mm} ${dd} ${apt2}`;
+}
+
+function __invComputeInvoiceNoFromData_(data, invoiceId){
+  const dRaw = data && data.issue_date ? data.issue_date : null;
+  const d = dRaw ? new Date(dRaw) : new Date(); // current date if not provided
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+
+  // apartment: prefer data.apartment, else parse from invoiceId prefix
+  let apt = (data && (data.apartment!==undefined && data.apartment!==null)) ? String(data.apartment) : "";
+  if(!apt){
+    const s = String(invoiceId||"").trim();
+    const m = s.match(/^(\d+)[_\s]+\d{4}-\d{2}$/);
+    if(m) apt = String(m[1]);
+  }
+  const apt2 = String(apt||"").padStart(2,"0");
+
+  // Spec: "YY MM DD KK" where DD is current day, KK is selected apartment.
+  return `${yy} ${mm} ${dd} ${apt2}`;
+}
+
+
+function __invGetInvoiceNo_(data){
+  // Prefer explicit invoice_no field if provided by backend
+  const explicit = (data && (data.invoice_no || data.invoiceNo)) ? String(data.invoice_no || data.invoiceNo).trim() : "";
+  if(explicit) return explicit;
+
+  // Fallback: compute from issue_date (current system date), not from selected month/year.
+  // Pattern: "YY MM DD KK" where KK = apartment number (2 digits).
+  const invoiceId = (data && data.invoice_id) ? data.invoice_id : ((window.__invDraft && window.__invDraft.invoice_id) ? window.__invDraft.invoice_id : "");
+  return __invComputeInvoiceNoFromData_(data, invoiceId);
+}
+
+function __invSetEditTitle_(data){
+  const el = byId("invEditModalTitle");
+  if(el){
+    const prefix = (typeof tr==="function" ? tr("invoiceEditTitle") : "Arve info");
+    el.textContent = prefix;
+  }
+  const noEl = byId("invEditInvoiceNoLine");
+  if(noEl){
+    const no = __invGetInvoiceNo_(data);
+    noEl.textContent = no ? String(no) : "";
+  }
+}
+
+function __invFitInvoiceId_(){
+  const el = byId("invF_invoice_id");
+  if(!el) return;
+  const v = String(el.value || "");
+  // width based on characters; keep within reasonable bounds
+  const ch = Math.min(40, Math.max(10, v.length + 2));
+  el.style.width = ch + "ch";
+}
+
+function __invPopulateForm_(data){
+  byId("invF_invoice_id").value = String(data.invoice_id||"");
+  __invSetEditTitle_(data);
+  byId("invF_amount").value = String(data.amount ?? "");
+  byId("invF_ettemaks").value = String(data.ettemaks ?? "");
+  byId("invF_viivis").value = String(data.viivis ?? "");
+  byId("invF_payment_due").value = String(data.payment_due ?? "");
+  byId("invF_hooldus_tariif").value = String(data.hooldus_tariif ?? "1");
+  byId("invF_hooldus_kogus").value = String(data.hooldus_kogus ?? "0");
+  byId("invF_ragn_amount").value = String(data.ragn_amount ?? "0");
+  byId("invF_parnu_amount").value = String(data.parnu_amount ?? "0");
+  byId("invF_parnu_tariff").value = String(data.parnu_tariff ?? "0");
+  byId("invF_enefit_amount").value = String(data.enefit_amount ?? "0");
+  __invFormatEditFields_();
+  __invMarkPrefill_();
+}
+
+
+function __invFormatEditFields_(){
+  // Ensure all numeric fields show required decimals immediately on open
+  const moneyIds = ["invF_ragn_amount","invF_parnu_amount","invF_enefit_amount","invF_ettemaks","invF_viivis","invF_amount","invF_payment_due"];
+  moneyIds.forEach(id=>{
+    const el = byId(id);
+    if(!el) return;
+    const v = __parseNum_(el.value);
+    el.value = __formatMoney_Dot2_(isNaN(v)?0:v);
+  });
+
+  // Kogus (2 decimals)
+  const kogus = byId("invF_hooldus_kogus");
+  if(kogus){
+    const v = __parseNum_(kogus.value);
+    kogus.value = __formatMoney_Dot2_(isNaN(v)?0:v);
+  }
+
+  // Tariif (2 decimals if present)
+  const tariif = byId("invF_hooldus_tariif");
+  if(tariif){
+    const raw = String(tariif.value||"").trim();
+    if(raw!==""){
+      const v = __parseNum_(raw);
+      tariif.value = __formatMoney_Dot2_(isNaN(v)?0:v);
+    }
+  }
+
+  // Tarbimine, m3 (3 decimals)
+  const m3 = byId("invF_parnu_tariff");
+  if(m3){
+    const v = __parseNum_(m3.value);
+    m3.value = __formatNum_Dot3_(isNaN(v)?0:v);
+  }
+}
+
+function __invReadForm_(){
+  const data = Object.assign({}, (__invCtx.data||{}));
+  data.invoice_id = String(byId("invF_invoice_id").value||"");
+  data.amount = __invNum_(byId("invF_amount").value);
+  data.ettemaks = __invNum_(byId("invF_ettemaks").value);
+  data.viivis = __invNum_(byId("invF_viivis").value);
+  data.payment_due = __invNum_(byId("invF_payment_due").value);
+  // Tariff is a plain number (NOT %). Keep decimals.
+  // Use shared numeric parser to avoid turning "1.00" into "100".
+  data.hooldus_tariif = __invNum_(byId("invF_hooldus_tariif").value || "", 1);
+  if(!isFinite(data.hooldus_tariif)) data.hooldus_tariif = 1;
+  data.hooldus_kogus = __invNum_(byId("invF_hooldus_kogus").value);
+  data.ragn_amount = __invNum_(byId("invF_ragn_amount").value);
+  data.parnu_amount = __invNum_(byId("invF_parnu_amount").value);
+  data.parnu_tariff = __invNum3_(byId("invF_parnu_tariff").value);
+  if(!isFinite(data.parnu_tariff)) data.parnu_tariff = 0;
+  data.enefit_amount = __invNum_(byId("invF_enefit_amount").value);
+  return data;
+}
+
+function __invSetDirty_(dirty){
+  __invCtx.dirty = !!dirty;
+  const btn = byId("invEditSave");
+  if(btn) btn.disabled = !__invCtx.dirty;
+}
+
+function __invUpdateSendEnabled_(){
+  const btn = byId("invEditSend");
+  if(!btn) return;
+  btn.disabled = !(__invCtx.drive_file_id && String(__invCtx.drive_file_id).trim());
+}
+
+
+function __invMarkPrefill_(){
+  try{
+    const wrap = byId("invEditModal");
+    if(!wrap) return;
+
+    // mark all text inputs as prefilled (grey)
+    wrap.querySelectorAll('input[type="text"]').forEach(el=>{
+      el.classList.add("invPrefill");
+    });
+
+    // One-time wiring: any user edit makes the value "active" (black)
+    if(!wrap.dataset._prefillWire){
+      wrap.dataset._prefillWire = "1";
+      const unmark = (ev)=>{
+        const t = ev && ev.target;
+        if(t && t.tagName === "INPUT" && t.type === "text"){
+          __invUnmarkPrefill_(t);
+        }
+      };
+      wrap.addEventListener("input", unmark, true);
+      wrap.addEventListener("change", unmark, true);
+    }
+  }catch(e){}
+}
+
+
+function __invUnmarkPrefill_(el){
+  try{
+    if(!el) return;
+    el.classList.remove("invPrefill");
+    // fallback: ensure becomes visually black even if other CSS interferes
+    el.style.color = "#000";
+  }catch(e){}
+}
+
+function __invSetBusy_(busy){
+  __invCtx.busy = !!busy;
+  const wrap = byId("invEditModal");
+  if(wrap){
+    if(__invCtx.busy) wrap.classList.add("busy");
+    else wrap.classList.remove("busy");
+    // inputs
+    wrap.querySelectorAll('input[type="text"]').forEach(el=>{ el.disabled = __invCtx.busy; });
+  }
+  // explicit buttons (to restore correctly after busy)
+  const ids = ["invEditCancel","invEditSave","invEditPreview","invEditRegister","invEditModalX"];
+  ids.forEach(id=>{
+    const btn = byId(id);
+    if(!btn) return;
+    if(__invCtx.busy){
+      btn.dataset._wasDisabled = btn.disabled ? "1" : "0";
+      btn.disabled = true;
+    }else{
+      const was = btn.dataset._wasDisabled;
+      if(was === "0") btn.disabled = false;
+      delete btn.dataset._wasDisabled;
+    }
+  });
+
+  // keep Send button state controlled by logic (drive_file_id)
+  if(!__invCtx.busy){
+    try{ __invSetDirty_(__invCtx.dirty); }catch(_e){}
+    try{ __invUpdateSendEnabled_(); }catch(_e){}
+  }
+
+  // prevent backdrop close while busy
+  const bd = byId("invEditClose");
+  if(bd) bd.style.pointerEvents = __invCtx.busy ? "none" : "auto";
+}
+
+
+function __invBindDirtyTracking_(){
+  ["invF_amount","invF_ettemaks","invF_viivis","invF_payment_due"].forEach(id=>{
+    const el = byId(id);
+    if(!el) return;
+    el.addEventListener("input", ()=>{
+      __invSetDirty_(true);
+      __invSetMsg_("invEditMsg","");
+    });
+  });
+}
+
+async function __invOpenEditModalFromWorkbook_(apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceEditLoad", { token, apartment:apt, month, year });
+  if(!r || !r.ok){
+    const msg = (r && (r.message || r.error)) ? (r.message || r.error) : "LOAD_FAILED";
+    // unlock selector modal (it might be in busy state) and show message
+    __invSetStatus_("invSelMsg","");
+    __invSetMsg_("invSelMsg", msg);
+    return;
+  }
+  const data = r.data || {};
+  __invCtx.data = data;
+  __invCtx.invoice_id = String(data.invoice_id||"");
+  __invCtx.drive_file_id = String(data.drive_file_id||"");
+  __invPopulateForm_(data);
+  try{ applyLang(); }catch(_e){}
+  __invEnsureMoneyHandlers_();
+  try{
+    ["invEditSave","invEditPreview","invEditRegister","invEditSend"].forEach(id=>{ const b=byId(id); if(!b) return; if(b.dataset._fmtWired) return; b.dataset._fmtWired="1"; b.addEventListener("mousedown", ()=>{ try{ __invForceFormatAll_(); }catch(_e){} }); });
+  }catch(_e){}
+
+  __invSetDirty_(true); // enabled on first open
+  __invUpdateSendEnabled_();
+  __invSetMsg_("invEditMsg","");
+  __modalShow_("invEditModal");
+}
+
+async function __invOpenCreateModalDraft_(apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceDraftCreate", { token, apartment:apt, month, year });
+  if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "DRAFT_FAILED");
+  const data = r.data || {};
+  __invCtx.data = data;
+  __invCtx.invoice_id = String(data.invoice_id||"");
+  __invCtx.drive_file_id = String(data.drive_file_id||"");
+  __invPopulateForm_(data);
+  try{ applyLang(); }catch(_e){}
+
+  __invEnsureMoneyHandlers_();
+  try{
+    ["invEditSave","invEditPreview","invEditRegister","invEditSend"].forEach(id=>{ const b=byId(id); if(!b) return; if(b.dataset._fmtWired) return; b.dataset._fmtWired="1"; b.addEventListener("mousedown", ()=>{ try{ __invForceFormatAll_(); }catch(_e){} }); });
+  }catch(_e){}
+  __invSetDirty_(true); // enabled on first open
+  __invUpdateSendEnabled_(); // likely disabled (no drive id)
+  __invSetMsg_("invEditMsg","");
+  return data;
+}
+
+async function __invContinue_(){
+  const apt = Number(byId("invSelApt").value||0);
+  const month = Number(byId("invSelMonth").value||0);
+  const year = Number(byId("invSelYear").value||0);
+  if(!apt || !month || !year){ __invSetMsg_("invSelMsg", tr("invSelChooseAll")); return; }
+
+  __invCtx.apt=apt; __invCtx.month=month; __invCtx.year=year;
+
+  // remember selector state so we can return back on Cancel
+  __invCtx._sel = { apt, month, year };
+
+  // v1.427a: show status + lock modal controls during async check
+  __invSetStatus_("invSelMsg", tr("invSelChecking"));
+
+  let chk;
+  try{
+    chk = await __invCheckExists_(apt, month, year);
+  }catch(e){
+    // unlock and show error (error is NOT a "busy status")
+    __invSetStatus_("invSelMsg", "");
+    __invSetMsg_("invSelMsg", String(e));
+    return;
+  }
+
+  __invCtx.exists = !!chk.exists;
+  __invCtx.invoice_id = String(chk.invoice_id||"");
+  __invCtx.drive_file_id = String(chk.drive_file_id||"");
+
+  // Clear status right before switching to the next step (this restores controls)
+  __invSetStatus_("invSelMsg","");
+
+  if(__invCtx.exists){
+    __modalShow_("invExistsModal");
+    return;
+  }
+
+  // create draft and open form
+  try{
+    __invSetStatus_("invSelMsg", tr("invSelCreatingDraft"));
+    const data = await __invOpenCreateModalDraft_(apt, month, year);
+    // switch modals without "empty gap"
+    __modalHide_("invSelModal");
+    __invSetStatus_("invSelMsg","");
+    __modalShow_("invEditModal");
+  }catch(e){
+    __invSetStatus_("invSelMsg","");
+    __invSetMsg_("invSelMsg", String(e));
+  }
+}
+
+
+function __invReturnToSel_(){
+  try{
+    const s = (__invCtx && __invCtx._sel) ? __invCtx._sel : null;
+    if(s){
+      const selA = byId("invSelApt"); if(selA) selA.value = String(s.apt);
+      const selM = byId("invSelMonth"); if(selM) selM.value = String(s.month);
+      const selY = byId("invSelYear"); if(selY) selY.value = String(s.year);
+    }
+    // clear any leftover statuses/messages
+    try{ __invSetStatus_("invSelMsg",""); }catch(_e){}
+    try{ __invSetMsg_("invSelMsg",""); }catch(_e){}
+    __modalShow_("invSelModal");
+  }catch(e){}
+}
+
+async function __invDoSave_(){
+  // show status + lock modal controls while saving
+  __invSetStatus_("invEditMsg", tr("invEditSaving"));
+  __invSetBusy_(true);
+    try{ __invForceFormatAll_(); }catch(_e){}
+
+  try{
+    const token = getToken();
+    const data = __invReadForm_();
+    const r = await apiPost("/invoiceSave", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
+    if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "SAVE_FAILED");
+    __invCtx.data = data;
+    // After успешного сохранения backend удаляет draft-файл; чтобы Cancel/X не пытались удалить повторно — очищаем draft id.
+    try{ __invCtx.data.draft_sheet_id = ""; }catch(_e){}
+    __invSetDirty_(false); // disabled after save
+
+    // clear busy state, then show final message
+    __invSetStatus_("invEditMsg", "");
+    __invSetMsg_("invEditMsg", tr("invEditSaved"));
+  }catch(e){
+    __invSetStatus_("invEditMsg", "");
+    __invSetMsg_("invEditMsg", String(e));
+  }
+  finally{ __invSetBusy_(false); }
+}
+
+
+async function __invDoCancel_(){
+  try{
+  __invSetBusy_(true);
+    try{ __invForceFormatAll_(); }catch(_e){}
+
+    // If draft exists (draft_sheet_id in ctx data) and invoice not registered yet, delete draft on Drive
+    const draftId = String((__invCtx.data||{}).draft_sheet_id || "");
+    if(!draftId){
+      __modalHide_("invEditModal");
+      __invReturnToSel_();
+      return;
+    }
+    // If we already have a real registered file (PDF), draft is already irrelevant
+    if(__invCtx.drive_file_id && String(__invCtx.drive_file_id).trim()){
+      __modalHide_("invEditModal");
+      __invReturnToSel_();
+      return;
+    }
+
+    __invSetStatus_("invEditMsg", (typeof tr==="function" ? tr("invDeletingDraft") : "Удаление черновика…"));
+    const token = getToken();
+    const data = __invReadForm_();
+    data.cancel = true; // instruct backend to delete draft only
+    const r = await apiPost("/invoiceSave", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
+    // Regardless of response, close modal (user explicitly cancelled)
+    __invSetStatus_("invEditMsg", "");
+    __modalHide_("invEditModal");
+    __invReturnToSel_();
+  }catch(e){
+    __invSetStatus_("invEditMsg", "");
+    __modalHide_("invEditModal");
+    __invReturnToSel_();
+  }
+  finally{ __invSetBusy_(false); }
+}
+
+async function __invDoPreview_(){
+  try{
+  __invSetBusy_(true);
+    try{ __invForceFormatAll_(); }catch(_e){}
+
+    const token = getToken();
+    const data = __invReadForm_();
+    const r = await apiPost("/invoicePreview", { token, data });
+    if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "PREVIEW_FAILED");
+    const b64 = r.data_base64 || r.base64;
+    const bin = atob(b64||"");
+    const bytes = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type:"application/pdf" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  }catch(e){
+    __invSetMsg_("invEditMsg", String(e));
+  }
+  finally{ __invSetBusy_(false); }
+}
+
+async function __invDoRegister_(){
+  try{
+  __invSetBusy_(true);
+    try{ __invForceFormatAll_(); }catch(_e){}
+
+    const token = getToken();
+    const data = __invReadForm_();
+    const r = await apiPost("/invoiceRegisterAndMakePdf", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
+    if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "REGISTER_FAILED");
+    __invCtx.drive_file_id = String(r.drive_file_id||"");
+    __invCtx.invoice_id = String(r.invoice_id||data.invoice_id||"");
+    byId("invF_invoice_id").value = __invCtx.invoice_id;
+    __invSetEditTitle_(__invCtx.data || {invoice_id:__invCtx.invoice_id});
+    __invSetMsg_("invEditMsg","✅ Зарегистрировано и PDF создан.");
+    __invUpdateSendEnabled_();
+    __invSetDirty_(false);
+    // reload bills table if open
+    try{ await loadBills(); }catch(e){}
+  }catch(e){
+    __invSetMsg_("invEditMsg", String(e));
+  }
+  finally{ __invSetBusy_(false); }
+}
+
+function __invShowStub_(){
+  __modalShow_("invStubModal");
+}
+
+function __invInitUiOnce_(){
+  // Selector modal buttons
+  
+  // R15 modals: do not close by clicking backdrop; close only by explicit buttons
+  const invSelClose = byId("invSelClose"); if(invSelClose) invSelClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+  const invSelX = byId("invSelModalX"); if(invSelX) invSelX.onclick = ()=>__modalHide_("invSelModal");
+
+  const invExistsClose = byId("invExistsClose"); if(invExistsClose) invExistsClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+  const invExistsX = byId("invExistsModalX"); if(invExistsX) invExistsX.onclick = ()=>__modalHide_("invExistsModal");
+
+  const invEditClose = byId("invEditClose"); if(invEditClose) invEditClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+  const invEditX = byId("invEditModalX"); if(invEditX) invEditX.onclick = ()=>__invDoCancel_();
+
+  const invStubClose = byId("invStubClose"); if(invStubClose) invStubClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+  const invStubX = byId("invStubModalX"); if(invStubX) invStubX.onclick = ()=>__modalHide_("invStubModal");
+  const invStubOk = byId("invStubOk"); if(invStubOk) invStubOk.onclick = ()=>__modalHide_("invStubModal");
+
+const c1 = byId("invSelCancel"); if(c1) c1.onclick = ()=>__modalHide_("invSelModal");
+  const c2 = byId("invSelContinue"); if(c2) c2.onclick = ()=>__invContinue_();
+
+  // Exists modal
+  const no = byId("invExistsNo"); if(no) no.onclick = ()=>{ __modalHide_("invExistsModal"); /* back to selector */ };
+  const yes = byId("invExistsYes"); if(yes) yes.onclick = async ()=>{
+    // Do NOT close everything and leave the user staring at nothing.
+    // Keep selector modal visible and show loading state while we load invoice from workbook.
+    __modalHide_("invExistsModal");
+
+    // show progress in selector modal immediately
+    try{
+      __invSetStatus_("invSelMsg", tr("invEditLoading"));
+      __modalShow_("invSelModal");
+    }catch(e){}
+
+    // Load from workbook. If missing -> message shown in selector modal.
+    await __invOpenEditModalFromWorkbook_(__invCtx.apt, __invCtx.month, __invCtx.year);
+
+    // Clear status (unlocks selector modal controls)
+    try{ __invSetStatus_("invSelMsg",""); }catch(e){}
+
+    if(byId("invEditModal").style.display==="block"){
+      __modalHide_("invSelModal");
+      // also sync invoice id if exists
+      if(__invCtx.invoice_id && !byId("invF_invoice_id").value){ byId("invF_invoice_id").value = __invCtx.invoice_id; __invFitInvoiceId_(); }
+    __invFitInvoiceId_();
+    }else{
+      // keep selector open; message is already shown by loader (e.g. missing workbook)
+      __modalShow_("invSelModal");
+    }
+  };
+
+  // Edit modal buttons
+  const ec = byId("invEditCancel"); if(ec) ec.onclick = ()=>__invDoCancel_();
+  const es = byId("invEditSave"); if(es) es.onclick = ()=>__invDoSave_();
+  const ep = byId("invEditPreview"); if(ep) ep.onclick = ()=>__invDoPreview_();
+  const er = byId("invEditRegister"); if(er) er.onclick = ()=>__invDoRegister_();
+  const se = byId("invEditSend"); if(se) se.onclick = ()=>__invShowStub_();
+
+  // Stub modal
+  const ok = byId("invStubOk"); if(ok) ok.onclick = ()=>__modalHide_("invStubModal");
+
+  __invBindDirtyTracking_();
+  __invSetDirty_(true); // enabled at first open by requirement; will be reset on open anyway.
+  __invUpdateSendEnabled_();
+}
+
+// Initialize once after DOM is ready
+try{
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", __invInitUiOnce_, { once:true });
+  }else{
+    __invInitUiOnce_();
+  }
+}catch(e){}
 window.addEventListener("load", () => { try{ updateLangFlag_(); }catch(e){} });
 if(langSelect){
       langSelect.addEventListener("change", ()=> setLang(langSelect.value));
@@ -5452,22 +7205,202 @@ document.addEventListener("keydown", (e) => {
   </div>
 
 
+
+<!-- R15: Invoice generation modals -->
+<div id="invSelModal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="invSelClose"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="h2" id="invSelModalTitle" data-i18n="invSelTitle"></div>
+      <button class="iconbtn" id="invSelModalX" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label id="invSelAptLbl" data-i18n="invSelApt"></label>
+        <select id="invSelApt"></select>
+      </div>
+
+      <div class="field">
+        <label id="invSelMonthLbl" data-i18n="invSelMonth"></label>
+        <select id="invSelMonth"></select>
+      </div>
+
+      <div class="field">
+        <label id="invSelYearLbl" data-i18n="invSelYear"></label>
+        <select id="invSelYear"></select>
+      </div>
+
+      <div class="muted" id="invSelMsg" style="margin-top:10px; min-height:18px"></div>
+
+      <div class="modal-footer">
+        <button class="btn" id="invSelCancel" data-i18n="cancel"></button>
+        <button class="btn primary" id="invSelContinue" data-i18n="continue"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="invExistsModal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="invExistsClose"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="h2" id="invExistsModalTitle" data-i18n="invExistsTitle"></div>
+      <button class="iconbtn" id="invExistsModalX" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="muted" id="invExistsText" data-i18n="invExistsText"></div>
+      <div class="muted" id="invExistsMsg" style="margin-top:10px; min-height:18px"></div>
+      <div class="modal-footer">
+        <button class="btn" id="invExistsNo" data-i18n="no"></button>
+        <button class="btn primary" id="invExistsYes" data-i18n="yes"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="invEditModal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="invEditClose"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="invEditHeadRow">
+        <div class="h2" id="invEditModalTitle" data-i18n="invoiceEditTitle"></div>
+      </div>
+      <button class="iconbtn" id="invEditModalX" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="invEditInvoiceNoRow"><span class="invEditInvoiceNoLabel">Arve nr.:</span> <span id="invEditInvoiceNoLine"></span></div>
+      <input id="invF_invoice_id" type="hidden"/>
+
+<!-- v1.427a: manual input fields (spec 3.1–3.4) -->
+      <div class="field" style="margin-top:14px">
+        <div class="invEditGrid2">
+
+          <!-- Hoolduskulud -->
+          <div class="invRowLabel" data-i18n="invHooldusTitle">Hoolduskulud</div>
+          <div class="invRowControls">
+            <div class="subgrid2">
+              <div class="subfield">
+                <label data-i18n="invTariif">Tariif</label>
+                <input id="invF_hooldus_tariif" type="text" inputmode="numeric" placeholder="1"/>
+              </div>
+              <div class="subfield">
+                <label data-i18n="invKogus">Kogus</label>
+                <input id="invF_hooldus_kogus" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pärnu vesi arve -->
+          <div class="invRowLabel" data-i18n="invParnuTitle">Pärnu vesi arve</div>
+          <div class="invRowControls">
+            <div class="subgrid2">
+              <div class="subfield">
+                <label data-i18n="invSumma">Summa, €</label>
+                <input id="invF_parnu_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+              </div>
+              <div class="subfield">
+                <label data-i18n="invHouseM3">Tarbimine, m3</label>
+                <div class="invInlineFile">
+                  <input id="invF_parnu_tariff" type="text" inputmode="decimal" placeholder="0.000" value="0.000"/>
+                  <button type="button" id="btnParnuPdfLoad" class="invPdfBtnSmall" title="Lae PDF">📄</button>
+                  <input type="file" id="fileParnuPdf" accept="application/pdf" style="display:none"/>
+                </div>
+                <div id="parnuPdfStatus" class="invPdfStatus"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ragn and Sells arve -->
+          <div class="invRowLabel" data-i18n="invRagnTitle">Ragn and Sells arve</div>
+          <div class="invRowControls">
+            <label class="subcap" data-i18n="invSumma">Summa, €</label>
+            <input id="invF_ragn_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+          </div>
+
+          <!-- Enefit arve -->
+          <div class="invRowLabel" data-i18n="invEnefitTitle">Enefit arve</div>
+          <div class="invRowControls">
+            <label class="subcap" data-i18n="invSumma">Summa, €</label>
+            <input id="invF_enefit_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+          </div>
+
+          <!-- hidden calculated fields kept for logic compatibility -->
+          <div class="invRowLabel" style="display:none" id="invF_amount_lbl">Начислено (€)</div>
+          <div class="invRowControls" style="display:none">
+            <input id="invF_amount" type="text" inputmode="decimal" placeholder="0,00"/>
+          </div>
+
+          <div class="invRowLabel" style="display:none" id="invF_due_lbl">К оплате (€)</div>
+          <div class="invRowControls" style="display:none">
+            <input id="invF_payment_due" type="text" inputmode="decimal" placeholder="0,00"/>
+          </div>
+
+          <!-- Долг / Предоплата & Пени -->
+          <div class="invRowLabel" id="invF_ettemaks_lbl" data-i18n="invDebtTitle">Долг / Предоплата</div>
+          <div class="invRowControls">
+            <label class="subcap" data-i18n="invSumma">Summa, €</label>
+            <input id="invF_ettemaks" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+          </div>
+
+          <div class="invRowLabel" id="invF_viivis_lbl" data-i18n="invPenaltyTitle">Пени</div>
+          <div class="invRowControls">
+            <label class="subcap" data-i18n="invSumma">Summa, €</label>
+            <input id="invF_viivis" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="muted" id="invEditMsg" style="margin-top:10px; min-height:18px"></div>
+
+      <div class="modal-footer">
+        <button class="btn" id="invEditCancel">Cancel</button>
+        <button class="btn" id="invEditSave">Save</button>
+        <button class="btn" id="invEditPreview">Preview</button>
+        <button class="btn primary" id="invEditRegister">Register Invoice &amp; make PDF</button>
+        <button class="btn" id="invEditSend">Send invoice</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="invStubModal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="invStubClose"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="h2" id="invStubModalTitle">Send invoice</div>
+      <button class="iconbtn" id="invStubModalX" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="muted" style="margin-top:6px">эту часть еще нужно разработать</div>
+      <div class="modal-footer">
+        <button class="btn primary" id="invStubOk">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+
 <!-- Admin: Confirm payment modal (Invoices: date_paid, amount_paid, status=paid, ettemaks) -->
 <div id="payModal" class="modal" style="display:none">
   <div class="modal-card" style="max-width:420px; width:92%">
     <div id="payTitle" style="font-weight:700; margin-bottom:10px">Подтверждение оплаты</div>
     <div class="field">
-      <label id="payDateLbl">Дата оплаты</label>
-      <input id="payDate" type="date"/>
+      <label id="payLblDate">Дата оплаты</label>
+      <input id="payDate" type="text" inputmode="numeric" placeholder="dd.mm.yyyy"/>
     </div>
     <div class="field" style="margin-top:10px">
-      <label id="payAmountLbl">Сумма оплаты (€)</label>
+      <label id="payLblAmount">Сумма оплаты (€)</label>
       <input id="payAmount" type="text" inputmode="decimal" placeholder="0,00"/>
     </div>
     <div class="muted" id="payMsg" style="margin-top:10px; min-height:18px"></div>
     <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
-      <button class="btn" id="payCancelBtn">Cancel</button>
-      <button class="btn primary" id="payConfirmBtn">Confirm</button>
+      <button class="btn" id="payCancel">Cancel</button>
+      <button class="btn primary" id="payConfirm">Confirm</button>
     </div>
   </div>
 </div>
@@ -6383,7 +8316,7 @@ try{
     n++;
     try{ ensurePanel(); }catch(e){}
     if(n>120) clearInterval(timer);
-  }, 250);
+  }, 80);
 
 // v1.293: allow core page to trigger panel refresh
 try{ window.__rdVisUpdate = function(){ try{ ensurePanel(); }catch(e){} }; }catch(e){}
@@ -6542,9 +8475,9 @@ function __fixAdminUsersGridM2__(){
 
 // --- Pay modal wiring (safe) ---
 window.addEventListener('DOMContentLoaded', ()=>{
-  const c=document.getElementById('payCancelBtn');
+  const c=document.getElementById('payCancel');
   if(c) c.addEventListener('click', ()=>{ try{ closePayModal_(); }catch(e){} });
-  const ok=document.getElementById('payConfirmBtn');
+  const ok=document.getElementById('payConfirm');
   if(ok) ok.addEventListener('click', ()=>{ try{ confirmPayModal_(); }catch(e){} });
   const m=document.getElementById('payModal');
   // backdrop click disabled: do not auto-close modal
@@ -6587,7 +8520,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   font-size:12px !important;
 }
 
-/* v1.353a0p251: bills table deterministic shrink + fixed widths (NO AUTO STRETCH)
+/* v1.353a0p266: bills table deterministic shrink + fixed widths (NO AUTO STRETCH)
    Goal: table width must shrink when columns shrink. */
 #page_bills table.bills-table{
   table-layout: fixed !important;
@@ -6673,6 +8606,221 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
 
 </style>
+
+
+
+<style>
+/* v1.367: numeric columns must be narrow and одинаковые как у 3-й колонки */
+#page_bills table.bills-table{
+  table-layout: fixed !important;
+  width: max-content !important; /* no auto-stretch */
+}
+/* Set одинаковая ширина для колонок: 3,4,5,6,9 */
+#page_bills table.bills-table th:nth-child(3),
+#page_bills table.bills-table td:nth-child(3),
+#page_bills table.bills-table th:nth-child(4),
+#page_bills table.bills-table td:nth-child(4),
+#page_bills table.bills-table th:nth-child(5),
+#page_bills table.bills-table td:nth-child(5),
+#page_bills table.bills-table th:nth-child(6),
+#page_bills table.bills-table td:nth-child(6),
+#page_bills table.bills-table th:nth-child(9),
+#page_bills table.bills-table td:nth-child(9){
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 70px !important;
+  padding-left:6px !important;
+  padding-right:6px !important;
+}
+/* Keep header wrapping */
+#page_bills table.bills-table th{
+  white-space: normal !important;
+  line-height: 1.2;
+}
+</style>
+
+
+<style>
+/* v1.395: Arved — уменьшить шрифт на 1 размер в колонках 3-5 (только значения, хедер не трогаем) */
+#page_bills table.bills-table td:nth-child(3),
+#page_bills table.bills-table td:nth-child(4),
+#page_bills table.bills-table td:nth-child(5){
+  font-size:11px !important; /* was 12px */
+  line-height:1.15 !important;
+}
+</style>
+
+
+<script>
+/* --- Pärnu Vesi: import Tarbimine(m3) + Kokku(EUR) from supplier PDF (text PDF) --- */
+(function(){
+  function setStatus(msg, kind){
+    var el = document.getElementById('parnuPdfStatus');
+    if(!el) return;
+    el.className = 'invPdfStatus' + (kind ? (' ' + kind) : '');
+    el.textContent = msg || '';
+  }
+
+  function loadPdfJs(){
+    return new Promise(function(resolve, reject){
+      if(window.pdfjsLib && window.pdfjsLib.getDocument){ return resolve(window.pdfjsLib); }
+
+      var urls = [
+        "./pdf.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js",
+        "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.js",
+        "https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.min.js"
+      ];
+
+      (function tryNext(i){
+        if(i>=urls.length) return reject(new Error("PDFJS_LOAD_FAILED"));
+        var s = document.createElement('script');
+        s.src = urls[i];
+        s.async = true;
+        s.onload = function(){
+          if(window.pdfjsLib && window.pdfjsLib.getDocument){
+            try{ if(window.pdfjsLib.GlobalWorkerOptions){ window.pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdf.worker.min.js"; } }catch(_e){}
+            return resolve(window.pdfjsLib);
+          }
+          tryNext(i+1);
+        };
+        s.onerror = function(){ tryNext(i+1); };
+        document.head.appendChild(s);
+      })(0);
+    });
+  }
+
+  async function extractTextFromPdf(file){
+    var pdfjs = await loadPdfJs();
+
+    // for local file:// development, worker scripts can be blocked; disable worker always for robustness
+    var buf = await file.arrayBuffer();
+    var disableWorker = (location.protocol === "file:");
+    var loadingTask = pdfjs.getDocument({ data: buf, disableWorker: disableWorker });
+    var pdf = await loadingTask.promise;
+
+    var out = [];
+    for(var p=1; p<=pdf.numPages; p++){
+      var page = await pdf.getPage(p);
+      var tc = await page.getTextContent();
+      for(var i=0; i<tc.items.length; i++){
+        var str = tc.items[i] && tc.items[i].str;
+        if(str) out.push(str);
+      }
+      out.push("\n");
+    }
+    return out.join(" ");
+  }
+
+  function normNum(s){
+    if(s==null) return null;
+    var x = String(s).trim().replace(/\s+/g,'').replace(',','.');
+    var n = Number(x);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function parseParnu(text){
+    var t = String(text||"");
+
+    // normalize cases where PDF.js splits decimals into separate tokens: "42 . 28" -> "42.28"
+    t = t.replace(/(\d)\s*[\.,]\s*(\d)/g, "$1.$2");
+    // normalize NBSP and multiple spaces
+    t = t.replace(/\u00A0/g, " ").replace(/\s+/g, " ");
+
+    // Consumption: line with "Vesi ... 11 m3/m³"
+    var mCons = t.match(/Vesi[\s\S]{0,180}?(\d+(?:[\.,]\d+)?)\s*m(?:3|³)/i);
+    var consumption = mCons ? normNum(mCons[1]) : null;
+
+    // Kokku: PDF layout may split tokens, so we:
+    // 1) try direct regex
+    var mKokku = t.match(/Kokku\s*\(?\s*EUR\s*\)?\s*[:]?\s*(\d+(?:\s*[\.,]\s*\d+)?)/i);
+    var kokku = mKokku ? normNum(mKokku[1]) : null;
+
+    // 2) if not found, find the marker and read the next ~250 chars, then pick the first amount-like number
+    if(kokku==null){
+      var ix = t.search(/Kokku\s*\(?\s*EUR\s*\)?/i);
+      if(ix>=0){
+        var tail = t.slice(ix, ix+260);
+        // prefer numbers with 1-2 decimals
+        var m2 = tail.match(/(\d+[\.,]\d{1,2})/);
+        if(m2) kokku = normNum(m2[1]);
+        if(kokku==null){
+          // fallback: any integer/decimal
+          var m3 = tail.match(/(\d+(?:[\.,]\d+)?)/);
+          if(m3) kokku = normNum(m3[1]);
+        }
+      }
+    }
+
+    // 3) fallback: "Tasumata arvete saldo: 42.28" (often equals total to pay)
+    if(kokku==null){
+      var mSaldo = t.match(/Tasumata\s+arvete\s+saldo\s*[:]?\s*(\d+(?:\s*[\.,]\s*\d+)?)/i);
+      if(mSaldo) kokku = normNum(mSaldo[1]);
+    }
+
+    return { consumption: consumption, kokku: kokku };
+  }
+
+  function fmt3(n){ return (Number.isFinite(n)? n : 0).toFixed(3); }
+  function fmt2(n){ return (Number.isFinite(n)? n : 0).toFixed(2); }
+
+  function wire(){
+    var btn = document.getElementById('btnParnuPdfLoad');
+    var fileInput = document.getElementById('fileParnuPdf');
+    if(!btn || !fileInput) return;
+
+    // prevent any parent handlers from swallowing the click
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      setStatus('', '');
+      fileInput.value = '';
+      // must be triggered by user gesture
+      fileInput.click();
+    }, true);
+
+    fileInput.addEventListener('change', async function(){
+      var f = fileInput.files && fileInput.files[0];
+      if(!f) return;
+
+      try{
+        setStatus('Loen PDF…', 'warn');
+        var txt = await extractTextFromPdf(f);
+        var r = parseParnu(txt);
+
+        var miss = [];
+        if(r.consumption==null) miss.push('Tarbimine (m3)');
+        if(r.kokku==null) miss.push('Kokku (EUR)');
+
+        if(r.consumption!=null){
+          var elC = document.getElementById('invF_parnu_tariff');
+          if(elC){ elC.value = fmt3(r.consumption); }
+        }
+        if(r.kokku!=null){
+          var elK = document.getElementById('invF_parnu_amount');
+          if(elK){ elK.value = fmt2(r.kokku); }
+        }
+
+        if(miss.length){
+          setStatus('Hoiatus: PDF-ist ei leitud: ' + miss.join(', '), 'warn');
+        }else{
+          setStatus('OK: andmed loetud PDF-ist.', 'ok');
+        }
+      }catch(e){
+        console.error(e);
+        setStatus('Viga: PDF-i ei saanud lugeda. (Kontrolli, et pdf.min.js ja pdf.worker.min.js on samas kaustas kui HTML. Kui ikka ei tööta, ava leht http://localhost kaudu.)', 'warn');
+      }
+    });
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', wire);
+  }else{
+    wire();
+  }
+})();
+</script>
+
 </body>
 </html>
 
