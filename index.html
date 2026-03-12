@@ -38,7 +38,6 @@ if (typeof window.__formatMoney_Dot2_ !== "function") {
   };
 }
 
-
 function __invEnsureMoneyHandlers_(){
   if(__invCtx._moneyHandlersWired) return;
   __invCtx._moneyHandlersWired = true;
@@ -71,7 +70,7 @@ function __invEnsureMoneyHandlers_(){
   moneyIds.forEach(id=>wireFmt(document.getElementById(id), __formatMoney_Dot2_));
 
   // Volume fields (m3) — 3 decimals
-  const m3Ids = ["invF_parnu_tariff"];
+  const m3Ids = ["invF_parnu_tariff","invF_parnu_rate"];
   m3Ids.forEach(id=>wireFmt(document.getElementById(id), __formatNum_Dot3_));
 }
 
@@ -85,10 +84,8 @@ function __invForceFormatAll_(){
   const fmt2 = (id)=>{ const el=byId(id); if(!el) return; const v=__parseNum_(el.value); el.value=__formatMoney_Dot2_(v); };
   const fmt3 = (id)=>{ const el=byId(id); if(!el) return; const v=__parseNum_(el.value); el.value=__formatNum_Dot3_(v); };
   ["invF_hooldus_tariif","invF_hooldus_kogus","invF_ragn_amount","invF_parnu_amount","invF_enefit_amount","invF_ettemaks","invF_viivis"].forEach(fmt2);
-  ["invF_parnu_tariff"].forEach(fmt3);
+  ["invF_parnu_tariff","invF_parnu_rate"].forEach(fmt3);
 }
-
-
   
 window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
 </script>
@@ -106,7 +103,7 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.485</title>
+  <title>Karusselli 4 KÜ — v1.564</title>
   <script>
     // v1.417: keep browser tab title in sync with visible version badge
     document.addEventListener('DOMContentLoaded', function(){
@@ -133,8 +130,6 @@ try{
 #adminConfigForm button {
   font-size: 13px;
 }
-
-
     :root{
       /* Palette D — Warm Light (v1.151) */
       --bg0:#FAFAF9;
@@ -324,7 +319,6 @@ try{
       line-height:1.45;
     }
     .hidden{display:none !important}
-
     
 /* === AUTH INPUTS (v1.151 UI fix) === */
 #authSection input,
@@ -581,7 +575,6 @@ ul.ci-body{
 .ci-ico{ display:inline-block; width:18px; text-align:center; }
 .ci-nowrap{ white-space:nowrap; }
 
-
     .status-cards{display:grid; grid-template-columns: 1fr 1fr !important; gap:10px; margin-top:10px}
     .stat{
       border:1px solid var(--stroke);
@@ -606,13 +599,26 @@ ul.ci-body{
     .ok{color:var(--good); font-weight:900}
     .warn{color:var(--warn); font-weight:900}
   
-    .modal{display:none; position:fixed; inset:0; z-index:2000; align-items:center; justify-content:center; background:rgba(0,0,0,.35); padding:24px 16px;}
-    .modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.35)}
+    .modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.15);
+  padding:24px 16px;
+}
+
+.modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.15)}
     .modal-card{position:relative; width:min(720px, 92vw); margin:0; background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow: var(--shadow); overflow:auto; max-height:80vh;}
     
 
+
+#invEditModal .modal-card{max-height:92vh;}
+#invEditModal .invExtraInfoControls{width: calc(var(--invCtlW)*2 + 32px + 16px + 145px); max-width:100%;}
 /* --- Pay modal sizing (bills payment confirmation) --- */
-#payModal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,.35);padding:24px 16px;z-index:9999;}
+#payModal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,.15);padding:24px 16px;z-index:9999;}
 /* v1.353a0p266: pay modal spacing */
 #payModal .modal-card{padding:18px 22px; box-sizing:border-box;}
 #payModal .modal-row{margin-top:10px;}
@@ -628,7 +634,7 @@ ul.ci-body{
 #invSelModal .field:first-of-type, #invEditModal .field:first-of-type{ margin-top:0; }
 #invSelModal .field label, #invEditModal .field label{
   display:block;
-  font-size:12px;
+  font-size:11px;
   font-weight:600;
   color: var(--muted);
   margin-bottom:4px;
@@ -637,7 +643,7 @@ ul.ci-body{
   width:100%;
   font-size:12px;
   padding:6px 10px;
-  border:1px solid rgba(0,0,0,0.25);
+  border:1px solid rgba(0,0,0,0.15);
   border-radius:10px;
   background: transparent;
   box-shadow:none;
@@ -655,16 +661,16 @@ ul.ci-body{
   grid-template-columns: 1fr 1fr;
   gap:10px;
 }
-#invEditModal .subcap{
-  display:block;
-  font-size:11px;
-  font-weight:600;
-  color: var(--muted);
-  margin:8px 0 4px;
+#invEditModal .subgrid3{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:10px;
 }
+
 @media (max-width:720px){
   #invEditModal .subgrid{ grid-template-columns: 1fr; }
   #invEditModal .subgrid2{ grid-template-columns: 1fr 1fr; }
+  #invEditModal .subgrid3{ grid-template-columns: 1fr; }
 }
 
 #invSelModal .modal-footer, #invExistsModal .modal-footer, #invEditModal .modal-footer, #invStubModal .modal-footer{
@@ -688,7 +694,7 @@ ul.ci-body{
 #invEditModal input{ box-sizing:border-box !important; }
 #invEditModal .subfield{ width:100%; }
 
-#invEditModal .modal-card{width:min(840px, 98vw); max-width:840px;}
+#invEditModal .modal-card{width:min(658px, 98vw); max-width:658px;}
 
 .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
 .modal-head .headstack{display:flex; flex-direction:column; gap:4px;}
@@ -1365,14 +1371,14 @@ body{
   z-index: 5;
 }
 #page_readings .rd-vis-card{
-  border: 1px solid rgba(0,0,0,.25);
+  border: 1px solid rgba(0,0,0,.15);
   background: linear-gradient(180deg, rgba(160,190,255,.35), rgba(255,255,255,.95));
   padding: 16px 16px 12px 16px;
   text-align:center;
 }
 #page_readings .rd-vis-title{font-weight:700;color:#111;font-size:18px;}
 #page_readings .rd-vis-month{margin-top:4px;font-weight:600;color:#0b59d6;font-size:22px;}
-#page_readings .rd-vis-btn{margin:14px auto 10px auto;min-width:140px;padding:9px 16px;border-radius:0;border:1px solid rgba(0,0,0,.25);background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(215,228,255,.95));font-weight:700;}
+#page_readings .rd-vis-btn{margin:14px auto 10px auto;min-width:140px;padding:9px 16px;border-radius:0;border:1px solid rgba(0,0,0,.15);background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(215,228,255,.95));font-weight:700;}
 #page_readings .rd-vis-btn[disabled]{ opacity:.55; cursor:not-allowed; }
 #page_readings .rd-vis-foot{margin-top:10px;font-weight:700;color:#333;}
 #page_readings .rd-vis-foot.open{color:#1b7f2a;}
@@ -1505,12 +1511,13 @@ table td:nth-child(5) {
 
 
 /* v1.445: invoice edit modal layout + bottom row aligned right + footer no-overlap */
-#invEditModal .modal-card{width:min(840px, 98vw); max-width:840px;}
+#invEditModal .modal-card{width:min(658px, 98vw); max-width:658px;}
 #invEditModal .invEditGrid2{
   --invCtlW: 120px;
   display:grid;
   grid-template-columns: 170px auto;
-  gap:12px 26px;
+  row-gap:0px;
+  column-gap:26px;
   align-items:center;
 }
 .invRowLabel{
@@ -1518,8 +1525,33 @@ table td:nth-child(5) {
   color:#333;
   align-self:center;
   position:relative;
-  top:5px;
+  top:0;
 }
+
+#invEditModal .invRowControls{
+  min-height:68px;
+}
+
+#invEditModal .invRowLabel[data-i18n="invHooldusTitle"]{margin-top:-20px;}
+#invEditModal .invRowLabel[data-i18n="invHooldusTitle"] + .invRowControls{margin-top:-20px;}
+#invEditModal .invRowLabel[data-i18n="invParnuTitle"]{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invParnuTitle"] + .invRowControls{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invRagnTitle"]{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invRagnTitle"] + .invRowControls{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invEnefitTitle"]{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invEnefitTitle"] + .invRowControls{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invDebtTitle"]{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invDebtTitle"] + .invRowControls{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invPenaltyTitle"]{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invPenaltyTitle"] + .invRowControls{margin-top:-15px;}
+#invEditModal .invRowLabel[data-i18n="invRemondiDecisionNr"]{margin-top:-35px;}
+#invEditModal .invRowLabel[data-i18n="invRemondiDecisionNr"] + .invRowControls{margin-top:8px;}
+
+#invEditModal .invExtraInfoControls{
+  min-height:auto;
+  display:block;
+}
+
 .invRowControls{min-width:0;}
 /* Keep controls compact like 'Kogus' */
 #invEditModal .invEditGrid2 input{
@@ -1529,7 +1561,8 @@ table td:nth-child(5) {
 #invEditModal .invEditGrid2 .subgrid2{
   display:grid;
   grid-template-columns: var(--invCtlW) var(--invCtlW);
-  gap:18px 26px;
+  row-gap:4px;
+  column-gap:26px;
 }
 #invEditModal .invEditGrid2 .subcap{margin:0 0 6px 0;}
 
@@ -1541,13 +1574,12 @@ table td:nth-child(5) {
 #invEditModal .subfield{max-width:120px;}
 #invEditModal input:not(#invF_invoice_id){width:var(--invCtlW) !important;}
 #invEditModal #invF_invoice_id{width:auto; min-width:10ch; max-width:100%; display:inline-block;}
-#invEditModal .subgrid2{display:grid; grid-template-columns:120px 120px; gap:12px;}
 #invEditModal .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px 26px;}
 
 /* v1.445: compact Invoice ID + centered row labels + footer buttons auto width */
 #invEditModal .field > label{display:block;}
 #invEditModal #invF_invoice_id{padding-right:12px;}
-#invEditModal .modal-footer{display:flex; gap:12px; flex-wrap:nowrap; justify-content:flex-start; align-items:center;}
+#invEditModal .modal-footer{display:grid;grid-template-columns:repeat(3,auto);grid-column-gap:12px;grid-row-gap:10px;justify-content:center;margin-top:0px;}
 #invEditModal .modal-footer .btn{flex:0 0 auto !important; width:auto !important; white-space:nowrap !important;}
 #invEditModal .modal-footer #invEditRegister{flex:0 0 auto !important; white-space:nowrap !important;}
 
@@ -1558,6 +1590,17 @@ table td:nth-child(5) {
 /* v1.474: invoice edit modal - fix tariff parsing (do not turn 1.00 into 100) */
 #invEditModal input.invPrefill{
   color:#9a9a9a !important;
+}
+#invEditModal textarea.invTextarea{
+  width:100%;
+  height:70px;
+  resize:vertical;
+  padding:10px 12px;
+  border:1px solid #d7d7d7;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.35;
+  background:#fff;
 }
 #invEditModal.busy .modal-backdrop{
   pointer-events:none;
@@ -1591,8 +1634,57 @@ table td:nth-child(5) {
 }
 
 /* --- Pärnu Vesi PDF import (UI only) --- */
-.invInlineFile{ display:flex; align-items:center; gap:10px; }
-.invInlineFile input{ flex:1; min-width:0; width:auto; } /* prevent input overlaying button */
+
+.invInlineFile{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:4px;
+}
+
+#invEditModal .invParnuUnified{
+  display:grid;
+  grid-template-columns: var(--invCtlW) auto;
+  row-gap:4px;
+  column-gap:26px;
+  align-items:start;
+}
+
+#invEditModal .invParnuRight{
+  min-width:0;
+}
+
+#invEditModal .invParnuRightGrid{
+  display:grid;
+  grid-template-columns: var(--invCtlW) 32px var(--invCtlW);
+  gap:8px;
+  align-items:end;
+}
+
+#invEditModal .invParnuRightGrid > div{
+  min-width:0;
+}
+
+#invEditModal .invParnuRightGrid label{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+
+#invEditModal .invParnuRightGrid input{
+  width:var(--invCtlW) !important;
+}
+
+#invEditModal .invParnuRightGrid .invPdfBtnSmall{
+  align-self:end;
+  margin-bottom:0;
+}
+
+.invInlineFile input{ flex:0 0 var(--invCtlW); width:var(--invCtlW); min-width:0; } /* keep original control width, avoid overlay */
+.invInlineTariff{ display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
+.invInlineTariff input{ flex:0 0 auto; width:var(--invCtlW); min-width:0; }
 .invPdfBtnSmall{
   flex:0 0 auto;
   width:32px; height:32px; padding:0;
@@ -2125,7 +2217,7 @@ table td:nth-child(5) {
 /* Omanik (3rd cell) input */
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3) .au-inp{
   font-size:12px !important;
-  border:1px solid rgba(0,0,0,0.25) !important;
+  border:1px solid rgba(0,0,0,0.15) !important;
   border-radius:6px !important;
   padding:4px 6px !important;
   background:#f4f7ff !important;
@@ -2348,7 +2440,7 @@ table td:nth-child(5) {
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(3) input.au-inp,
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4) input.au-inp,
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(5) input.au-inp{
-  border:1px solid rgba(0,0,0,0.25) !important;
+  border:1px solid rgba(0,0,0,0.15) !important;
   border-radius:6px !important;
   padding:4px 6px !important;
   background: transparent !important;
@@ -2504,7 +2596,7 @@ table td:nth-child(5) {
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(4) input.au-inp,
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(5) input.au-inp,
 #page_admin #adminUsersTable .au-row:not(.au-head) .au-cell:nth-child(6) input.au-inp{
-  border:1px solid rgba(0,0,0,0.25) !important;
+  border:1px solid rgba(0,0,0,0.15) !important;
   border-radius:6px !important;
   padding:4px 6px !important;
   background: transparent !important;
@@ -2556,7 +2648,7 @@ table td:nth-child(5) {
   width:100%;
   font-size:12px;
   padding:4px 6px;
-  border:1px solid rgba(0,0,0,0.25);
+  border:1px solid rgba(0,0,0,0.15);
   border-radius:6px;
   background: transparent;
   box-shadow:none;
@@ -2645,7 +2737,7 @@ table td:nth-child(5) {
 
 /* m² placeholder "00.0" in light gray when empty */
 #page_admin #adminUsersTable input.au-inp[data-field="flat_square"]::placeholder{
-  color: rgba(0,0,0,0.35) !important;
+  color: rgba(0,0,0,0.15) !important;
 }
 </style>
 
@@ -2796,7 +2888,7 @@ table td:nth-child(5) {
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.485</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.564</span>
         <small id="brandSub"></small>
       </div>
 
@@ -3310,6 +3402,7 @@ table td:nth-child(5) {
     new_password: "Новый пароль",
     continue: "Продолжить",
     close: "Закрыть",
+    ok: "ОК",
     code_sent: "Код отправлен",
     sending: "Отправка…",
     verifying: "Проверка…",
@@ -3351,10 +3444,16 @@ table td:nth-child(5) {
   invSelLoading: "Загрузка квартир…",
   invSelChooseAll: "Выберите квартиру, месяц и год.",
   invSelChecking: "Проверка…",
+  invSelCheckingDraft: "Проверка черновика…",
   invSelCreatingDraft: "Создание счёта…",
         invEditLoading: "Загрузка счёта…",
   invEditSaving: "Сохранение…",
+  invEditRegisteringPdf: "Регистрирую счёт и создаю PDF…",
+  invEditRegisterDone: "✅ Счёт зарегистрирован и PDF создан.",
   invEditSaved: "Сохранено.",
+  invGuideUnsaved: "Сохраните счет в базу данных",
+  invGuideSaved: "Зарегистрируйте счет",
+  invGuideRegistered: "Отправьте счет по e-mail или сохраните на компьютер",
   month_1: "Январь",
   month_2: "Февраль",
   month_3: "Март",
@@ -3368,19 +3467,51 @@ table td:nth-child(5) {
   month_11: "Ноябрь",
   month_12: "Декабрь",
   invExistsTitle: "Счёт уже существует",
-  invExistsText: "Вы хотите отредактировать данный счёт?",
+  invExistsText: "Создание счёта для этого периода невозможно. Счёт уже существует.",
+  invDraftTitle: "Найден черновик",
+  invDraftText: "Для выбранного периода существует черновик. Хотите загрузить его?",
+  invDraftLoad: "Загрузить черновик",
+  invDraftLoading: "Загрузка черновика…",
+  invDraftFilesTitle: "Найденные файлы",
+  invDraftCompareTitle: "Проверка системных данных",
+  invDraftPreview: "Предпросмотр",
+  invDraftDelete: "Удалить",
+  invDraftDeleteConfirm: "Удалить этот файл?",
+  invDraftDeleteDone: "Файл удалён.",
+  invDraftDeleteFailed: "Не удалось удалить файл.",
+  invDraftTypeSource: "сохранённый черновик",
+  invDraftTypeDraft: "черновик",
+  invDraftTypeXlsx: "xlsx",
+  invDraftNoFiles: "Файлы не найдены.",
+  invDraftNoLoadable: "Нет файла для загрузки.",
+  invDraftCreateNew: "Создать новый черновик",
+  invDraftCreating: "Создание нового черновика…",
+  invDraftCompareOk: "Системные данные проверены. Несоответствий не обнаружено.",
+  invDraftCompareDiff: "Обнаружены различия между файлом и системой:",
+  invDraftSystemUsed: "При работе со счётом будут использованы данные системы.",
+  invFieldFirstName: "Имя",
+  invFieldLastName: "Фамилия",
+  invFieldFlatSquare: "Площадь",
+  invFieldBoardNames: "Имена правления",
+  invFieldBoardPhones: "Телефоны правления",
+  invFieldUldarveRate: "Тариф общего счёта",
+  invFieldRemondiRate: "Тариф ремонтного фонда",
+  invRemondiDecisionNr: "Номер решения ремонтного фонда",
   invoiceEditTitle: "Инфо счёта",
   invExistsYes: "Да",
-  invExistsNo: "Нет",
+  invExistsNo: "Назад к выбору",
   invEditTitle: "Счёт",
   invEditCancel: "Отмена",
-  invEditSave: "Сохранить",
+  invEditSave: "Сохранить в БД",
   invEditPreview: "Предпросмотр",
   invEditRegister: "Зарегистрировать счёт и создать PDF",
   invEditSend: "Отправить счёт",
+  invEditSavePc: "Сохранить на ПК",
   // Invoice edit modal labels
   invDeletingDraft: "Удаление черновика…",
   invPenaltyTitle: "Пени",
+        invExtraInfoSub: "Текст",
+        invExtraInfoTitle: "Дополнительная информация жильцам",
   invDebtTitle: "Долг / Предоплата",
   invHooldusTitle: "Обслуживание",
   invParnuTitle: "Pärnu vesi счёт",
@@ -3552,6 +3683,7 @@ table td:nth-child(5) {
     new_password: "Uus parool",
     continue: "Jätka",
     close: "Sulge",
+    ok: "OK",
     code_sent: "Kood saadetud",
     sending: "Saatmine…",
     verifying: "Kontrollimine…",
@@ -3593,10 +3725,16 @@ table td:nth-child(5) {
   invSelLoading: "Korterite laadimine…",
   invSelChooseAll: "Vali korter, kuu ja aasta.",
   invSelChecking: "Kontrollin…",
+  invSelCheckingDraft: "Kontrollin mustandit…",
   invSelCreatingDraft: "Arve loomine…",
         invEditLoading: "Arve laadimine…",
   invEditSaving: "Salvestan…",
+      invEditRegisteringPdf: "Registreerin arve ja loon PDF…",
+      invEditRegisterDone: "✅ Arve registreeritud ja PDF loodud.",
   invEditSaved: "Salvestatud.",
+  invGuideUnsaved: "Salvestage arve andmebaasi",
+  invGuideSaved: "Registreerige arve",
+  invGuideRegistered: "Saatke arve e-posti teel või salvestage arvutisse",
   month_1: "Jaanuar",
   month_2: "Veebruar",
   month_3: "Märts",
@@ -3610,19 +3748,51 @@ table td:nth-child(5) {
   month_11: "November",
   month_12: "Detsember",
   invExistsTitle: "Arve juba olemas",
-  invExistsText: "Kas soovid seda arvet muuta?",
+  invExistsText: "Arve koostamine selle perioodi jaoks pole võimalik. Arve on juba olemas.",
+  invDraftTitle: "Mustand leitud",
+  invDraftText: "Valitud perioodi jaoks on olemas mustand. Kas laadida see?",
+  invDraftLoad: "Laadi mustand",
+  invDraftLoading: "Laadin mustandi…",
+  invDraftFilesTitle: "Leitud failid",
+  invDraftCompareTitle: "Süsteemiandmete kontroll",
+  invDraftPreview: "Eelvaade",
+  invDraftDelete: "Kustuta",
+  invDraftDeleteConfirm: "Kustuta see fail?",
+  invDraftDeleteDone: "Fail kustutatud.",
+  invDraftDeleteFailed: "Faili kustutamine ebaõnnestus.",
+  invDraftTypeSource: "salvestatud mustand",
+  invDraftTypeDraft: "mustand",
+  invDraftTypeXlsx: "xlsx",
+  invDraftNoFiles: "Faile ei leitud.",
+  invDraftNoLoadable: "Laaditavat faili ei ole.",
+  invDraftCreateNew: "Loo uus mustand",
+  invDraftCreating: "Loon uut mustandit…",
+  invDraftCompareOk: "Süsteemi andmed kontrollitud. Erinevusi ei leitud.",
+  invDraftCompareDiff: "Leitud erinevused faili ja süsteemi vahel:",
+  invDraftSystemUsed: "Arvega töötamisel kasutatakse süsteemi andmeid.",
+  invFieldFirstName: "Eesnimi",
+  invFieldLastName: "Perenimi",
+  invFieldFlatSquare: "Pindala",
+  invFieldBoardNames: "Juhatuse nimed",
+  invFieldBoardPhones: "Juhatuse telefonid",
+  invFieldUldarveRate: "Üld arve tariif",
+  invFieldRemondiRate: "Remondi tariif",
+  invRemondiDecisionNr: "Remondifondi otsuse nr",
   invoiceEditTitle: "Arve info",
   invExistsYes: "Jah",
-  invExistsNo: "Ei",
+  invExistsNo: "Tagasi valikusse",
   invEditTitle: "Arve",
   invEditCancel: "Tühista",
-  invEditSave: "Salvesta",
+  invEditSave: "Salvesta andmebaasi",
   invEditPreview: "Eelvaade",
   invEditRegister: "Registreeri arve ja loo PDF",
   invEditSend: "Saada arve",
+  invEditSavePc: "Salvesta arvutisse",
   // Invoice edit modal labels
   invDeletingDraft: "Mustandi kustutamine…",
   invPenaltyTitle: "Viivis",
+        invExtraInfoSub: "Tekst",
+        invExtraInfoTitle: "Lisainfo elanikele",
   invDebtTitle: "Võlg / Ettemaks",
   invHooldusTitle: "Hoolduskulud",
   invParnuTitle: "Pärnu vesi arve",
@@ -3793,6 +3963,7 @@ table td:nth-child(5) {
     new_password: "New password",
     continue: "Continue",
     close: "Close",
+    ok: "OK",
     code_sent: "Code sent",
     sending: "Sending…",
     verifying: "Verifying…",
@@ -3834,10 +4005,16 @@ table td:nth-child(5) {
   invSelLoading: "Loading apartments…",
   invSelChooseAll: "Select apartment, month and year.",
   invSelChecking: "Checking…",
+  invSelCheckingDraft: "Checking draft…",
   invSelCreatingDraft: "Creating invoice…",
         invEditLoading: "Loading invoice…",
   invEditSaving: "Saving…",
+      invEditRegisteringPdf: "Registering invoice & creating PDF…",
+      invEditRegisterDone: "✅ Invoice registered and PDF created.",
   invEditSaved: "Saved.",
+  invGuideUnsaved: "Save invoice to database",
+  invGuideSaved: "Register the invoice",
+  invGuideRegistered: "Send the invoice by email or save it to your computer",
   month_1: "January",
   month_2: "February",
   month_3: "March",
@@ -3851,19 +4028,51 @@ table td:nth-child(5) {
   month_11: "November",
   month_12: "December",
   invExistsTitle: "Invoice already exists",
-  invExistsText: "Do you want to edit this invoice?",
+  invExistsText: "Cannot create an invoice for this period. The invoice already exists.",
+  invDraftTitle: "Draft found",
+  invDraftText: "A draft exists for the selected period. Do you want to load it?",
+  invDraftLoad: "Load draft",
+  invDraftLoading: "Loading draft…",
+  invDraftFilesTitle: "Found files",
+  invDraftCompareTitle: "System data check",
+  invDraftPreview: "Preview",
+  invDraftDelete: "Delete",
+  invDraftDeleteConfirm: "Delete this file?",
+  invDraftDeleteDone: "File deleted.",
+  invDraftDeleteFailed: "Failed to delete file.",
+  invDraftTypeSource: "saved draft",
+  invDraftTypeDraft: "draft",
+  invDraftTypeXlsx: "xlsx",
+  invDraftNoFiles: "No files found.",
+  invDraftNoLoadable: "No file available for loading.",
+  invDraftCreateNew: "Create new draft",
+  invDraftCreating: "Creating new draft…",
+  invDraftCompareOk: "System data checked. No differences found.",
+  invDraftCompareDiff: "Differences found between file and system:",
+  invDraftSystemUsed: "System data will be used while working with the invoice.",
+  invFieldFirstName: "First name",
+  invFieldLastName: "Last name",
+  invFieldFlatSquare: "Area",
+  invFieldBoardNames: "Board names",
+  invFieldBoardPhones: "Board phones",
+  invFieldUldarveRate: "General invoice rate",
+  invFieldRemondiRate: "Repair fund rate",
+  invRemondiDecisionNr: "Repair fund decision no.",
   invoiceEditTitle: "Invoice info",
   invExistsYes: "Yes",
-  invExistsNo: "No",
+  invExistsNo: "Back to selection",
   invEditTitle: "Invoice",
   invEditCancel: "Cancel",
-  invEditSave: "Save",
+  invEditSave: "Save to DB",
   invEditPreview: "Preview",
   invEditRegister: "Register invoice & make PDF",
   invEditSend: "Send invoice",
+  invEditSavePc: "Save to PC",
   // Invoice edit modal labels
   invDeletingDraft: "Deleting draft…",
   invPenaltyTitle: "Penalty",
+        invExtraInfoSub: "Text",
+        invExtraInfoTitle: "Additional information for residents",
   invDebtTitle: "Debt / Prepayment",
   invHooldusTitle: "Maintenance",
   invParnuTitle: "Pärnu vesi invoice",
@@ -4371,6 +4580,12 @@ function updateInvoiceI18n_(){
     const txEx = document.getElementById("invExistsText"); if(txEx) txEx.textContent = tr("invExistsText");
     const bNo = document.getElementById("invExistsNo"); if(bNo) bNo.textContent = tr("invExistsNo");
     const bYes = document.getElementById("invExistsYes"); if(bYes) bYes.textContent = tr("invExistsYes");
+    // Draft modal
+    const tDr = document.getElementById("invDraftModalTitle"); if(tDr) tDr.textContent = tr("invDraftTitle");
+    const txDr = document.getElementById("invDraftText"); if(txDr) txDr.textContent = tr("invDraftText");
+    const bDrCancel = document.getElementById("invDraftCancel"); if(bDrCancel) bDrCancel.textContent = tr("cancel");
+    const bDrLoad = document.getElementById("invDraftLoad"); if(bDrLoad) bDrLoad.textContent = tr("invDraftLoad");
+
 
     // Edit modal buttons + title
     const tEdit = document.getElementById("invEditModalTitle");
@@ -4389,6 +4604,7 @@ function updateInvoiceI18n_(){
     const bEP = document.getElementById("invEditPreview"); if(bEP) bEP.textContent = tr("invEditPreview");
     const bER = document.getElementById("invEditRegister"); if(bER) bER.textContent = tr("invEditRegister");
     const bSend = document.getElementById("invEditSend"); if(bSend) bSend.textContent = tr("invEditSend");
+    const bPc = document.getElementById("invEditSavePc"); if(bPc) bPc.textContent = tr("invEditSavePc");
 
     // Stub modal
     const tStub = document.getElementById("invStubModalTitle"); if(tStub) tStub.textContent = tr("invStubTitle");
@@ -4715,8 +4931,8 @@ async function apiPost(path, payload){
       // v1.353a0p139: longer timeout for Admin endpoints (Apps Script can be slower there)
       const p = String(path||"" );
       const ms = (p.includes("adminUsers") ? 60000 : (
-        (p.includes("invoiceDraftCreate") || p.includes("invoiceSave") || p.includes("invoiceRegister") || p.includes("invoicePdf") || p.includes("invoiceSend")) ? 90000 :
-        (p.includes("invoiceCheck") || p.includes("invoiceApartments") || p.includes("invoices")) ? 45000 : 20000
+        (p.includes("invoiceDraftCreate") || p.includes("invoiceDraftLoad") || p.includes("invoiceSourceLoad") || p.includes("invoiceSave") || p.includes("invoiceRegister") || p.includes("invoicePdf") || p.includes("invoiceSend")) ? 90000 :
+        (p.includes("invoiceCheck") || p.includes("invoiceApartments") || p.includes("invoices") || p.includes("invoiceDraftStatus") || p.includes("invoiceSourceStatus")) ? 45000 : 20000
       ));
       const t = setTimeout(()=>ctrl.abort(), ms);
 // 20s
@@ -4727,12 +4943,40 @@ async function apiPost(path, payload){
           body: JSON.stringify(payload || {}),
           signal: ctrl.signal
         });
-        const data = await res.json().catch(()=>({ ok:false, error:"Bad JSON" }));
-        // If upstream returns non-2xx, still surface the payload error if present
+        //const data = await res.json().catch(()=>({ ok:false, error:"Bad JSON" }));
+        //// If upstream returns non-2xx, still surface the payload error if present
+        //if (!res.ok && data && typeof data === "object" && !data.ok){
+        //  data.http_status = res.status;
+        //}
+        //return data;
+
+
+        const raw = await res.text();
+        console.log("API RAW RESPONSE:", path, raw);
+
+        let data;
+
+        try{
+          data = JSON.parse(raw);
+        }catch(e){
+          console.error("BAD JSON RESPONSE:", path, raw);
+          data = {
+            ok:false,
+            error:"Bad JSON",
+            raw: raw,
+            http_status: res.status
+          };
+        }
+
         if (!res.ok && data && typeof data === "object" && !data.ok){
           data.http_status = res.status;
         }
+
         return data;
+
+
+
+
       }catch(err){
         const msg = (err && err.name === "AbortError") ? "Request timeout" : String(err);
         return { ok:false, error: msg };
@@ -6181,7 +6425,7 @@ function updateLangFlag_() {
  * - Send invoice stub (enabled only when drive_file_id exists)
  * ============================================================ */
 
-const __invCtx = { apt:0, month:0, year:0, exists:false, drive_file_id:"", invoice_id:"", data:null, dirty:false };
+const __invCtx = { apt:0, month:0, year:0, exists:false, drive_file_id:"", sendOnly:false, invoice_id:"", data:null, dirty:false };
 
 function __modalShow_(id){ const el=byId(id); if(!el) return; el.style.display = (el.classList && el.classList.contains("modal")) ? "flex" : "block"; }
 function __modalHide_(id){ const el=byId(id); if(el) el.style.display="none"; }
@@ -6258,6 +6502,20 @@ function __invSetMsg_(id, txt){
   el.textContent = (txt == null) ? "" : String(txt);
 }
 
+
+
+// Reset transient UI status messages between invoice sessions
+function __invResetUiMessages_(){
+  const ids = ["parnuPdfStatus","ragnPdfStatus","enefitPdfStatus","invEditMsg","invDraftMsg"];
+  for(const id of ids){
+    const el = document.getElementById(id);
+    if(el){
+      el.textContent = "";
+      try{ el.classList.remove("ok","err"); }catch(_e){}
+      try{ el.style.display = ""; }catch(_e){}
+    }
+  }
+}
 // Status helper: when status message is shown, lock ALL controls; when cleared, restore.
 function __invSetStatus_(id, txt){
   const el = byId(id);
@@ -6385,6 +6643,180 @@ async function __invCheckExists_(apt, month, year){
   return r;
 }
 
+async function __invDraftStatus_(apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceDraftStatus", { token, apartment:apt, month, year });
+  if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "DRAFT_STATUS_FAILED");
+  return r;
+}
+
+async function __invDraftFind_(apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceDraftFind", { token, apartment:apt, month, year });
+  if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "DRAFT_FIND_FAILED");
+  return r;
+}
+
+async function __invDraftLoad_(apt, month, year, draftId){
+  const token = getToken();
+  const payload = { token, apartment:apt, month, year };
+  if(draftId) payload.draft_sheet_id = String(draftId);
+  const r = await apiPost("/invoiceDraftLoad", payload);
+  if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "DRAFT_LOAD_FAILED");
+  return r;
+}
+
+async function __invSourceLoad_(apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceSourceLoad", { token, apartment:apt, month, year });
+  if(!r || !r.ok) throw new Error((r && (r.error || r.message)) ? (r.error || r.message) : "SOURCE_LOAD_FAILED");
+  return r;
+}
+
+async function __invFileDelete_(fileId, apt, month, year){
+  const token = getToken();
+  const r = await apiPost("/invoiceFileDelete", { token, file_id:fileId, apartment:apt, month, year });
+  if(!r || !r.ok) throw new Error((r && (r.error || r.message)) ? (r.error || r.message) : "FILE_DELETE_FAILED");
+  return r;
+}
+
+function __invFieldLabel_(key){
+  const map = {
+    first_name: "invFieldFirstName",
+    last_name: "invFieldLastName",
+    flat_square: "invFieldFlatSquare",
+    board_names: "invFieldBoardNames",
+    board_phones: "invFieldBoardPhones",
+    uldarve_rate: "invFieldUldarveRate",
+    remondi_rate: "invFieldRemondiRate"
+  };
+  return tr(map[key] || key);
+}
+
+function __invFormatDraftDate_(v){
+  try{
+    const d = new Date(v);
+    if(isNaN(d.getTime())) return "";
+    return d.toLocaleString();
+  }catch(_e){ return ""; }
+}
+
+function __invFilePreviewUrl_(file){
+  if(!file || !file.file_id) return "";
+  const type = String(file.type || "");
+  if(type === "source" || type === "draft") return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(file.file_id)}/edit`;
+  return `https://drive.google.com/file/d/${encodeURIComponent(file.file_id)}/view`;
+}
+
+function __invRenderDraftModal_(){
+  const status = (__invCtx && __invCtx._draftStatus) ? __invCtx._draftStatus : null;
+  const filesBox = byId("invDraftFiles");
+  const cmpBox = byId("invDraftCompare");
+  const loadBtn = byId("invDraftLoad");
+  const msgBox = byId("invDraftMsg");
+  if(msgBox) msgBox.textContent = "";
+  if(filesBox) filesBox.innerHTML = "";
+  if(cmpBox) cmpBox.innerHTML = "";
+
+  const files = [];
+  if(status && status.source) files.push(status.source);
+  if(status && status.xlsx) files.push(status.xlsx);
+  if(status && status.draft) files.push(status.draft);
+
+  if(filesBox){
+    if(!files.length){
+      const row = document.createElement("div");
+      row.className = "muted";
+      row.textContent = tr("invDraftNoFiles");
+      filesBox.appendChild(row);
+    }else{
+      files.forEach(file=>{
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.flexWrap = "wrap";
+        row.style.alignItems = "center";
+        row.style.gap = "8px";
+        row.style.margin = "6px 0";
+
+        const meta = document.createElement("div");
+        meta.style.flex = "1 1 360px";
+        const typeKey = file.type === "source" ? "invDraftTypeSource" : (file.type === "draft" ? "invDraftTypeDraft" : "invDraftTypeXlsx");
+        const dt = __invFormatDraftDate_(file.updated_at);
+        meta.textContent = `${file.name} | ${tr(typeKey)}${dt ? ' | ' + dt : ''}`;
+        row.appendChild(meta);
+
+        const preview = document.createElement("button");
+        preview.className = "btn";
+        preview.textContent = tr("invDraftPreview");
+        preview.onclick = ()=>{
+          const url = __invFilePreviewUrl_(file);
+          if(url) window.open(url, "_blank", "noopener");
+        };
+        row.appendChild(preview);
+
+        const del = document.createElement("button");
+        del.className = "btn";
+        del.textContent = tr("invDraftDelete");
+        del.onclick = async ()=>{
+          if(!confirm(tr("invDraftDeleteConfirm"))) return;
+          try{
+            __invSetStatus_("invDraftMsg", tr("invDeletingDraft"));
+            await __invFileDelete_(file.file_id, __invCtx.apt, __invCtx.month, __invCtx.year);
+            const refreshed = await __invDraftStatus_(__invCtx.apt, __invCtx.month, __invCtx.year);
+            __invCtx._draftStatus = refreshed;
+            __invRenderDraftModal_();
+            __invSetStatus_("invDraftMsg", "");
+            __invSetMsg_("invDraftMsg", tr("invDraftDeleteDone"));
+          }catch(e){
+            __invSetStatus_("invDraftMsg", "");
+            __invSetMsg_("invDraftMsg", tr("invDraftDeleteFailed") + ' ' + String(e));
+          }
+        };
+        row.appendChild(del);
+
+        filesBox.appendChild(row);
+      });
+    }
+  }
+
+  if(cmpBox){
+    const cmp = status && status.comparison ? status.comparison : null;
+    if(cmp && Array.isArray(cmp.lines) && cmp.lines.length){
+      const top = document.createElement("div");
+      top.className = cmp.matches ? "muted" : "muted";
+      top.style.marginBottom = "6px";
+      top.textContent = tr(cmp.matches ? "invDraftCompareOk" : "invDraftCompareDiff");
+      cmpBox.appendChild(top);
+
+      cmp.lines.forEach(line=>{
+        const row = document.createElement("div");
+        row.style.margin = "4px 0";
+        const label = __invFieldLabel_(line.field);
+        if(line.same){
+          row.textContent = `✓ ${label}: ${line.system_value || '—'}`;
+        }else{
+          row.textContent = `⚠ ${label}: ${line.file_value || '—'} → ${line.system_value || '—'}`;
+        }
+        cmpBox.appendChild(row);
+      });
+
+      const note = document.createElement("div");
+      note.className = "muted";
+      note.style.marginTop = "8px";
+      note.textContent = tr("invDraftSystemUsed");
+      cmpBox.appendChild(note);
+    }
+  }
+
+  if(loadBtn){
+    const canLoad = !!(status && (status.use_source || status.use_draft));
+    loadBtn.disabled = false;
+    loadBtn.dataset.mode = canLoad ? "load" : "create";
+    loadBtn.textContent = tr(canLoad ? "invDraftLoad" : "invDraftCreateNew");
+    loadBtn.title = canLoad ? "" : tr("invDraftNoFiles");
+  }
+}
+
 function __invNum_(s){
   const t = String(s||"").trim().replace(/\s+/g,"");
   if(!t) return 0;
@@ -6476,11 +6908,17 @@ function __invPopulateForm_(data){
   byId("invF_ettemaks").value = String(data.ettemaks ?? "");
   byId("invF_viivis").value = String(data.viivis ?? "");
   byId("invF_payment_due").value = String(data.payment_due ?? "");
+  try{ byId("invF_extra_info").value = String(data.extra_info ?? ""); }catch(_e){}
+  try{ byId("invF_remondi_decision_nr").value = String(data.remondi_decision_nr ?? ""); }catch(_e){}
   byId("invF_hooldus_tariif").value = String(data.hooldus_tariif ?? "1");
   byId("invF_hooldus_kogus").value = String(data.hooldus_kogus ?? "0");
   byId("invF_ragn_amount").value = String(data.ragn_amount ?? "0");
   byId("invF_parnu_amount").value = String(data.parnu_amount ?? "0");
-  byId("invF_parnu_tariff").value = String(data.parnu_tariff ?? "0");
+  // R16: Pärnu fields
+  // - invF_parnu_rate   = Tarbimine (m3)
+  // - invF_parnu_tariff = Tariif (€/m3)
+  byId("invF_parnu_rate").value = String((data.parnu_consumption_m3 ?? data.parnu_consumption) ?? "0");
+  try{ byId("invF_parnu_tariff").value = String((data.parnu_rate ?? data.parnu_tariff) ?? "0"); }catch(_e){}
   byId("invF_enefit_amount").value = String(data.enefit_amount ?? "0");
   __invFormatEditFields_();
   __invMarkPrefill_();
@@ -6515,11 +6953,12 @@ function __invFormatEditFields_(){
   }
 
   // Tarbimine, m3 (3 decimals)
-  const m3 = byId("invF_parnu_tariff");
-  if(m3){
-    const v = __parseNum_(m3.value);
-    m3.value = __formatNum_Dot3_(isNaN(v)?0:v);
-  }
+  ["invF_parnu_tariff","invF_parnu_rate"].forEach(id=>{
+    const el = byId(id);
+    if(!el) return;
+    const v = __parseNum_(el.value);
+    el.value = __formatNum_Dot3_(isNaN(v)?0:v);
+  });
 }
 
 function __invReadForm_(){
@@ -6536,24 +6975,158 @@ function __invReadForm_(){
   data.hooldus_kogus = __invNum_(byId("invF_hooldus_kogus").value);
   data.ragn_amount = __invNum_(byId("invF_ragn_amount").value);
   data.parnu_amount = __invNum_(byId("invF_parnu_amount").value);
-  data.parnu_tariff = __invNum3_(byId("invF_parnu_tariff").value);
-  if(!isFinite(data.parnu_tariff)) data.parnu_tariff = 0;
+  // R16: Pärnu
+  data.parnu_consumption_m3 = __invNum3_(byId("invF_parnu_rate").value);
+  if(!isFinite(data.parnu_consumption_m3)) data.parnu_consumption_m3 = 0;
+  try{
+    data.parnu_tariff = __invNum3_(byId("invF_parnu_tariff").value);
+    if(!isFinite(data.parnu_tariff)) data.parnu_tariff = 0;
+  }catch(_e){
+    data.parnu_tariff = 0;
+  }
   data.enefit_amount = __invNum_(byId("invF_enefit_amount").value);
+  try{ data.extra_info = String(byId("invF_extra_info").value||""); }catch(_e){ data.extra_info=""; }
+  try{ data.remondi_decision_nr = String(byId("invF_remondi_decision_nr").value||"").trim(); }catch(_e){ data.remondi_decision_nr=""; }
   return data;
+}
+
+function __invGetGuideMsg_(){
+  const registered = !!__invCtx.registered;
+  if(registered) return tr("invGuideRegistered");
+  return __invCtx.hasSource ? tr("invGuideSaved") : tr("invGuideUnsaved");
+}
+
+function __invApplyGuideMsg_(force){
+  const el = byId("invEditMsg");
+  if(!el) return;
+  const cur = String(el.textContent||"").trim();
+  if(cur && !force) return;
+  __invSetMsg_("invEditMsg", __invGetGuideMsg_());
+}
+
+function __invRefreshActionState_(forceGuide){
+  const registered = !!__invCtx.registered;
+  const saved = registered || !!__invCtx.hasSource;
+  const dirty = !!__invCtx.dirty && !registered;
+
+  const saveBtn = byId("invEditSave");
+  if(saveBtn){
+    saveBtn.disabled = registered || !dirty;
+    try{ saveBtn.title = ""; }catch(_e){}
+  }
+
+  const previewBtn = byId("invEditPreview");
+  if(previewBtn){
+    previewBtn.disabled = false;
+    try{ previewBtn.title = ""; }catch(_e){}
+  }
+
+  const registerBtn = byId("invEditRegister");
+  if(registerBtn){
+    registerBtn.disabled = registered || !saved;
+    try{ registerBtn.title = (!registered && !saved) ? "" : ""; }catch(_e){}
+  }
+
+  const sendBtn = byId("invEditSend");
+  if(sendBtn){
+    sendBtn.disabled = !registered;
+    try{ sendBtn.title = ""; }catch(_e){}
+  }
+
+  const savePcBtn = byId("invEditSavePc");
+  if(savePcBtn){
+    savePcBtn.disabled = !registered;
+    try{ savePcBtn.title = ""; }catch(_e){}
+  }
+
+  __invApplyGuideMsg_(!!forceGuide);
 }
 
 function __invSetDirty_(dirty){
   __invCtx.dirty = !!dirty;
-  const btn = byId("invEditSave");
-  if(btn) btn.disabled = !__invCtx.dirty;
+  __invRefreshActionState_(false);
+}
+
+function __invApplySendOnlyMode_(){
+  return;
+}
+
+function __invUpdateSavePcEnabled_(){
+  __invRefreshActionState_(false);
+}
+
+function __invUpdateRegisterEnabled_(){
+  __invRefreshActionState_(false);
 }
 
 function __invUpdateSendEnabled_(){
-  const btn = byId("invEditSend");
-  if(!btn) return;
-  btn.disabled = !(__invCtx.drive_file_id && String(__invCtx.drive_file_id).trim());
+  __invRefreshActionState_(false);
 }
 
+async function __invDoSavePc_(){
+  try{
+    if(!String(__invCtx.invoice_id||"").trim()){
+      __invSetMsg_("invEditMsg", "Invoice must be registered first.");
+      return;
+    }
+    if(typeof window.showDirectoryPicker !== "function"){
+      __invSetMsg_("invEditMsg", "Directory picker is not supported in this browser.");
+      return;
+    }
+    const dirHandle = await window.showDirectoryPicker({ mode:"readwrite" });
+    __invSetBusy_(true);
+    __invSetMsg_("invEditMsg", "Preparing files...");
+    const token = getToken();
+    const r = await apiPost("/invoiceDownloadFiles", {
+      token,
+      apartment: __invCtx.apt,
+      month: __invCtx.month,
+      year: __invCtx.year
+    });
+    if(!r || !r.ok) throw new Error((r && (r.detail || r.error)) ? (r.detail || r.error) : "DOWNLOAD_FAILED");
+
+    const saveB64 = async (name, b64) => {
+      const bytes = Uint8Array.from(atob(String(b64||"")), c => c.charCodeAt(0));
+      const h = await dirHandle.getFileHandle(name, { create:true });
+      const w = await h.createWritable();
+      await w.write(bytes);
+      await w.close();
+    };
+
+    await saveB64(String(r.xlsx_name||"invoice.xlsx"), String(r.xlsx_b64||""));
+    await saveB64(String(r.pdf_name||"invoice.pdf"), String(r.pdf_b64||""));
+    __invSetMsg_("invEditMsg", "✅ Files saved to selected folder.");
+  }catch(e){
+    if(String(e && e.name || "") === "AbortError") __invSetMsg_("invEditMsg", "Operation cancelled.");
+    else __invSetMsg_("invEditMsg", String((e && e.message) || e));
+  }finally{
+    __invSetBusy_(false);
+  }
+}
+
+async function __invDoSend_(){
+  try{
+    if(!String(__invCtx.invoice_id||"").trim()){
+      __invSetMsg_("invEditMsg", "Arve saatmiseks tuleb see esmalt registreerida.");
+      return;
+    }
+    __invSetBusy_(true);
+    __invSetMsg_("invEditMsg", "Arve saatmine...");
+    const token = getToken();
+    const r = await apiPost("/invoiceSendEmail", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, invoice_id:__invCtx.invoice_id });
+    if(!r || !r.ok) throw new Error((r && (r.error || r.detail)) ? (r.error || r.detail) : "SEND_FAILED");
+    const sent = Array.isArray(r.sent_to) ? r.sent_to.join(", ") : String(r.sent_to||"");
+    __invCtx.email_sent_at = new Date().toISOString();
+    __invCtx.email_sent_to = sent;
+    __invCtx.sendOnly = false;
+    __invSetMsg_("invEditMsg", sent ? ("✅ Arve saadetud: " + sent) : "✅ Arve saadetud.");
+  }catch(e){
+    __invSetMsg_("invEditMsg", String(e));
+  }finally{
+    __invSetBusy_(false);
+    try{ __invRefreshActionState_(false); }catch(_e){}
+  }
+}
 
 function __invMarkPrefill_(){
   try{
@@ -6600,7 +7173,7 @@ function __invSetBusy_(busy){
     wrap.querySelectorAll('input[type="text"]').forEach(el=>{ el.disabled = __invCtx.busy; });
   }
   // explicit buttons (to restore correctly after busy)
-  const ids = ["invEditCancel","invEditSave","invEditPreview","invEditRegister","invEditModalX"];
+  const ids = ["invEditCancel","invEditSave","invEditPreview","invEditRegister","invEditSend","invEditSavePc","invEditModalX"];
   ids.forEach(id=>{
     const btn = byId(id);
     if(!btn) return;
@@ -6616,8 +7189,7 @@ function __invSetBusy_(busy){
 
   // keep Send button state controlled by logic (drive_file_id)
   if(!__invCtx.busy){
-    try{ __invSetDirty_(__invCtx.dirty); }catch(_e){}
-    try{ __invUpdateSendEnabled_(); }catch(_e){}
+    try{ __invRefreshActionState_(false); }catch(_e){}
   }
 
   // prevent backdrop close while busy
@@ -6627,17 +7199,28 @@ function __invSetBusy_(busy){
 
 
 function __invBindDirtyTracking_(){
-  ["invF_amount","invF_ettemaks","invF_viivis","invF_payment_due"].forEach(id=>{
+  const ids = [
+    "invF_hooldus_tariif","invF_hooldus_kogus","invF_parnu_amount","invF_parnu_tariff","invF_parnu_rate",
+    "invF_ragn_amount","invF_enefit_amount","invF_ettemaks","invF_viivis","invF_extra_info","invF_remondi_decision_nr"
+  ];
+  ids.forEach(id=>{
     const el = byId(id);
-    if(!el) return;
-    el.addEventListener("input", ()=>{
+    if(!el || el.dataset._dirtyWired === "1") return;
+    el.dataset._dirtyWired = "1";
+    const mark = ()=>{
       __invSetDirty_(true);
-      __invSetMsg_("invEditMsg","");
-    });
+      if(!__invCtx.registered){
+        __invSetMsg_("invEditMsg", "");
+        __invApplyGuideMsg_(true);
+      }
+    };
+    el.addEventListener("input", mark);
+    el.addEventListener("change", mark);
   });
 }
 
-async function __invOpenEditModalFromWorkbook_(apt, month, year){
+async function __invOpenEditModalFromWorkbook_(apt, month, year, opts){
+  opts = opts || {};
   const token = getToken();
   const r = await apiPost("/invoiceEditLoad", { token, apartment:apt, month, year });
   if(!r || !r.ok){
@@ -6651,6 +7234,13 @@ async function __invOpenEditModalFromWorkbook_(apt, month, year){
   __invCtx.data = data;
   __invCtx.invoice_id = String(data.invoice_id||"");
   __invCtx.drive_file_id = String(data.drive_file_id||"");
+  __invCtx.email_sent_at = data.email_sent_at || "";
+  __invCtx.email_sent_to = String(data.email_sent_to||"");
+  __invCtx.sendOnly = false;
+  __invCtx.hasSource = true;
+  __invCtx.registered = !!(opts && opts.registered);
+  if(typeof __invCtx.email_sent_at === "undefined") __invCtx.email_sent_at = "";
+  __invResetUiMessages_();
   __invPopulateForm_(data);
   try{ applyLang(); }catch(_e){}
   __invEnsureMoneyHandlers_();
@@ -6658,9 +7248,8 @@ async function __invOpenEditModalFromWorkbook_(apt, month, year){
     ["invEditSave","invEditPreview","invEditRegister","invEditSend"].forEach(id=>{ const b=byId(id); if(!b) return; if(b.dataset._fmtWired) return; b.dataset._fmtWired="1"; b.addEventListener("mousedown", ()=>{ try{ __invForceFormatAll_(); }catch(_e){} }); });
   }catch(_e){}
 
-  __invSetDirty_(true); // enabled on first open
-  __invUpdateSendEnabled_();
-  __invSetMsg_("invEditMsg","");
+  __invSetDirty_(!__invCtx.hasSource);
+  __invRefreshActionState_(true);
   __modalShow_("invEditModal");
 }
 
@@ -6672,6 +7261,14 @@ async function __invOpenCreateModalDraft_(apt, month, year){
   __invCtx.data = data;
   __invCtx.invoice_id = String(data.invoice_id||"");
   __invCtx.drive_file_id = String(data.drive_file_id||"");
+  __invCtx.email_sent_at = data.email_sent_at || "";
+  __invCtx.email_sent_to = String(data.email_sent_to||"");
+  __invCtx.sendOnly = false;
+  __invCtx.hasSource = false;
+  __invCtx.registered = false;
+  __invCtx.email_sent_at = "";
+  __invCtx.email_sent_to = "";
+  __invResetUiMessages_();
   __invPopulateForm_(data);
   try{ applyLang(); }catch(_e){}
 
@@ -6679,10 +7276,36 @@ async function __invOpenCreateModalDraft_(apt, month, year){
   try{
     ["invEditSave","invEditPreview","invEditRegister","invEditSend"].forEach(id=>{ const b=byId(id); if(!b) return; if(b.dataset._fmtWired) return; b.dataset._fmtWired="1"; b.addEventListener("mousedown", ()=>{ try{ __invForceFormatAll_(); }catch(_e){} }); });
   }catch(_e){}
-  __invSetDirty_(true); // enabled on first open
-  __invUpdateSendEnabled_(); // likely disabled (no drive id)
-  __invSetMsg_("invEditMsg","");
+  __invSetDirty_(true);
+  __invRefreshActionState_(true);
   return data;
+}
+
+async function __invOpenRegisteredSendOnly_(chk){
+  const data = Object.assign({}, (chk && chk.data) ? chk.data : {}, {
+    apartment: __invCtx.apt,
+    month: __invCtx.month,
+    year: __invCtx.year
+  });
+  __invCtx.data = data;
+  __invCtx.invoice_id = String((chk && chk.invoice_id) || data.invoice_id || "");
+  __invCtx.drive_file_id = String((chk && chk.drive_file_id) || data.drive_file_id || "");
+  __invCtx.email_sent_at = (chk && chk.email_sent_at) || data.email_sent_at || "";
+  __invCtx.email_sent_to = String((chk && chk.email_sent_to) || data.email_sent_to || "");
+  __invCtx.sendOnly = false;
+  __invCtx.hasSource = true;
+  __invCtx.registered = true;
+  __invCtx.email_sent_at = String(__invCtx.email_sent_at||"");
+  __invResetUiMessages_();
+  __invPopulateForm_(data);
+  try{ applyLang(); }catch(_e){}
+  __invEnsureMoneyHandlers_();
+  try{
+    ["invEditSave","invEditPreview","invEditRegister","invEditSend"].forEach(id=>{ const b=byId(id); if(!b) return; if(b.dataset._fmtWired) return; b.dataset._fmtWired="1"; b.addEventListener("mousedown", ()=>{ try{ __invForceFormatAll_(); }catch(_e){} }); });
+  }catch(_e){}
+  __invSetDirty_(false);
+  __invRefreshActionState_(true);
+  __modalShow_("invEditModal");
 }
 
 async function __invContinue_(){
@@ -6691,47 +7314,66 @@ async function __invContinue_(){
   const year = Number(byId("invSelYear").value||0);
   if(!apt || !month || !year){ __invSetMsg_("invSelMsg", tr("invSelChooseAll")); return; }
 
-  __invCtx.apt=apt; __invCtx.month=month; __invCtx.year=year;
-
-  // remember selector state so we can return back on Cancel
+  __invCtx.apt = apt;
+  __invCtx.month = month;
+  __invCtx.year = year;
   __invCtx._sel = { apt, month, year };
+  __invCtx._sourceFound = null;
+  __invCtx._draftFound = null;
+  __invCtx.data = null;
 
-  // v1.427a: show status + lock modal controls during async check
-  __invSetStatus_("invSelMsg", tr("invSelChecking"));
-
-  let chk;
+  __invSetBusy_(true);
   try{
-    chk = await __invCheckExists_(apt, month, year);
-  }catch(e){
-    // unlock and show error (error is NOT a "busy status")
-    __invSetStatus_("invSelMsg", "");
-    __invSetMsg_("invSelMsg", String(e));
-    return;
-  }
+    __invSetStatus_("invSelMsg", tr("invSelChecking"));
 
-  __invCtx.exists = !!chk.exists;
-  __invCtx.invoice_id = String(chk.invoice_id||"");
-  __invCtx.drive_file_id = String(chk.drive_file_id||"");
+    const chk = await __invCheckExists_(apt, month, year);
+    const chkData = (chk && chk.data) ? chk.data : {};
 
-  // Clear status right before switching to the next step (this restores controls)
-  __invSetStatus_("invSelMsg","");
+    __invCtx.exists = !!((chk && chk.exists) || (chkData && chkData.invoice_id));
+    __invCtx.registered = __invCtx.exists;
+    __invCtx.invoice_id = String((chk && chk.invoice_id) || chkData.invoice_id || "");
+    __invCtx.drive_file_id = String((chk && chk.drive_file_id) || chkData.drive_file_id || "");
+    __invCtx.email_sent_at = String((chk && chk.email_sent_at) || chkData.email_sent_at || "");
+    __invCtx.email_sent_to = String((chk && chk.email_sent_to) || chkData.email_sent_to || "");
 
-  if(__invCtx.exists){
-    __modalShow_("invExistsModal");
-    return;
-  }
+    if(__invCtx.exists){
+      await __invOpenEditModalFromWorkbook_(apt, month, year, { registered:true });
+      __invSetStatus_("invSelMsg", "");
+      __modalHide_("invSelModal");
+      return;
+    }
 
-  // create draft and open form
-  try{
+// Not registered: inspect existing files/draft state
+__invSetStatus_("invSelMsg", tr("invSelChecking"));
+const dst = await __invDraftStatus_(apt, month, year);
+__invCtx._draftStatus = dst || null;
+__invCtx._sourceFound = null;
+__invCtx._draftFound = null;
+__invCtx.hasSource = !!(dst && dst.use_source);
+__invCtx.registered = false;
+__invCtx.email_sent_at = "";
+__invCtx.email_sent_to = "";
+__invCtx.sendOnly = false;
+
+if(dst && dst.found_any){
+  __invSetStatus_("invSelMsg", "");
+  __modalHide_("invSelModal");
+  __invRenderDraftModal_();
+  __modalShow_("invDraftModal");
+  return;
+}
+
+    // No draft/source files -> create new draft and open form
     __invSetStatus_("invSelMsg", tr("invSelCreatingDraft"));
-    const data = await __invOpenCreateModalDraft_(apt, month, year);
-    // switch modals without "empty gap"
+    await __invOpenCreateModalDraft_(apt, month, year);
+    __invSetStatus_("invSelMsg", "");
     __modalHide_("invSelModal");
-    __invSetStatus_("invSelMsg","");
     __modalShow_("invEditModal");
   }catch(e){
-    __invSetStatus_("invSelMsg","");
+    __invSetStatus_("invSelMsg", "");
     __invSetMsg_("invSelMsg", String(e));
+  }finally{
+    __invSetBusy_(false);
   }
 }
 
@@ -6751,6 +7393,11 @@ function __invReturnToSel_(){
   }catch(e){}
 }
 
+function __invDraftBackToSel_(){
+  try{ __modalHide_("invDraftModal"); }catch(_e){}
+  __invReturnToSel_();
+}
+
 async function __invDoSave_(){
   // show status + lock modal controls while saving
   __invSetStatus_("invEditMsg", tr("invEditSaving"));
@@ -6760,16 +7407,25 @@ async function __invDoSave_(){
   try{
     const token = getToken();
     const data = __invReadForm_();
+    // Ensure backend gets draft_sheet_id (required for preview)
+    try{
+      if(!data.draft_sheet_id){
+        data.draft_sheet_id = String((__invCtx.data||{}).draft_sheet_id || (__invCtx.data||{}).drive_file_id || __invCtx.drive_file_id || "");
+      }
+    }catch(_e){}
     const r = await apiPost("/invoiceSave", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
     if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "SAVE_FAILED");
     __invCtx.data = data;
-    // After успешного сохранения backend удаляет draft-файл; чтобы Cancel/X не пытались удалить повторно — очищаем draft id.
-    try{ __invCtx.data.draft_sheet_id = ""; }catch(_e){}
+    __invCtx.hasSource = true;
+    __invCtx.registered = false;
+    // R16: draft is NOT deleted on Save; keep it for possible дальнейшего редактирования.
+    // To avoid accidental deletion via Cancel/X after a successful Save, mark it as non-deletable.
+    try{ __invCtx.data._draft_deletable = false; }catch(_e){}
     __invSetDirty_(false); // disabled after save
 
     // clear busy state, then show final message
     __invSetStatus_("invEditMsg", "");
-    __invSetMsg_("invEditMsg", tr("invEditSaved"));
+    __invRefreshActionState_(true);
   }catch(e){
     __invSetStatus_("invEditMsg", "");
     __invSetMsg_("invEditMsg", String(e));
@@ -6780,38 +7436,19 @@ async function __invDoSave_(){
 
 async function __invDoCancel_(){
   try{
-  __invSetBusy_(true);
+    __invSetBusy_(true);
     try{ __invForceFormatAll_(); }catch(_e){}
-
-    // If draft exists (draft_sheet_id in ctx data) and invoice not registered yet, delete draft on Drive
-    const draftId = String((__invCtx.data||{}).draft_sheet_id || "");
-    if(!draftId){
-      __modalHide_("invEditModal");
-      __invReturnToSel_();
-      return;
-    }
-    // If we already have a real registered file (PDF), draft is already irrelevant
-    if(__invCtx.drive_file_id && String(__invCtx.drive_file_id).trim()){
-      __modalHide_("invEditModal");
-      __invReturnToSel_();
-      return;
-    }
-
-    __invSetStatus_("invEditMsg", (typeof tr==="function" ? tr("invDeletingDraft") : "Удаление черновика…"));
-    const token = getToken();
-    const data = __invReadForm_();
-    data.cancel = true; // instruct backend to delete draft only
-    const r = await apiPost("/invoiceSave", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
-    // Regardless of response, close modal (user explicitly cancelled)
+    // R16: Cancel/X no longer deletes the draft. Draft is kept for resume; it is deleted only after successful Register.
     __invSetStatus_("invEditMsg", "");
     __modalHide_("invEditModal");
     __invReturnToSel_();
-  }catch(e){
-    __invSetStatus_("invEditMsg", "");
-    __modalHide_("invEditModal");
-    __invReturnToSel_();
+  }catch(_e){
+    try{ __invSetStatus_("invEditMsg", ""); }catch(__e){}
+    try{ __modalHide_("invEditModal"); }catch(__e){}
+    try{ __invReturnToSel_(); }catch(__e){}
+  }finally{
+    __invSetBusy_(false);
   }
-  finally{ __invSetBusy_(false); }
 }
 
 async function __invDoPreview_(){
@@ -6821,20 +7458,70 @@ async function __invDoPreview_(){
 
     const token = getToken();
     const data = __invReadForm_();
+
+    // Ensure draft_sheet_id is present for preview (backend requires it)
+    if(!data.draft_sheet_id){
+      const ctxDraft = String((__invCtx.data||{}).draft_sheet_id||"");
+      if(ctxDraft) data.draft_sheet_id = ctxDraft;
+    }
+
+    // Popups are blocked if opened after await; open a blank tab immediately (user gesture)
+    const win = window.open("about:blank", "_blank");
+
     const r = await apiPost("/invoicePreview", { token, data });
     if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "PREVIEW_FAILED");
+
     const b64 = r.data_base64 || r.base64;
-    const bin = atob(b64||"");
+    if(!b64) throw new Error("PREVIEW_NO_DATA");
+    const bin = atob(b64);
     const bytes = new Uint8Array(bin.length);
     for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
     const blob = new Blob([bytes], { type:"application/pdf" });
     const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
+
+    if(win && !win.closed){
+      try{ win.location = url; }catch(_e){ try{ win.document.location.href = url; }catch(_e2){} }
+    }else{
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.download = r.filename || "preview.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
     setTimeout(()=>URL.revokeObjectURL(url), 60000);
   }catch(e){
     __invSetMsg_("invEditMsg", String(e));
   }
   finally{ __invSetBusy_(false); }
+}
+async function __invReloadCurrentInvoice_(){
+  try{
+    const token = getToken();
+    const r = await apiPost("/invoiceEditLoad", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year });
+    if(r && r.ok && r.data){
+      const data = r.data || {};
+      __invCtx.data = data || {};
+      __invCtx.invoice_id = String(data.invoice_id||__invCtx.invoice_id||"");
+      __invCtx.drive_file_id = String(data.drive_file_id||__invCtx.drive_file_id||"");
+      __invCtx.email_sent_at = data.email_sent_at || "";
+      __invCtx.email_sent_to = String(data.email_sent_to||"");
+      __invCtx.sendOnly = false;
+      __invPopulateForm_(__invCtx.data);
+    }else{
+      const chk = await __invCheckExists_(__invCtx.apt, __invCtx.month, __invCtx.year);
+      if(chk){
+        __invCtx.exists = !!chk.exists;
+        __invCtx.invoice_id = String(chk.invoice_id||__invCtx.invoice_id||"");
+        __invCtx.drive_file_id = String(chk.drive_file_id||__invCtx.drive_file_id||"");
+        __invCtx.email_sent_at = chk.email_sent_at || "";
+        __invCtx.email_sent_to = String(chk.email_sent_to||"");
+      }
+    }
+  }catch(_e){}
 }
 
 async function __invDoRegister_(){
@@ -6844,15 +7531,21 @@ async function __invDoRegister_(){
 
     const token = getToken();
     const data = __invReadForm_();
+    __invSetMsg_("invEditMsg", tr("invEditRegisteringPdf"));
     const r = await apiPost("/invoiceRegisterAndMakePdf", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
-    if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "REGISTER_FAILED");
-    __invCtx.drive_file_id = String(r.drive_file_id||"");
-    __invCtx.invoice_id = String(r.invoice_id||data.invoice_id||"");
+    if(!r || !r.ok) throw new Error((r && (r.error || r.detail)) ? (r.error || r.detail) : "REGISTER_FAILED");
+    const rd = (r && r.data) ? r.data : r;
+    __invCtx.drive_file_id = String((rd && rd.drive_file_id) || "");
+    __invCtx.invoice_id = String((rd && rd.invoice_id) || data.invoice_id || "");
+    __invCtx.hasSource = true;
+    __invCtx.registered = true;
+    __invCtx.email_sent_at = "";
+    __invCtx.email_sent_to = "";
     byId("invF_invoice_id").value = __invCtx.invoice_id;
     __invSetEditTitle_(__invCtx.data || {invoice_id:__invCtx.invoice_id});
-    __invSetMsg_("invEditMsg","✅ Зарегистрировано и PDF создан.");
-    __invUpdateSendEnabled_();
+    try{ await __invReloadCurrentInvoice_(); }catch(_e){}
     __invSetDirty_(false);
+    __invRefreshActionState_(true);
     // reload bills table if open
     try{ await loadBills(); }catch(e){}
   }catch(e){
@@ -6875,6 +7568,9 @@ function __invInitUiOnce_(){
   const invExistsClose = byId("invExistsClose"); if(invExistsClose) invExistsClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
   const invExistsX = byId("invExistsModalX"); if(invExistsX) invExistsX.onclick = ()=>__modalHide_("invExistsModal");
 
+  const invDraftClose = byId("invDraftClose"); if(invDraftClose) invDraftClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+  const invDraftX = byId("invDraftModalX"); if(invDraftX) invDraftX.onclick = ()=>__invDraftBackToSel_();
+
   const invEditClose = byId("invEditClose"); if(invEditClose) invEditClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
   const invEditX = byId("invEditModalX"); if(invEditX) invEditX.onclick = ()=>__invDoCancel_();
 
@@ -6886,48 +7582,93 @@ const c1 = byId("invSelCancel"); if(c1) c1.onclick = ()=>__modalHide_("invSelMod
   const c2 = byId("invSelContinue"); if(c2) c2.onclick = ()=>__invContinue_();
 
   // Exists modal
-  const no = byId("invExistsNo"); if(no) no.onclick = ()=>{ __modalHide_("invExistsModal"); /* back to selector */ };
-  const yes = byId("invExistsYes"); if(yes) yes.onclick = async ()=>{
-    // Do NOT close everything and leave the user staring at nothing.
-    // Keep selector modal visible and show loading state while we load invoice from workbook.
-    __modalHide_("invExistsModal");
+  const no = byId("invExistsNo"); if(no) no.onclick = ()=>{ __modalHide_("invExistsModal"); __invReturnToSel_(); };
 
-    // show progress in selector modal immediately
-    try{
-      __invSetStatus_("invSelMsg", tr("invEditLoading"));
-      __modalShow_("invSelModal");
-    }catch(e){}
+  // Draft modal
+  const dCancel = byId("invDraftCancel"); if(dCancel) dCancel.onclick = ()=>__invDraftBackToSel_();
+const dLoad = byId("invDraftLoad"); if(dLoad) dLoad.onclick = async ()=>{
+  try{
+    const mode = String((dLoad && dLoad.dataset && dLoad.dataset.mode) || "load");
+    const status = __invCtx._draftStatus || {};
 
-    // Load from workbook. If missing -> message shown in selector modal.
-    await __invOpenEditModalFromWorkbook_(__invCtx.apt, __invCtx.month, __invCtx.year);
-
-    // Clear status (unlocks selector modal controls)
-    try{ __invSetStatus_("invSelMsg",""); }catch(e){}
-
-    if(byId("invEditModal").style.display==="block"){
-      __modalHide_("invSelModal");
-      // also sync invoice id if exists
-      if(__invCtx.invoice_id && !byId("invF_invoice_id").value){ byId("invF_invoice_id").value = __invCtx.invoice_id; __invFitInvoiceId_(); }
-    __invFitInvoiceId_();
-    }else{
-      // keep selector open; message is already shown by loader (e.g. missing workbook)
-      __modalShow_("invSelModal");
+    if(mode === "create"){
+      __invSetStatus_("invDraftMsg", tr("invDraftCreating"));
+      await __invOpenCreateModalDraft_(__invCtx.apt, __invCtx.month, __invCtx.year);
+      __modalHide_("invDraftModal");
+      __invSetStatus_("invDraftMsg", "");
+      __modalShow_("invEditModal");
+      return;
     }
-  };
+
+    __invSetStatus_("invDraftMsg", tr("invDraftLoading"));
+
+    if(status.use_source){
+      const src = await __invSourceLoad_(__invCtx.apt, __invCtx.month, __invCtx.year);
+      if(!src || !src.ok || !src.data) throw new Error("SOURCE_LOAD_FAILED");
+      const data = src.data || {};
+      __invCtx.data = data || {};
+      __invCtx.drive_file_id = "";
+      __invCtx.invoice_id = String(data.invoice_id || "");
+      __invCtx.hasSource = true;
+      __invCtx.registered = false;
+
+      __invResetUiMessages_();
+      __invPopulateForm_(__invCtx.data);
+      __invCtx.data._draft_deletable = true;
+      __invSetDirty_(false);
+      __invRefreshActionState_(true);
+
+      __modalHide_("invDraftModal");
+      __invSetStatus_("invDraftMsg", "");
+      __modalShow_("invEditModal");
+      try{ __invFitInvoiceId_(); }catch(_e){}
+      return;
+    }
+
+    if(status.use_draft && status.draft && status.draft.file_id){
+      const r = await __invDraftLoad_(__invCtx.apt, __invCtx.month, __invCtx.year, status.draft.file_id);
+      if(!r || !r.ok) throw new Error((r && r.error) ? r.error : "DRAFT_LOAD_FAILED");
+
+      __invCtx.data = (r && r.data) ? r.data : {};
+      __invCtx.drive_file_id = "";
+      __invCtx.invoice_id = String((r.data && r.data.invoice_id) || "");
+      __invCtx.hasSource = false;
+      __invCtx.registered = false;
+
+      __invResetUiMessages_();
+      __invPopulateForm_(__invCtx.data);
+      __invCtx.data._draft_deletable = true;
+      __invSetDirty_(true);
+      __invRefreshActionState_(true);
+
+      __modalHide_("invDraftModal");
+      __invSetStatus_("invDraftMsg", "");
+      __modalShow_("invEditModal");
+      try{ __invFitInvoiceId_(); }catch(_e){}
+      return;
+    }
+
+    throw new Error(tr("invDraftNoLoadable"));
+  }catch(e){
+    __invSetStatus_("invDraftMsg", "");
+    __invSetMsg_("invDraftMsg", String(e));
+  }
+};
 
   // Edit modal buttons
   const ec = byId("invEditCancel"); if(ec) ec.onclick = ()=>__invDoCancel_();
   const es = byId("invEditSave"); if(es) es.onclick = ()=>__invDoSave_();
   const ep = byId("invEditPreview"); if(ep) ep.onclick = ()=>__invDoPreview_();
   const er = byId("invEditRegister"); if(er) er.onclick = ()=>__invDoRegister_();
-  const se = byId("invEditSend"); if(se) se.onclick = ()=>__invShowStub_();
+  const se = byId("invEditSend"); if(se) se.onclick = ()=>__invDoSend_();
+  const spc = byId("invEditSavePc"); if(spc) spc.onclick = ()=>__invDoSavePc_();
 
   // Stub modal
   const ok = byId("invStubOk"); if(ok) ok.onclick = ()=>__modalHide_("invStubModal");
 
   __invBindDirtyTracking_();
   __invSetDirty_(true); // enabled at first open by requirement; will be reset on open anyway.
-  __invUpdateSendEnabled_();
+  __invRefreshActionState_(true);
 }
 
 // Initialize once after DOM is ready
@@ -7204,8 +7945,6 @@ document.addEventListener("keydown", (e) => {
     </div>
   </div>
 
-
-
 <!-- R15: Invoice generation modals -->
 <div id="invSelModal" class="modal" style="display:none">
   <div class="modal-backdrop" id="invSelClose"></div>
@@ -7230,7 +7969,7 @@ document.addEventListener("keydown", (e) => {
         <select id="invSelYear"></select>
       </div>
 
-      <div class="muted" id="invSelMsg" style="margin-top:10px; min-height:18px"></div>
+      <div class="muted" id="invSelMsg" style="margin-top:10px; min-height:18px; font-style:italic;"></div>
 
       <div class="modal-footer">
         <button class="btn" id="invSelCancel" data-i18n="cancel"></button>
@@ -7251,8 +7990,35 @@ document.addEventListener("keydown", (e) => {
       <div class="muted" id="invExistsText" data-i18n="invExistsText"></div>
       <div class="muted" id="invExistsMsg" style="margin-top:10px; min-height:18px"></div>
       <div class="modal-footer">
-        <button class="btn" id="invExistsNo" data-i18n="no"></button>
-        <button class="btn primary" id="invExistsYes" data-i18n="yes"></button>
+        <button class="btn primary" id="invExistsNo" data-i18n="ok"></button>
+        <button class="btn" id="invExistsYes" style="display:none"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- R16: draft exists choice modal (Load existing draft or Cancel) -->
+<div id="invDraftModal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="invDraftClose"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="h2" id="invDraftModalTitle" data-i18n="invDraftTitle"></div>
+      <button class="iconbtn" id="invDraftModalX" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="muted" id="invDraftText" data-i18n="invDraftText"></div>
+      <div style="margin-top:12px">
+        <div class="muted" style="font-weight:600; margin-bottom:6px" data-i18n="invDraftFilesTitle"></div>
+        <div id="invDraftFiles"></div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="muted" style="font-weight:600; margin-bottom:6px" data-i18n="invDraftCompareTitle"></div>
+        <div id="invDraftCompare"></div>
+      </div>
+      <div class="muted" id="invDraftMsg" style="margin-top:10px; margin-bottom:15px; min-height:18px; font-style:italic;"></div>
+      <div class="modal-footer">
+        <button class="btn" id="invDraftCancel" data-i18n="cancel"></button>
+        <button class="btn primary" id="invDraftLoad" data-i18n="invDraftLoad"></button>
       </div>
     </div>
   </div>
@@ -7292,36 +8058,56 @@ document.addEventListener("keydown", (e) => {
 
           <!-- Pärnu vesi arve -->
           <div class="invRowLabel" data-i18n="invParnuTitle">Pärnu vesi arve</div>
-          <div class="invRowControls">
-            <div class="subgrid2">
-              <div class="subfield">
-                <label data-i18n="invSumma">Summa, €</label>
-                <input id="invF_parnu_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
-              </div>
-              <div class="subfield">
-                <label data-i18n="invHouseM3">Tarbimine, m3</label>
-                <div class="invInlineFile">
-                  <input id="invF_parnu_tariff" type="text" inputmode="decimal" placeholder="0.000" value="0.000"/>
-                  <button type="button" id="btnParnuPdfLoad" class="invPdfBtnSmall" title="Lae PDF">📄</button>
-                  <input type="file" id="fileParnuPdf" accept="application/pdf" style="display:none"/>
+            <div class="invRowControls">
+              <div class="subgrid2 invParnuUnified">
+                <div class="subfield">
+                  <label data-i18n="invSumma">Summa, €</label>
+                  <input id="invF_parnu_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
                 </div>
-                <div id="parnuPdfStatus" class="invPdfStatus"></div>
+
+                <div class="subfield invParnuRight">
+                  <div class="invParnuRightGrid">
+                    <div>
+                      <label data-i18n="invHouseM3">Tarbimine, m3</label>
+                      <input id="invF_parnu_rate" type="text" inputmode="decimal" placeholder="0.000" value="0.000"/>
+                    </div>
+
+                    <button type="button" id="btnParnuPdfLoad" class="invPdfBtnSmall" title="Lae PDF">📄</button>
+
+                    <div>
+                      <label data-i18n="invTariif">Tariif</label>
+                      <input id="invF_parnu_tariff" type="text" inputmode="decimal" placeholder="0.000" value="0.000"/>
+                    </div>
+                  </div>
+
+                  <input type="file" id="fileParnuPdf" accept="application/pdf" style="display:none"/>
+                  <div id="parnuPdfStatus" class="invPdfStatus"></div>
+                </div>
               </div>
             </div>
-          </div>
 
           <!-- Ragn and Sells arve -->
           <div class="invRowLabel" data-i18n="invRagnTitle">Ragn and Sells arve</div>
           <div class="invRowControls">
-            <label class="subcap" data-i18n="invSumma">Summa, €</label>
-            <input id="invF_ragn_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+            <label data-i18n="invSumma">Summa, €</label>
+            <div class="invInlineFile">
+              <input id="invF_ragn_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+              <button type="button" id="btnRagnPdfLoad" class="invPdfBtnSmall" title="Lae PDF">📄</button>
+              <input type="file" id="fileRagnPdf" accept="application/pdf" style="display:none"/>
+            </div>
+            <div id="ragnPdfStatus" class="invPdfStatus"></div>
           </div>
 
           <!-- Enefit arve -->
           <div class="invRowLabel" data-i18n="invEnefitTitle">Enefit arve</div>
           <div class="invRowControls">
-            <label class="subcap" data-i18n="invSumma">Summa, €</label>
-            <input id="invF_enefit_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+            <label data-i18n="invSumma">Summa, €</label>
+            <div class="invInlineFile">
+              <input id="invF_enefit_amount" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+              <button type="button" id="btnEnefitPdfLoad" class="invPdfBtnSmall" title="Lae PDF">📄</button>
+              <input type="file" id="fileEnefitPdf" accept="application/pdf" style="display:none"/>
+            </div>
+            <div id="enefitPdfStatus" class="invPdfStatus"></div>
           </div>
 
           <!-- hidden calculated fields kept for logic compatibility -->
@@ -7338,32 +8124,42 @@ document.addEventListener("keydown", (e) => {
           <!-- Долг / Предоплата & Пени -->
           <div class="invRowLabel" id="invF_ettemaks_lbl" data-i18n="invDebtTitle">Долг / Предоплата</div>
           <div class="invRowControls">
-            <label class="subcap" data-i18n="invSumma">Summa, €</label>
+            <label data-i18n="invSumma">Summa, €</label>
             <input id="invF_ettemaks" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
           </div>
 
           <div class="invRowLabel" id="invF_viivis_lbl" data-i18n="invPenaltyTitle">Пени</div>
           <div class="invRowControls">
-            <label class="subcap" data-i18n="invSumma">Summa, €</label>
+            <label data-i18n="invSumma">Summa, €</label>
             <input id="invF_viivis" type="text" inputmode="decimal" placeholder="0.00" value="0.00"/>
+          </div>
+
+          <!-- Additional info to residents -->
+          <div class="invRowLabel" data-i18n="invExtraInfoTitle">Дополнительная информация жильцам</div>
+          <div class="invRowControls invExtraInfoControls">
+            <textarea id="invF_extra_info" class="invTextarea" rows="6" placeholder=""></textarea>
+          </div>
+
+          <div class="invRowLabel" data-i18n="invRemondiDecisionNr">Номер решения ремонтного фонда</div>
+          <div class="invRowControls">
+            <input id="invF_remondi_decision_nr" type="number" inputmode="numeric" min="1" step="1" placeholder="10" />
           </div>
 
         </div>
       </div>
 
-      <div class="muted" id="invEditMsg" style="margin-top:10px; min-height:18px"></div>
+      <div class="muted" id="invEditMsg" style="margin-top:-30px; position:relative; top:-8px; text-align:right; min-height:18px; font-style:italic;"></div>
 
       <div class="modal-footer">
         <button class="btn" id="invEditCancel">Cancel</button>
-        <button class="btn" id="invEditSave">Save</button>
+        <button class="btn" id="invEditSave">Save to DB</button>
         <button class="btn" id="invEditPreview">Preview</button>
         <button class="btn primary" id="invEditRegister">Register Invoice &amp; make PDF</button>
         <button class="btn" id="invEditSend">Send invoice</button>
+        <button class="btn" id="invEditSavePc">Save to PC</button>
       </div>
     </div>
   </div>
-</div>
-
 </div>
 
 <div id="invStubModal" class="modal" style="display:none">
@@ -7384,7 +8180,6 @@ document.addEventListener("keydown", (e) => {
 
 </div>
 
-
 <!-- Admin: Confirm payment modal (Invoices: date_paid, amount_paid, status=paid, ettemaks) -->
 <div id="payModal" class="modal" style="display:none">
   <div class="modal-card" style="max-width:420px; width:92%">
@@ -7404,7 +8199,6 @@ document.addEventListener("keydown", (e) => {
     </div>
   </div>
 </div>
-
 
 <script>
 /* v1.204 add-on: Water Readings write-mode (isolated; does NOT touch login/forgot/reset)
@@ -7630,7 +8424,6 @@ function setScope_(scope){
     try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(_){}
   }
 
-
   function monthName_(m){
     const mi = Number(m) || 0;
     // Use the same month dictionaries that are already in the file (used by invoices),
@@ -7833,8 +8626,6 @@ try{ updateScopeToggleUI_(); }catch(_){ }
 msg && (msg.textContent="");
   }
 
-
-
   // ===== v1.270: Input panel independent of year selector =====
   function rdUiText_(k){ try{ return rdText_(k); }catch(_){ return k; } }
 
@@ -7952,7 +8743,8 @@ msg && (msg.textContent="");
         </div>
       </div>`;
     document.body.appendChild(m);
-    const close = ()=>{ try{ m.remove(); }catch(_){ } };
+    m.style.display='flex';
+const close = ()=>{ try{ m.style.display='none'; }catch(_){ } try{ m.remove(); }catch(_){ } try{ const mm=document.getElementById('rdModal'); if(mm) mm.remove(); }catch(_){ } };
     const validate = (v)=>{
       const s = String(v||"").trim().replace(",", ".");
       if(!s) return {ok:false,val:null};
@@ -7998,7 +8790,10 @@ msg && (msg.textContent="");
         try{ updateInputPanel_(); }catch(e){}
         close();
 
-        // v1.323: re-enable controls after SUCCESS (tabs/menu/year selector)
+        
+        // v1.516: stop further processing after close
+        return;
+// v1.323: re-enable controls after SUCCESS (tabs/menu/year selector)
         try{ m.classList.remove("busy"); }catch(e){}
         try{ (toDisable||[]).forEach(el=>{ try{ el.disabled=false; }catch(e){} }); }catch(e){}
         try{ const ys=document.getElementById("readingsYearSelect"); if(ys) ys.disabled=false; }catch(e){}
@@ -8055,6 +8850,42 @@ try{
   // Expose modal opener for the right panel (rdActionBtn removed)
   try{ window.__ku_showReadingModal = showReadingModal_; }catch(e){}
 
+  // v1.516: robust Sisesta button handler (fix missing/dropped rdVisBtn listener)
+  try{
+    if(!window.__ku_rd_sisesta_hooked){
+      window.__ku_rd_sisesta_hooked = true;
+      document.addEventListener("click", function(ev){
+        try{
+          var t = ev && ev.target;
+          if(!t || t.id !== "rdVisBtn") return;
+          // mirror original handler, but with visible errors
+          var win = window.__ku_rd_window || null;
+          var perms = window.__ku_rd_permissions || {};
+          var canAct = !!(perms.can_submit || perms.can_edit);
+          if(!win || !canAct) return;
+
+          var y = Number(win.target_year||0);
+          var m = Number(win.target_month||0);
+          if(!y || !m) return;
+
+          var existingEnd = "";
+          if(Number(window.__ku_rd_lastYear||0) === y){
+            var rows = window.__ku_rd_lastRows || [];
+            if(Array.isArray(rows)){
+              var row = rows.find(function(r){ return Number(r.month||0) === m; });
+              existingEnd = row ? ((row.end_m3!=null)?row.end_m3:((row.end!=null)?row.end:"")) : "";
+            }
+          }
+
+          if(typeof window.__ku_showReadingModal === "function"){
+            window.__ku_showReadingModal(y, m, existingEnd);
+          }
+        }catch(e){
+          console.error("Sisesta handler error:", e);
+        }
+      }, true);
+    }
+  }catch(e){ console.error(e); }
 
   async function saveMonth_(year, month, endValue){
     const msg = $("readingsStatusMsg");
@@ -8160,7 +8991,6 @@ try{
       return (l==="et"||l==="en"||l==="ru") ? l : "ru";
     }catch(e){ return "ru"; }
   }
-
 
   function fmtOpenAt(s){
     // "YYYY-MM-DD HH:MM:SS" -> "DD.MM HH:MM"
@@ -8323,11 +9153,6 @@ try{ window.__rdVisUpdate = function(){ try{ ensurePanel(); }catch(e){} }; }catc
 })();
 </script>
 
-
-
-
-
-
 <script>
 /* === p16: ONLY fix font-size in Korter + Kasutaja columns to match other columns ===
    No layout/centering changes.
@@ -8384,7 +9209,6 @@ try{ window.__rdVisUpdate = function(){ try{ ensurePanel(); }catch(e){} }; }catc
   setInterval(tick, 500);
 })();
 </script>
-
 
 <style>
 /* p171: ULTIMATE Admin Users grid override (placed at end of BODY to win) */
@@ -8604,10 +9428,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   padding: 3px 8px !important;
 }
 
-
 </style>
-
-
 
 <style>
 /* v1.367: numeric columns must be narrow and одинаковые как у 3-й колонки */
@@ -8639,7 +9460,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
 }
 </style>
 
-
 <style>
 /* v1.395: Arved — уменьшить шрифт на 1 размер в колонках 3-5 (только значения, хедер не трогаем) */
 #page_bills table.bills-table td:nth-child(3),
@@ -8650,16 +9470,31 @@ window.addEventListener('DOMContentLoaded', ()=>{
 }
 </style>
 
-
 <script>
 /* --- Pärnu Vesi: import Tarbimine(m3) + Kokku(EUR) from supplier PDF (text PDF) --- */
 (function(){
-  function setStatus(msg, kind){
-    var el = document.getElementById('parnuPdfStatus');
+  function setStatusFor(id, msg, kind){
+    var el = document.getElementById(id);
     if(!el) return;
     el.className = 'invPdfStatus' + (kind ? (' ' + kind) : '');
     el.textContent = msg || '';
   }
+  function setStatusParnu(msg, kind){ setStatusFor('parnuPdfStatus', msg, kind); }
+  function setStatusRagn(msg, kind){ setStatusFor('ragnPdfStatus', msg, kind); }
+  function setStatusEnefit(msg, kind){ setStatusFor('enefitPdfStatus', msg, kind); }
+
+function __invResetUiMessages_(){
+  try{ setStatusParnu('', ''); }catch(_e){}
+  try{ setStatusRagn('', ''); }catch(_e){}
+  try{ setStatusEnefit('', ''); }catch(_e){}
+  try{ __invSetMsg_('invEditMsg',''); }catch(_e){}
+  try{ __invSetMsg_('invDraftMsg',''); }catch(_e){}
+}
+
+// Alias for backward compatibility (some handlers may call without leading '__')
+function invResetUiMessages_(){
+  return __invResetUiMessages_();
+}
 
   function loadPdfJs(){
     return new Promise(function(resolve, reject){
@@ -8761,10 +9596,50 @@ window.addEventListener('DOMContentLoaded', ()=>{
     return { consumption: consumption, kokku: kokku };
   }
 
+  // Ragn-Sells PDF: extract amount from line "ARVE KOKKU <amount> EUR"
+  function parseRagn(txt){
+    var t = String(txt||"");
+    // normalize spacing and decimals split by spaces (e.g. "9 . 92" -> "9.92")
+    t = t.replace(/\s+/g," ").replace(/(\d)\s*[\.,]\s*(\d)/g, "$1.$2");
+    var m = t.match(/ARVE\s+KOKKU\s+([0-9]+(?:\.[0-9]+)?)/i);
+    var amount = null;
+    if(m) amount = normNum(m[1]);
+    if(amount==null){
+      // fallback: take first number after "ARVE KOKKU" within next 120 chars
+      var p = t.toUpperCase().indexOf("ARVE KOKKU");
+      if(p>=0){
+        var tail = t.slice(p, p+200);
+        // allow "9.92 EUR" or "9.92" etc
+        var m2 = tail.match(/ARVE\s+KOKKU[^0-9]*([0-9]+(?:\.[0-9]+)?)/i);
+        if(m2) amount = normNum(m2[1]);
+      }
+    }
+    return { amount: amount };
+  }
+  function parseEnefit(txt){
+    var t = String(txt||"");
+    // normalize spacing and decimals split by spaces/commas (e.g. "5 , 31" -> "5.31")
+    t = t.replace(/\s+/g," ").replace(/(\d)\s*[\.,]\s*(\d)/g, "$1.$2");
+    // Enefit: "Kuulub tasumisele 5,31 €"
+    var m = t.match(/Kuulub\s+tasumisele[^0-9]*([0-9]+(?:\.[0-9]+)?)/i);
+    var amount = null;
+    if(m) amount = normNum(m[1]);
+    if(amount==null){
+      // fallback: sometimes label is split; try within window
+      var p = t.toLowerCase().indexOf("kuulub tasumisele");
+      if(p>=0){
+        var tail = t.slice(p, p+220);
+        var m2 = tail.match(/kuulub\s+tasumisele[^0-9]*([0-9]+(?:\.[0-9]+)?)/i);
+        if(m2) amount = normNum(m2[1]);
+      }
+    }
+    return { amount: amount };
+  }
+
   function fmt3(n){ return (Number.isFinite(n)? n : 0).toFixed(3); }
   function fmt2(n){ return (Number.isFinite(n)? n : 0).toFixed(2); }
 
-  function wire(){
+  function wireParnu(){
     var btn = document.getElementById('btnParnuPdfLoad');
     var fileInput = document.getElementById('fileParnuPdf');
     if(!btn || !fileInput) return;
@@ -8772,8 +9647,9 @@ window.addEventListener('DOMContentLoaded', ()=>{
     // prevent any parent handlers from swallowing the click
     btn.addEventListener('click', function(ev){
       ev.preventDefault();
+      ev.stopImmediatePropagation();
       ev.stopPropagation();
-      setStatus('', '');
+      setStatusParnu('', '');
       fileInput.value = '';
       // must be triggered by user gesture
       fileInput.click();
@@ -8784,7 +9660,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
       if(!f) return;
 
       try{
-        setStatus('Loen PDF…', 'warn');
+        setStatusParnu('Loen PDF…', 'warn');
         var txt = await extractTextFromPdf(f);
         var r = parseParnu(txt);
 
@@ -8793,34 +9669,125 @@ window.addEventListener('DOMContentLoaded', ()=>{
         if(r.kokku==null) miss.push('Kokku (EUR)');
 
         if(r.consumption!=null){
-          var elC = document.getElementById('invF_parnu_tariff');
-          if(elC){ elC.value = fmt3(r.consumption); }
+          var elC = document.getElementById('invF_parnu_rate');
+          if(elC){ elC.value = fmt3(r.consumption); try{ if(typeof __invUnmarkPrefill_==='function') __invUnmarkPrefill_(elC); }catch(_e){} }
         }
         if(r.kokku!=null){
           var elK = document.getElementById('invF_parnu_amount');
-          if(elK){ elK.value = fmt2(r.kokku); }
+          if(elK){ elK.value = fmt2(r.kokku); try{ if(typeof __invUnmarkPrefill_==='function') __invUnmarkPrefill_(elK); }catch(_e){} }
+        }
+
+        // R16: compute tariff immediately and show it (€/m3)
+        if(r.consumption!=null && r.kokku!=null && Number(r.consumption)>0){
+          var rate = Number(r.kokku) / Number(r.consumption);
+          var elR = document.getElementById('invF_parnu_tariff');
+          if(elR){ elR.value = fmt3(rate); try{ if(typeof __invUnmarkPrefill_==='function') __invUnmarkPrefill_(elR); }catch(_e){} }
         }
 
         if(miss.length){
-          setStatus('Hoiatus: PDF-ist ei leitud: ' + miss.join(', '), 'warn');
+          setStatusParnu('Hoiatus: PDF-ist ei leitud: ' + miss.join(', '), 'warn');
         }else{
-          setStatus('OK: andmed loetud PDF-ist.', 'ok');
+          setStatusParnu('OK: andmed loetud PDF-ist.', 'ok');
         }
       }catch(e){
         console.error(e);
-        setStatus('Viga: PDF-i ei saanud lugeda. (Kontrolli, et pdf.min.js ja pdf.worker.min.js on samas kaustas kui HTML. Kui ikka ei tööta, ava leht http://localhost kaudu.)', 'warn');
+        setStatusParnu('Viga: PDF-i ei saanud lugeda. (Kontrolli, et pdf.min.js ja pdf.worker.min.js on samas kaustas kui HTML. Kui ikka ei tööta, ava leht http://localhost kaudu.)', 'warn');
+      }
+    });
+  }
+
+  function wireRagn(){
+    var btn = document.getElementById('btnRagnPdfLoad');
+    var fileInput = document.getElementById('fileRagnPdf');
+    if(!btn || !fileInput) return;
+
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      setStatusRagn('', '');
+      fileInput.value = '';
+      fileInput.click();
+    }, true);
+
+    fileInput.addEventListener('change', async function(){
+      var f = fileInput.files && fileInput.files[0];
+      if(!f) return;
+
+      try{
+        setStatusRagn('Loen PDF…', 'warn');
+        var txt = await extractTextFromPdf(f);
+        var r = parseRagn(txt);
+
+        if(r.amount==null){
+          setStatusRagn('Hoiatus: PDF-ist ei leitud: ARVE KOKKU', 'warn');
+          return;
+        }
+
+        var elAmount = document.getElementById('invF_ragn_amount');
+        if(elAmount){
+          elAmount.value = fmt2(r.amount);
+          try{ if(typeof __invUnmarkPrefill_==='function') __invUnmarkPrefill_(elAmount); }catch(_e){}
+        }
+        setStatusRagn('OK: ARVE KOKKU = ' + fmt2(r.amount) + ' €', 'ok');
+      }catch(e){
+        console.error(e);
+        setStatusRagn('Viga: PDF-i ei saanud lugeda. (Kontrolli, et pdf.min.js ja pdf.worker.min.js on samas kaustas kui HTML. Kui ikka ei tööta, ava leht http://localhost kaudu.)', 'warn');
+      }
+    });
+  }
+
+  function wireEnefit(){
+    var btn = document.getElementById('btnEnefitPdfLoad');
+    var fileInput = document.getElementById('fileEnefitPdf');
+    if(!btn || !fileInput) return;
+
+    // guard: avoid double-binding when modal/UI is re-opened
+    if(btn.dataset && btn.dataset.wired === '1') return;
+    if(btn.dataset) btn.dataset.wired = '1';
+
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      setStatusEnefit('', '');
+      fileInput.value = '';
+      fileInput.click();
+    }, true);
+
+    fileInput.addEventListener('change', async function(){
+      var f = fileInput.files && fileInput.files[0];
+      if(!f) return;
+
+      try{
+        setStatusEnefit('Loen PDF…', 'warn');
+        var txt = await extractTextFromPdf(f);
+        var r = parseEnefit(txt);
+
+        if(r.amount == null){
+          setStatusEnefit('Hoiatus: PDF-ist ei leitud: Kuulub tasumisele', 'warn');
+          return;
+        }
+
+        var elAmount = document.getElementById('invF_enefit_amount');
+        if(elAmount){
+          elAmount.value = fmt2(r.amount);
+          try{ if(typeof __invUnmarkPrefill_==='function') __invUnmarkPrefill_(elAmount); }catch(_e){}
+        }
+
+        setStatusEnefit('OK: Kuulub tasumisele = ' + fmt2(r.amount) + ' €', 'ok');
+      }catch(e){
+        console.error(e);
+        setStatusEnefit('Viga: PDF-i ei saanud lugeda. (Kontrolli, et pdf.min.js ja pdf.worker.min.js on samas kaustas kui HTML. Kui ikka ei tööta, ava leht http://localhost kaudu.)', 'warn');
       }
     });
   }
 
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', wire);
+    document.addEventListener('DOMContentLoaded', function(){ wireParnu(); wireRagn(); wireEnefit(); wireEnefit(); });
   }else{
-    wire();
+    wireParnu(); wireRagn(); wireEnefit();
   }
 })();
 </script>
 
 </body>
 </html>
-
