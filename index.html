@@ -103,7 +103,7 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.564</title>
+  <title>Karusselli 4 KÜ — v1.572</title>
   <script>
     // v1.417: keep browser tab title in sync with visible version badge
     document.addEventListener('DOMContentLoaded', function(){
@@ -2888,7 +2888,7 @@ table td:nth-child(5) {
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.564</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.572</span>
         <small id="brandSub"></small>
       </div>
 
@@ -7219,18 +7219,70 @@ function __invBindDirtyTracking_(){
   });
 }
 
+function __invMonthName_(m){
+  try{ return tr("month_" + String(Number(m)||0)) || String(m||""); }catch(_e){ return String(m||""); }
+}
+
+function __invFmtRegistrationFilesMissingMsg_(r){
+  const lang = getLang();
+  const apt = String((r && r.apartment) || (__invCtx && __invCtx.apt) || "");
+  const month = __invMonthName_((r && r.month) || (__invCtx && __invCtx.month) || "");
+  const year = String((r && r.year) || (__invCtx && __invCtx.year) || "");
+  const invoiceId = String((r && r.invoice_id) || (__invCtx && __invCtx.invoice_id) || "");
+  if(lang === "et") return `Arve registreering on leitud, kuid seotud failid puuduvad Google Drive'is.\n\nKorter: ${apt}\nKuu: ${month}\nAasta: ${year}\nArve ID: ${invoiceId}\n\nTõenäoliselt on failid käsitsi kustutatud. Kustutage registreering ja looge arve uuesti.`;
+  if(lang === "en") return `Invoice registration was found, but related files are missing on Google Drive.\n\nApartment: ${apt}\nMonth: ${month}\nYear: ${year}\nInvoice ID: ${invoiceId}\n\nThe files were probably deleted manually. Delete the registration and create the invoice again.`;
+  return `Регистрация счета найдена, но связанные файлы отсутствуют на Google Drive.\n\nКвартира: ${apt}\nМесяц: ${month}\nГод: ${year}\nID счета: ${invoiceId}\n\nВероятно, файлы были удалены вручную. Удалите регистрацию и создайте счет заново.`;
+}
+
+function __invFmtRegistrationExistsMsg_(r){
+  const lang = getLang();
+  const apt = String((r && r.apartment) || (__invCtx && __invCtx.apt) || "");
+  const month = __invMonthName_((r && r.month) || (__invCtx && __invCtx.month) || "");
+  const year = String((r && r.year) || (__invCtx && __invCtx.year) || "");
+  const invoiceId = String((r && r.invoice_id) || (__invCtx && __invCtx.invoice_id) || "");
+  if(lang === "et") return `Selle perioodi arve on juba registreeritud.\n\nKorter: ${apt}\nKuu: ${month}\nAasta: ${year}\nArve ID: ${invoiceId}`;
+  if(lang === "en") return `An invoice for this period has already been registered.\n\nApartment: ${apt}\nMonth: ${month}\nYear: ${year}\nInvoice ID: ${invoiceId}`;
+  return `Счет за этот период уже зарегистрирован.\n\nКвартира: ${apt}\nМесяц: ${month}\nГод: ${year}\nID счета: ${invoiceId}`;
+}
+
+
+function __invInfoModalTitle_(){
+  const lang = getLang();
+  if(lang === "et") return "Teade";
+  if(lang === "en") return "Message";
+  return "Сообщение";
+}
+
+function __invShowInfoModal_(msg, title){
+  const t = byId("invInfoModalTitle"); if(t) t.textContent = title || __invInfoModalTitle_();
+  const b = byId("invInfoModalBody"); if(b) b.textContent = String(msg || "");
+  __modalShow_("invInfoModal");
+}
+
 async function __invOpenEditModalFromWorkbook_(apt, month, year, opts){
   opts = opts || {};
   const token = getToken();
   const r = await apiPost("/invoiceEditLoad", { token, apartment:apt, month, year });
   if(!r || !r.ok){
-    const msg = (r && (r.message || r.error)) ? (r.message || r.error) : "LOAD_FAILED";
+    let msg = (r && (r.message || r.error)) ? (r.message || r.error) : "LOAD_FAILED";
+    if(r && r.error === "REGISTRATION_FILES_MISSING"){
+      msg = __invFmtRegistrationFilesMissingMsg_(r);
+      __invSetStatus_("invSelMsg", "");
+      __invSetMsg_("invSelMsg", "");
+      __invShowInfoModal_(msg, __invInfoModalTitle_());
+      return false;
+    }
     // unlock selector modal (it might be in busy state) and show message
     __invSetStatus_("invSelMsg","");
     __invSetMsg_("invSelMsg", msg);
-    return;
+    return false;
   }
   const data = r.data || {};
+  try{
+    if(!data.apartment) data.apartment = apt;
+    if(!data.month) data.month = month;
+    if(!data.year) data.year = year;
+  }catch(_e){}
   __invCtx.data = data;
   __invCtx.invoice_id = String(data.invoice_id||"");
   __invCtx.drive_file_id = String(data.drive_file_id||"");
@@ -7251,7 +7303,9 @@ async function __invOpenEditModalFromWorkbook_(apt, month, year, opts){
   __invSetDirty_(!__invCtx.hasSource);
   __invRefreshActionState_(true);
   __modalShow_("invEditModal");
+  return true;
 }
+
 
 async function __invOpenCreateModalDraft_(apt, month, year){
   const token = getToken();
@@ -7337,9 +7391,9 @@ async function __invContinue_(){
     __invCtx.email_sent_to = String((chk && chk.email_sent_to) || chkData.email_sent_to || "");
 
     if(__invCtx.exists){
-      await __invOpenEditModalFromWorkbook_(apt, month, year, { registered:true });
+      const opened = await __invOpenEditModalFromWorkbook_(apt, month, year, { registered:true });
       __invSetStatus_("invSelMsg", "");
-      __modalHide_("invSelModal");
+      if(opened) __modalHide_("invSelModal");
       return;
     }
 
@@ -7459,8 +7513,16 @@ async function __invDoPreview_(){
     const token = getToken();
     const data = __invReadForm_();
 
-    // Ensure draft_sheet_id is present for preview (backend requires it)
-    if(!data.draft_sheet_id){
+    // Registered invoice preview must use the final PDF from Invoices.drive_file_id.
+    try{
+      const ctxPdf = String((__invCtx.data||{}).drive_file_id || __invCtx.drive_file_id || "");
+      if(__invCtx && __invCtx.registered && ctxPdf){
+        data.drive_file_id = ctxPdf;
+      }
+    }catch(_e){}
+
+    // Non-registered preview uses the working draft sheet.
+    if(!data.drive_file_id && !data.draft_sheet_id){
       const ctxDraft = String((__invCtx.data||{}).draft_sheet_id||"");
       if(ctxDraft) data.draft_sheet_id = ctxDraft;
     }
@@ -7533,7 +7595,14 @@ async function __invDoRegister_(){
     const data = __invReadForm_();
     __invSetMsg_("invEditMsg", tr("invEditRegisteringPdf"));
     const r = await apiPost("/invoiceRegisterAndMakePdf", { token, apartment:__invCtx.apt, month:__invCtx.month, year:__invCtx.year, data });
-    if(!r || !r.ok) throw new Error((r && (r.error || r.detail)) ? (r.error || r.detail) : "REGISTER_FAILED");
+    if(!r || !r.ok){
+      if(r && r.error === "REGISTRATION_ALREADY_EXISTS"){
+        __invSetMsg_("invEditMsg", "");
+        __invShowInfoModal_(__invFmtRegistrationExistsMsg_(r), __invInfoModalTitle_());
+        return;
+      }
+      throw new Error((r && (r.error || r.detail)) ? (r.error || r.detail) : "REGISTER_FAILED");
+    }
     const rd = (r && r.data) ? r.data : r;
     __invCtx.drive_file_id = String((rd && rd.drive_file_id) || "");
     __invCtx.invoice_id = String((rd && rd.invoice_id) || data.invoice_id || "");
@@ -7543,7 +7612,7 @@ async function __invDoRegister_(){
     __invCtx.email_sent_to = "";
     byId("invF_invoice_id").value = __invCtx.invoice_id;
     __invSetEditTitle_(__invCtx.data || {invoice_id:__invCtx.invoice_id});
-    try{ await __invReloadCurrentInvoice_(); }catch(_e){}
+    //try{ await __invReloadCurrentInvoice_(); }catch(_e){}
     __invSetDirty_(false);
     __invRefreshActionState_(true);
     // reload bills table if open
@@ -7577,6 +7646,10 @@ function __invInitUiOnce_(){
   const invStubClose = byId("invStubClose"); if(invStubClose) invStubClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
   const invStubX = byId("invStubModalX"); if(invStubX) invStubX.onclick = ()=>__modalHide_("invStubModal");
   const invStubOk = byId("invStubOk"); if(invStubOk) invStubOk.onclick = ()=>__modalHide_("invStubModal");
+
+  const invInfoClose = byId("invInfoClose"); if(invInfoClose) invInfoClose.onclick = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+  const invInfoX = byId("invInfoModalX"); if(invInfoX) invInfoX.onclick = ()=>__modalHide_("invInfoModal");
+  const invInfoOk = byId("invInfoOk"); if(invInfoOk) invInfoOk.onclick = ()=>__modalHide_("invInfoModal");
 
 const c1 = byId("invSelCancel"); if(c1) c1.onclick = ()=>__modalHide_("invSelModal");
   const c2 = byId("invSelContinue"); if(c2) c2.onclick = ()=>__invContinue_();
@@ -7971,7 +8044,7 @@ document.addEventListener("keydown", (e) => {
 
       <div class="muted" id="invSelMsg" style="margin-top:10px; min-height:18px; font-style:italic;"></div>
 
-      <div class="modal-footer">
+      <div class="modal-footer" style="justify-content:center;">
         <button class="btn" id="invSelCancel" data-i18n="cancel"></button>
         <button class="btn primary" id="invSelContinue" data-i18n="continue"></button>
       </div>
@@ -8157,6 +8230,22 @@ document.addEventListener("keydown", (e) => {
         <button class="btn primary" id="invEditRegister">Register Invoice &amp; make PDF</button>
         <button class="btn" id="invEditSend">Send invoice</button>
         <button class="btn" id="invEditSavePc">Save to PC</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="invInfoModal" class="modal" style="display:none">
+  <div class="modal-backdrop" id="invInfoClose"></div>
+  <div class="modal-card" style="width:min(570px,92vw); max-width:570px;">
+    <div class="modal-head">
+      <div class="h2" id="invInfoModalTitle">Сообщение</div>
+      <button class="iconbtn" id="invInfoModalX" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="muted" id="invInfoModalBody" style="margin-top:6px; white-space:pre-line;"></div>
+      <div class="modal-footer" style="display:flex; justify-content:center; align-items:center; width:100%;">
+        <button class="btn primary" id="invInfoOk" style="margin:0 auto; display:inline-flex; justify-content:center; align-items:center;">OK</button>
       </div>
     </div>
   </div>
