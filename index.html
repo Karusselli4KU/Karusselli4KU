@@ -103,7 +103,7 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.572</title>
+  <title>Karusselli 4 KÜ — v1.578</title>
   <script>
     // v1.417: keep browser tab title in sync with visible version badge
     document.addEventListener('DOMContentLoaded', function(){
@@ -433,7 +433,9 @@ try{
 #authSection #log_pass,
 #authSection #reg_user,
 #authSection #reg_pass,
-#authSection #reg_email{
+#authSection #reg_email,
+#authSection #reg_name,
+#authSection #reg_phone{
   width: 210px;
 }
 
@@ -2692,6 +2694,65 @@ table td:nth-child(5) {
 
 </style>
 
+<style>
+/* v1.573: Admin invoice rates block styled like AdminConfig */
+#page_admin #adminRatesForm.rates-wrap{ margin-top:10px; display:flex; flex-direction:column; min-height:170px; }
+#page_admin #adminRatesForm .rates-grid{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:1 1 auto;
+}
+#page_admin #adminRatesForm .rates-row{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap:10px;
+  align-items:center;
+}
+#page_admin #adminRatesForm .rates-label{
+  font-size:12px;
+  font-weight:600;
+  color: var(--muted);
+  line-height:1.2;
+}
+#page_admin #adminRatesForm .rates-control{ min-width:0; }
+#page_admin #adminRatesForm .rates-input{
+  width:100%;
+  font-size:12px;
+  padding:4px 6px;
+  border:1px solid rgba(0,0,0,0.15);
+  border-radius:6px;
+  background: transparent;
+  box-shadow:none;
+  outline:none;
+}
+#page_admin #adminRatesForm .rates-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  margin-top:auto;
+  padding-top:8px;
+}
+#page_admin #adminRatesForm #ratesSaveBtn{
+  padding:6px 14px;
+  border-radius:12px;
+}
+#page_admin #adminRatesForm #ratesSaveBtn:disabled{
+  opacity:0.55;
+  cursor:not-allowed;
+}
+#page_admin #adminRatesForm #ratesMsg{
+  font-size:12px;
+  color: var(--muted);
+  min-height:16px;
+  flex:1 1 auto;
+  text-align:left;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+</style>
 
 <style>
 /* p169: FINAL single source of truth for Admin Users grid (wins over earlier PATCH blocks) */
@@ -2883,12 +2944,70 @@ table td:nth-child(5) {
   }
 </style>
 
+
+<style>
+/* v1.577: auth + reset UX polish */
+#authSection .btn.primary,
+#resetModal .btn.primary{
+  background: #BDD7EE !important;
+  background-image: none !important;
+  border-color: #AFC7DC !important;
+  color: #000 !important;
+}
+#authSection .btn.primary:hover,
+#resetModal .btn.primary:hover{
+  filter: none !important;
+  background: #BDD7EE !important;
+}
+#authSection .btn.primary:disabled,
+#resetModal .btn.primary:disabled{
+  background: #E5E5E5 !important;
+  border-color: #D0D0D0 !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+#authSection #log_msg,
+#authSection #reg_msg{
+  font-style: italic;
+  color: #000 !important;
+}
+#authSection #log_msg.msg.err,
+#authSection #log_msg.msg.ok,
+#authSection #reg_msg.msg.err,
+#authSection #reg_msg.msg.ok{
+  color: #000 !important;
+}
+#resetModal #resetMsg,
+#resetModal #resetMsg2{
+  font-style: italic;
+  color: #000 !important;
+}
+#resetModal .field label{
+  position: relative;
+  top: -2px;
+}
+</style>
+
+
+<style>
+/* v1.578: auth i18n + register success color fix */
+#authSection #reg_msg.msg.ok{
+  color:#1a7f37 !important;
+  font-weight:400 !important;
+}
+#authSection #log_msg.msg.ok{
+  color:#000 !important;
+  font-weight:400 !important;
+}
+</style>
+
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.572</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.578</span>
         <small id="brandSub"></small>
       </div>
 
@@ -2979,10 +3098,13 @@ table td:nth-child(5) {
 
   <div class="row">
     <div>
-      <label id="regEmailLabel">Username or email</label>
+      <label id="regEmailLabel">e-mail</label>
       <input id="reg_email" type="email" placeholder="name@example.com" autocomplete="email"/>
     </div>
-    <div></div>
+    <div>
+      <label id="regNameLabel">Nimi Perekonnanimi</label>
+      <input id="reg_name" placeholder="nt: Mari Tamm" autocomplete="name"/>
+    </div>
   </div>
 
   <div class="row">
@@ -2990,7 +3112,10 @@ table td:nth-child(5) {
       <label id="aptLabel">Квартира</label>
       <input id="reg_apt" placeholder="например: 5" inputmode="numeric"/>
     </div>
-    <div></div>
+    <div>
+      <label id="regPhoneLabel">Mob. tel. nr.</label>
+      <input id="reg_phone" placeholder="nt: 51234567" inputmode="numeric" autocomplete="tel"/>
+    </div>
   </div>
 
   <div class="actions">
@@ -3235,9 +3360,28 @@ table td:nth-child(5) {
             </div>
 
             <div class="mini">
-              <h4 id="adminInvoicesTitle" data-i18n="adminInvoicesTitle">Invoices</h4>
-              <div class="muted" id="adminInvoicesDesc" data-i18n="adminInvoicesDesc">Upload invoice PDF and link to apartment.</div>
-              <div class="hint" style="margin-top:10px" data-i18n="adminReserved">Reserved — will be implemented next.</div>
+              <h4 id="adminInvoicesTitle" data-i18n="adminInvoicesTitle">Arved</h4>
+              <div class="muted" id="adminInvoicesDesc" data-i18n="adminInvoicesDesc"></div>
+              <div id="adminRatesForm" class="rates-wrap">
+                <div class="rates-grid">
+                  <div class="rates-row">
+                    <div class="rates-label" id="ratesUldLabel" data-i18n="ratesUldLabel">Üldarve määr</div>
+                    <div class="rates-control">
+                      <input id="ratesUld" type="text" inputmode="decimal" class="rates-input" placeholder="0.0"/>
+                    </div>
+                  </div>
+                  <div class="rates-row">
+                    <div class="rates-label" id="ratesRemLabel" data-i18n="ratesRemLabel">Remondifond määr</div>
+                    <div class="rates-control">
+                      <input id="ratesRem" type="text" inputmode="decimal" class="rates-input" placeholder="0.0"/>
+                    </div>
+                  </div>
+                  <div class="rates-actions">
+                    <button class="btn" id="ratesSaveBtn" data-i18n="adminBtnSave" disabled>Salvesta</button>
+                    <span class="muted" id="ratesMsg"></span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -3276,6 +3420,9 @@ table td:nth-child(5) {
         regTitle: "Создать аккаунт",
         regSub: "Создайте имя пользователя и пароль.",
         aptLabel: "Квартира",
+        regEmailLabel: "e-mail",
+        regNameLabel: "Имя Фамилия",
+        regPhoneLabel: "Моб. tel. nr.",
         regBtn: "Создать аккаунт",
 
         ph_user: "например: member12",
@@ -3283,10 +3430,15 @@ table td:nth-child(5) {
         ph_pass_login: "••••••••",
         ph_pass_reg: "минимум 6 символов",
         ph_apt: "например: 5",
+        ph_reg_name: "например: Mari Tamm",
+        ph_reg_phone: "например: 51234567",
 
         regOk: "Регистрация успешна. Теперь можно войти.",
         errReg: "Ошибка регистрации",
         errLogin: "Ошибка входа",
+        errRegMissingFields: "Аккаунт не может быть создан: не все поля заполнены.",
+        errRegPhoneDigits: "В поле телефона допускаются только цифры.",
+        errRegNameInvalid: "Поле имени и фамилии должно содержать только буквы, имя и фамилия должны начинаться с большой буквы.",
 
         tabHome: "Главная",
         tabReadings: "Показания",
@@ -3347,7 +3499,14 @@ table td:nth-child(5) {
         adminStatsTitle: "Статистика",
         adminStatsDesc: "Обзор показаний и счетов, графики.",
         adminInvoicesTitle: "Счета",
-        adminInvoicesDesc: "Загрузка PDF счета и привязка к квартире.",
+        adminInvoicesDesc: "",
+        ratesUldLabel: "Üldarve määr",
+        ratesRemLabel: "Remondifond määr",
+        ratesLoading: "Загружаю…",
+        ratesSaving: "Сохраняю…",
+        ratesSaved: "Сохранено",
+        ratesLoadErr: "Ошибка загрузки",
+        ratesSaveErr: "Ошибка сохранения",
         adminReserved: "Резерв — будет реализовано позже.",
         adminReserved: "Резерв — будет внедрено позже.",
         quickSub: "Сводка по прошлому месяцу (демо-данные):",
@@ -3397,7 +3556,7 @@ table td:nth-child(5) {
         user_not_found: "Пользователь не найден.",
     reset_title: "Сброс пароля",
     reset_desc: "Введите имя пользователя или email, указанный при регистрации. Мы отправим код сброса.",
-    username_or_email: "Имя пользователя или email",
+    username_or_email: "e-mail",
     send_code: "Отправить код",
     new_password: "Новый пароль",
     continue: "Продолжить",
@@ -3549,14 +3708,17 @@ table td:nth-child(5) {
         logout: "Logi välja",
 
         loginTitle: "Logi sisse",
-        loginSub: "Sisesta kasutajanimi ja parool.",
+        loginSub: "",
         userLabel: "Kasutajanimi",
         passLabel: "Parool",
         loginBtn: "Logi sisse",
 
         regTitle: "Loo konto",
-        regSub: "Loo kasutajanimi ja parool.",
+        regSub: "",
         aptLabel: "Korter",
+        regEmailLabel: "e-mail",
+        regNameLabel: "Nimi Perekonnanimi",
+        regPhoneLabel: "Mob. tel. nr.",
         regBtn: "Loo konto",
 
         ph_user: "nt: member12",
@@ -3564,10 +3726,15 @@ table td:nth-child(5) {
         ph_pass_login: "••••••••",
         ph_pass_reg: "vähemalt 6 märki",
         ph_apt: "nt: 5",
+        ph_reg_name: "nt: Mari Tamm",
+        ph_reg_phone: "nt: 51234567",
 
         regOk: "Registreerimine õnnestus. Nüüd saad sisse logida.",
         errReg: "Registreerimise viga",
         errLogin: "Sisselogimise viga",
+        errRegMissingFields: "Kontot ei saa luua: kõik väljad peavad olema täidetud.",
+        errRegPhoneDigits: "Telefoninumbri väljas tohib kasutada ainult numbreid.",
+        errRegNameInvalid: "Nime väljas tohivad olla ainult tähed ning ees- ja perekonnanimi peavad algama suure tähega.",
 
         tabHome: "Avaleht",
         tabReadings: "Näidud",
@@ -3610,7 +3777,14 @@ table td:nth-child(5) {
         adminStatsTitle: "Statistika",
         adminStatsDesc: "Näitude ja arvete ülevaade, graafikud.",
         adminInvoicesTitle: "Arved",
-        adminInvoicesDesc: "Arve PDF-i üleslaadimine ja sidumine korteriga.",
+        adminInvoicesDesc: "",
+        ratesUldLabel: "Üldarve määr",
+        ratesRemLabel: "Remondifond määr",
+        ratesLoading: "Laadin…",
+        ratesSaving: "Salvestan…",
+        ratesSaved: "Salvestatud",
+        ratesLoadErr: "Laadimise viga",
+        ratesSaveErr: "Salvestamise viga",
         adminReserved: "Reserveeritud — lisame hiljem.",
 
         contactTitle: "",
@@ -3677,8 +3851,8 @@ table td:nth-child(5) {
         network_error: "Võrgu viga. Proovi uuesti.",
         user_not_found: "Kasutajat ei leitud.",
     reset_title: "Parooli taastamine",
-    reset_desc: "Sisesta registreerimisel kasutatud kasutajanimi või e‑post. Saadame taastamiskoodi.",
-    username_or_email: "Kasutajanimi või e‑post",
+    reset_desc: "Sisesta registreerimisel kasutatud e-post. Saadame taastamiskoodi.",
+    username_or_email: "e-post",
     send_code: "Saada kood",
     new_password: "Uus parool",
     continue: "Jätka",
@@ -3837,6 +4011,9 @@ table td:nth-child(5) {
         regTitle: "Create account",
         regSub: "Create a username and password.",
         aptLabel: "Apartment",
+        regEmailLabel: "e-mail",
+        regNameLabel: "Name Surname",
+        regPhoneLabel: "Mobile phone",
         regBtn: "Create account",
 
         ph_user: "e.g.: member12",
@@ -3844,10 +4021,15 @@ table td:nth-child(5) {
         ph_pass_login: "••••••••",
         ph_pass_reg: "min 6 characters",
         ph_apt: "e.g.: 5",
+        ph_reg_name: "e.g.: Mari Tamm",
+        ph_reg_phone: "e.g.: 51234567",
 
         regOk: "Registration successful. You can now sign in.",
         errReg: "Registration error",
         errLogin: "Sign-in error",
+        errRegMissingFields: "Account cannot be created: not all fields are filled in.",
+        errRegPhoneDigits: "Phone field may contain digits only.",
+        errRegNameInvalid: "Name field may contain letters only, and both first and last name must start with a capital letter.",
 
         tabHome: "Home",
         tabReadings: "Readings",
@@ -3908,7 +4090,14 @@ table td:nth-child(5) {
         adminStatsTitle: "Statistics",
         adminStatsDesc: "Readings and invoices overview, charts.",
         adminInvoicesTitle: "Invoices",
-        adminInvoicesDesc: "Upload invoice PDF and link to apartment.",
+        adminInvoicesDesc: "",
+        ratesUldLabel: "Üldarve määr",
+        ratesRemLabel: "Remondifond määr",
+        ratesLoading: "Loading…",
+        ratesSaving: "Saving…",
+        ratesSaved: "Saved",
+        ratesLoadErr: "Load error",
+        ratesSaveErr: "Save error",
         adminReserved: "Reserved — will be implemented next.",
         adminReserved: "Reserved — will be implemented later.",
         quickSub: "Summary for last month (demo data):",
@@ -3958,7 +4147,7 @@ table td:nth-child(5) {
         user_not_found: "User not found.",
     reset_title: "Password reset",
     reset_desc: "Enter the username or email used during registration. We will send a reset code.",
-    username_or_email: "Username or email",
+    username_or_email: "e-mail",
     send_code: "Send code",
     new_password: "New password",
     continue: "Continue",
@@ -4422,6 +4611,9 @@ function applyLang(){
       const _el_registerSub = document.getElementById("registerSub"); if(_el_registerSub) _el_registerSub.textContent = t.regSub;
       const _el_regUserLabel = document.getElementById("regUserLabel"); if(_el_regUserLabel) _el_regUserLabel.textContent = t.userLabel;
       const _el_regPassLabel = document.getElementById("regPassLabel"); if(_el_regPassLabel) _el_regPassLabel.textContent = t.passLabel;
+      const _el_regEmailLabel = document.getElementById("regEmailLabel"); if(_el_regEmailLabel) _el_regEmailLabel.textContent = t.regEmailLabel || "e-mail";
+      const _el_regNameLabel = document.getElementById("regNameLabel"); if(_el_regNameLabel) _el_regNameLabel.textContent = t.regNameLabel || "Name Surname";
+      const _el_regPhoneLabel = document.getElementById("regPhoneLabel"); if(_el_regPhoneLabel) _el_regPhoneLabel.textContent = t.regPhoneLabel || "Mobile phone no.";
       const _el_aptLabel = document.getElementById("aptLabel"); if(_el_aptLabel) _el_aptLabel.textContent = t.aptLabel;
       const _el_btnRegister = document.getElementById("btnRegister"); if(_el_btnRegister) _el_btnRegister.textContent = t.regBtn;
 
@@ -4429,6 +4621,8 @@ function applyLang(){
       const _el_reg_user = document.getElementById("reg_user"); if(_el_reg_user) _el_reg_user.placeholder = t.ph_reg_user;
       const _el_log_pass = document.getElementById("log_pass"); if(_el_log_pass) _el_log_pass.placeholder = t.ph_pass_login;
       const _el_reg_pass = document.getElementById("reg_pass"); if(_el_reg_pass) _el_reg_pass.placeholder = t.ph_pass_reg;
+      const _el_reg_name = document.getElementById("reg_name"); if(_el_reg_name) _el_reg_name.placeholder = t.ph_reg_name || "Mari Tamm";
+      const _el_reg_phone = document.getElementById("reg_phone"); if(_el_reg_phone) _el_reg_phone.placeholder = t.ph_reg_phone || "51234567";
       const _el_reg_apt = document.getElementById("reg_apt"); if(_el_reg_apt) _el_reg_apt.placeholder = t.ph_apt;
 
       // app nav
@@ -4848,19 +5042,19 @@ applyLang();
       const l = getLang();
       const dict = {
         ru: {
-          loggingIn:"Выполняю вход…", loadingYears:"Загружаю данные…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…",
+          loggingIn:"Выполняю вход…", registeringAccount:"Создаю аккаунт…", loadingYears:"Загружаю данные…", loadingBills:"Загружаю счета…", openingPdf:"Открываю PDF…",
           bills_th_invoice_no:"Счёт №", bills_th_period:"Период", bills_th_amount:"Начисле­но", bills_th_debt_advance:"Долг/Предоплата",
           bills_th_penalty:"Viivis", bills_th_due:"К оплате", bills_th_status:"Статус", bills_th_invoice:"Счёт",
           bills_th_paid_amount:"Оплаченная сумма", bills_th_paid_date:"Дата оплаты", bills_th_pay:"Подтвердить"
         },
         et: {
-          loggingIn:"Sisselogimine…", loadingYears:"Laadin andmeid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…",
+          loggingIn:"Sisselogimine…", registeringAccount:"Loon kontot…", loadingYears:"Laadin andmeid…", loadingBills:"Laadin arveid…", openingPdf:"Avan PDF-i…",
           bills_th_invoice_no:"Arve nr.", bills_th_period:"Periood", bills_th_amount:"Arvesta­tud", bills_th_debt_advance:"Võlg / Ettemaks",
           bills_th_penalty:"Viivis", bills_th_due:"Tasuda", bills_th_status:"Staatus", bills_th_invoice:"Arve",
           bills_th_paid_amount:"Makstud summa", bills_th_paid_date:"Makstud kuupäev", bills_th_pay:"Kinnita"
         },
         en: {
-          loggingIn:"Signing in…", loadingYears:"Loading data…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…",
+          loggingIn:"Signing in…", registeringAccount:"Creating account…", loadingYears:"Loading data…", loadingBills:"Loading invoices…", openingPdf:"Opening PDF…",
           bills_th_invoice_no:"Invoice #", bills_th_period:"Period", bills_th_amount:"Accrued", bills_th_debt_advance:"Debt / Advance",
           bills_th_penalty:"Penalty", bills_th_due:"Total due", bills_th_status:"Status", bills_th_invoice:"Invoice",
           bills_th_paid_amount:"Paid amount", bills_th_paid_date:"Paid date", bills_th_pay:"Confirm"
@@ -4990,16 +5184,50 @@ async function apiPost(path, payload){
       return apiPost(path, payload);
     }
 
+    function __regValidPhone_(s){
+      return /^\d+$/.test(String(s||"").trim());
+    }
+
+    function __regValidDisplayName_(s){
+      const parts = String(s||"").trim().split(/\s+/).filter(Boolean);
+      if(parts.length < 2) return false;
+      return parts.every(p => /^\p{Lu}\p{Ll}+$/u.test(p));
+    }
+
     async function register(){
       const u = document.getElementById("reg_user").value.trim();
       const p = document.getElementById("reg_pass").value;
+      const n = document.getElementById("reg_name").value.trim();
+      const ph = document.getElementById("reg_phone").value.trim();
       const a = document.getElementById("reg_apt").value.trim();
       const e = document.getElementById("reg_email").value.trim();
       const msg = document.getElementById("reg_msg");
+      const btn = document.getElementById("btnRegister");
       msg.className="msg"; msg.textContent="";
 
-      const d = await apiPost("/register", {username:u,password:p,apartment:a,email:e});
       const t = I18N[getLang()] || I18N.ru;
+
+      if(!u || !p || !n || !ph || !a || !e){
+        msg.className="msg err";
+        msg.textContent = t.errRegMissingFields || t.errReg;
+        return;
+      }
+      if(!__regValidPhone_(ph)){
+        msg.className="msg err";
+        msg.textContent = t.errRegPhoneDigits || t.errReg;
+        return;
+      }
+      if(!__regValidDisplayName_(n)){
+        msg.className="msg err";
+        msg.textContent = t.errRegNameInvalid || t.errReg;
+        return;
+      }
+
+      if(btn) btn.disabled = true;
+      msg.className = "msg";
+      msg.textContent = _uiMsg("registeringAccount");
+      const d = await apiPost("/register", {username:u,password:p,apartment:a,email:e,display_name:n,phone:ph});
+      if(btn) btn.disabled = false;
 
       if(d.ok){
         msg.className="msg ok";
@@ -5010,6 +5238,9 @@ async function apiPost(path, payload){
 if(code==="APARTMENT_TAKEN") msg.textContent = t.errAptTaken;
 else if(code==="USERNAME_TAKEN") msg.textContent = t.errUserTaken;
 else if(code==="EMAIL_TAKEN") msg.textContent = t.errEmailTaken;
+else if(code==="ALL_FIELDS_REQUIRED") msg.textContent = t.errRegMissingFields || t.errReg;
+else if(code==="PHONE_INVALID") msg.textContent = t.errRegPhoneDigits || t.errReg;
+else if(code==="DISPLAY_NAME_INVALID") msg.textContent = t.errRegNameInvalid || t.errReg;
 else msg.textContent = d.error || t.errReg;
       }
     }
@@ -6273,6 +6504,110 @@ async function adminConfigSave_(){
   setTimeout(()=>cfgSetMsg_("", false), 1200);
 }
 
+let __ku_rates_baseline = null;
+let __ku_rates_dirty = false;
+
+function ratesSetMsg_(txt, isErr){
+  const el = document.getElementById("ratesMsg");
+  if(!el) return;
+  el.textContent = txt || "";
+  el.style.color = isErr ? "#b00020" : "";
+}
+
+function ratesSetDirty_(dirty){
+  __ku_rates_dirty = !!dirty;
+  const btn = document.getElementById("ratesSaveBtn");
+  if(btn) btn.disabled = !__ku_rates_dirty;
+}
+
+function rateNormalizeOne_(v){
+  const s = String(v ?? "").trim().replace(/\s+/g,"").replace(",", ".");
+  if(!s) return "0.0";
+  const n = Number(s);
+  if(!Number.isFinite(n)) return "0.0";
+  return (Math.round(n*10)/10).toFixed(1);
+}
+
+function ratesNormalize_(cfg){
+  const c = cfg || {};
+  return {
+    uldarve_rate: rateNormalizeOne_(c.uldarve_rate),
+    remondi_rate: rateNormalizeOne_(c.remondi_rate)
+  };
+}
+
+function ratesGetUi_(){
+  return ratesNormalize_({
+    uldarve_rate: (document.getElementById("ratesUld")||{}).value || "0.0",
+    remondi_rate: (document.getElementById("ratesRem")||{}).value || "0.0"
+  });
+}
+
+function ratesSame_(a,b){
+  if(!a || !b) return false;
+  return String(a.uldarve_rate) === String(b.uldarve_rate) && String(a.remondi_rate) === String(b.remondi_rate);
+}
+
+function ratesRecalcDirty_(){
+  ratesSetDirty_(!ratesSame_(__ku_rates_baseline, ratesGetUi_()));
+}
+
+function ratesApply_(cfg){
+  const c = ratesNormalize_(cfg);
+  const u = document.getElementById("ratesUld");
+  const r = document.getElementById("ratesRem");
+  if(u) u.value = c.uldarve_rate;
+  if(r) r.value = c.remondi_rate;
+  __ku_rates_baseline = ratesGetUi_();
+  ratesSetDirty_(false);
+}
+
+function ratesBindDirty_(){
+  ["ratesUld","ratesRem"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el || el.__ku_bound_rates) return;
+    el.__ku_bound_rates = true;
+    const onAny = ()=>ratesRecalcDirty_();
+    el.addEventListener("change", onAny);
+    el.addEventListener("input", onAny);
+    el.addEventListener("blur", ()=>{ el.value = rateNormalizeOne_(el.value); ratesRecalcDirty_(); });
+  });
+}
+
+async function adminRatesLoad_(){
+  const token = getToken();
+  if(!token) return;
+  setProcessPill(tr("ratesLoading"));
+  ratesSetMsg_("", false);
+  const res = await apiPost("/adminRatesGet", { token });
+  setProcessPill("");
+  if(!res || res.ok===false){
+    ratesApply_({});
+    ratesSetMsg_(tr("ratesLoadErr") + (res && res.error ? (": " + String(res.error)) : ""), true);
+    return;
+  }
+  ratesApply_(res.rates || {});
+  ratesSetMsg_("", false);
+}
+
+async function adminRatesSave_(){
+  if(!__ku_rates_dirty) return;
+  const token = getToken();
+  if(!token) return;
+  setProcessPill(tr("ratesSaving"));
+  ratesSetMsg_("", false);
+  const payload = { token, rates: ratesGetUi_() };
+  const res = await apiPost("/adminRatesSave", payload);
+  setProcessPill("");
+  if(!res || res.ok===false){
+    ratesSetMsg_(tr("ratesSaveErr") + (res && res.error ? (": " + String(res.error)) : ""), true);
+    return;
+  }
+  ratesApply_((res && res.rates) ? res.rates : payload.rates);
+  ratesSetMsg_(tr("ratesSaved"), false);
+  setTimeout(()=>ratesSetMsg_("", false), 1200);
+}
+
 
 function initAdminPage_(){
   // only for visible admin page
@@ -6309,9 +6644,20 @@ function initAdminPage_(){
     cfgSetDirty_(false);
   }catch(e){}
 
+  try{
+    ratesBindDirty_();
+    const rbtn = document.getElementById("ratesSaveBtn");
+    if(rbtn && !rbtn.__ku_bound_ratesbtn){
+      rbtn.__ku_bound_ratesbtn = true;
+      rbtn.addEventListener("click", (e)=>{ e.preventDefault(); adminRatesSave_().catch(()=>{}); });
+    }
+    ratesSetDirty_(false);
+  }catch(e){}
+
 
   adminLoadUsers_().then(()=>{
     try{ adminConfigLoad_().catch(()=>{}); }catch(e){}
+    try{ adminRatesLoad_().catch(()=>{}); }catch(e){}
  
     try{ if(tbl) tbl.style.display = ""; }catch(e){}
     // v1.351b0p38: when opening Haldus tab, sync Owner indicator from latest server data (same as login)
@@ -7989,7 +8335,7 @@ document.addEventListener("keydown", (e) => {
         <p class="muted" id="resetHint" data-i18n="reset_desc">Enter the email used during registration. We will send a reset code.</p>
 
         <div class="field">
-          <label><span id="resetIdentifierLabel" data-i18n="username_or_email">Username or email</span></label>
+          <label><span id="resetIdentifierLabel" data-i18n="username_or_email">e-mail</span></label>
           <input id="resetEmail" type="text" autocomplete="email" placeholder="name@example.com"/>
         </div>
 
