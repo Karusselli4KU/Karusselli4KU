@@ -103,7 +103,7 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.578</title>
+  <title>Karusselli 4 KÜ — v1.590j</title>
   <script>
     // v1.417: keep browser tab title in sync with visible version badge
     document.addEventListener('DOMContentLoaded', function(){
@@ -2991,7 +2991,7 @@ table td:nth-child(5) {
 
 
 <style>
-/* v1.578: auth i18n + register success color fix */
+/* v1.580: readings init endpoint for first load */
 #authSection #reg_msg.msg.ok{
   color:#1a7f37 !important;
   font-weight:400 !important;
@@ -3007,7 +3007,7 @@ table td:nth-child(5) {
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.578</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.590j</span>
         <small id="brandSub"></small>
       </div>
 
@@ -3527,6 +3527,10 @@ table td:nth-child(5) {
         penaltyHdr: "Пени",
         dueHdr: "К оплате",
         thBillPdf: "Счёт",
+        pdfActionTitle: "Счёт",
+        choosePdfAction: "Выберите действие.",
+        previewBtn: "Предпросмотр",
+        downloadBtn: "Скачать PDF",
 
         nextReadings1: "Следующий шаг: читать данные из листа",
         nextReadings2: "и фильтровать по квартире/роли.",
@@ -3823,6 +3827,10 @@ table td:nth-child(5) {
         penaltyHdr: "Viivis",
         dueHdr: "Tasuda",
         thBillPdf: "Arve",
+        pdfActionTitle: "Arve",
+        choosePdfAction: "Valige tegevus.",
+        previewBtn: "Eelvaade",
+        downloadBtn: "Laadi PDF alla",
 
         nextReadings1: "Järgmine samm: loeme andmed lehelt",
         nextReadings2: "ja filtreerime korteri/rolli järgi.",
@@ -4118,6 +4126,10 @@ table td:nth-child(5) {
         penaltyHdr: "Penalty",
         dueHdr: "Total due",
         thBillPdf: "Invoice",
+        pdfActionTitle: "Invoice",
+        choosePdfAction: "Choose action.",
+        previewBtn: "Preview",
+        downloadBtn: "Download PDF",
 
         nextReadings1: "Next step: read data from sheet",
         nextReadings2: "and filter by apartment/role.",
@@ -4436,6 +4448,12 @@ function loadPublicInfo_(){
     window.__ku_public_info = o;
     return o;
   }catch(e){ return null; }
+}
+
+function invalidateHomePublicInfo_(){
+  try{ delete window.__ku_public_info; }catch(e){}
+  try{ localStorage.removeItem("ku_public_info"); }catch(e){}
+  try{ window.__ku_home_publicinfo_fresh = false; }catch(e){}
 }
 
 // v1.353a0p139: show/hide Contactinfo card (Avaleht) to avoid showing stale cached data while loading
@@ -4975,33 +4993,31 @@ applyLang();
       if(page==="admin") initAdminPage_();
     }
 
-    // v1.353a0p139: Home refresh — re-fetch public info & display name from Sheets on every Avaleht click
+    // v1.587: Home opens from cached login state; avoid /whoami on every Avaleht click
     async function initHomePage_(){
       try{
         const pageEl = document.getElementById("page_home");
         if(!pageEl || pageEl.classList.contains("hidden")) return;
 
         const token = getToken();
-        // if not logged in: just apply cached public info (if any)
-        if(!token){
-          try{ applyPublicInfo_(); }catch(e){}
-          return;
-        }
+        const hasCachedPublic = !!loadPublicInfo_();
+
+        // fast path: render from current cached state without blocking on /whoami
+        try{ applyPublicInfo_(); }catch(e){}
+        try{ setHomeContactVisible_(hasCachedPublic); }catch(e){}
+        try{ window.__ku_home_publicinfo_fresh = hasCachedPublic; }catch(e){}
+
+        // if not logged in or we already have cached home info from login, do not re-fetch
+        if(!token || hasCachedPublic) return;
 
         if(window.__ku_home_refresh_inflight) return;
         window.__ku_home_refresh_inflight = true;
 
-        // v1.353a0p139: hide Contactinfo until we load fresh data
-        window.__ku_home_publicinfo_fresh = false;
-        try{ setHomeContactVisible_(false); }catch(e){}
-
-        // show process pill in center/header (same component used elsewhere)
         try{ setProcessPill(_uiMsg("loadingYears")); }catch(e){}
 
         const d = await apiPost("/whoami", { token });
 
         if(d && d.ok){
-          // update cached user (display name, role, apt)
           let user = {};
           try{ user = JSON.parse(localStorage.getItem("ku_user") || "{}"); }catch(e){ user = {}; }
           if(d.username) user.username = d.username;
@@ -5012,14 +5028,13 @@ applyLang();
           try{ localStorage.setItem("ku_user", JSON.stringify(user)); }catch(e){}
           try{ setStatus(true, user.username, user.apartment, user.display_name); }catch(e){}
 
-          // update cached public info (contacts/bank) if provided
           if(d.public_info){
             try{
               window.__ku_public_info = d.public_info;
               localStorage.setItem("ku_public_info", JSON.stringify(d.public_info));
             }catch(e){}
             try{ applyPublicInfo_(); }catch(e){}
-            // mark as fresh (used by setProcessPill() to reveal Contactinfo)
+            try{ setHomeContactVisible_(true); }catch(e){}
             try{ window.__ku_home_publicinfo_fresh = true; }catch(e){}
           }
         }
@@ -5496,6 +5511,59 @@ else msg.textContent = t.errLogin;
 
 
 
+    async function loadBillsInitFromApi_(requestedYear){
+  const token = getToken();
+  const sel = document.getElementById("billsYear");
+  if(!sel) return null;
+  if(!token) return null;
+
+  setBillsBusy(true, _uiMsg("loadingYears"));
+  try{
+    const payload = { token };
+    const reqYear = Number(requestedYear || 0);
+    if(reqYear) payload.year = reqYear;
+    try{ if(__billsIsAdmin_()) payload.apartment = __billsGetSelectedApartment_(); }catch(_){ }
+    const resp = await apiPost("/invoicesInit", payload);
+    if(!resp || !resp.ok){
+      sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+      sel.disabled = true;
+      const bb = document.getElementById("billsBody");
+      if(bb) bb.innerHTML = "";
+      return null;
+    }
+
+    const years = (Array.isArray(resp.years) ? resp.years.slice() : []).map(Number).filter(Boolean);
+    sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+    years.forEach(y=>{
+      const opt = document.createElement("option");
+      opt.value = String(y);
+      opt.textContent = String(y);
+      sel.appendChild(opt);
+    });
+
+    const selectedYear = Number(resp.year || resp.selected_year || 0);
+    if(selectedYear && [...sel.options].some(o=>o.value===String(selectedYear))){
+      sel.value = String(selectedYear);
+    } else {
+      sel.value = "";
+    }
+    sel.disabled = !years.length;
+
+    window.__ku_lastBillsResp = resp;
+    window.__ku_lastBillsYear = selectedYear || 0;
+
+    const bo = document.getElementById("billsOwnerName");
+    const ba = document.getElementById("billsAptNum");
+    if (bo) bo.textContent = resp.username || (JSON.parse(localStorage.getItem("ku_user")||"{}").username||"—");
+    if (ba) ba.textContent = String(resp.apartment || "");
+
+    rerenderBillsFromCache_();
+    return resp;
+  }finally{
+    setBillsBusy(false, "");
+  }
+}
+
     // Bills: dynamic year list (from Sheets via API)
     async function populateBillsYearsFromApi_(){
   const token = getToken();
@@ -5648,7 +5716,8 @@ function rerenderBillsFromCache_(){
         year: Number(inv.year || year || 0),
         month: Number(inv.month||0),
         apartment: Number(window.__ku_billsSelectedApartment || window.currentUser?.apartment || 0),
-        amount_due: Number(inv.payment_due!=null ? inv.payment_due : inv.amount || 0),
+        amount: Number(inv.payment_due!=null ? inv.payment_due : inv.amount || 0),
+        payment_due: Number(inv.payment_due!=null ? inv.payment_due : inv.amount || 0),
         currency: String(currency)
       };
       payCell = `<td class="pay-col">${canPay ? `<button class="bills-pay-btn" type="button" data-pay='${esc(JSON.stringify(payload))}'>${esc(t.confirmPay || "Подтвердить оплату")}</button>` : ""}</td>`;
@@ -5688,7 +5757,7 @@ function rerenderBillsFromCache_(){
   bb.querySelectorAll(".pdf-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const id = btn.getAttribute("data-invoice");
-      if(id) downloadInvoicePdf(id, btn);
+      if(id) openInvoicePdfChoice_(id, btn);
     });
   });
 }
@@ -5702,7 +5771,7 @@ function attachBillsYearListener_(){
   sel.addEventListener("change", ()=>{
     sel.__ku_userSelected = true;
     const y = Number(sel.value || 0);
-    if(y) loadBillsFromApi(y);
+    if(y) loadBillsInitFromApi_(y);
   });
 }
 
@@ -5892,15 +5961,13 @@ const activeApt = __billsGetSelectedApartment_();
         b.classList.toggle("active", aa===apt);
       });
 
-      // re-run existing Bills init flow (indicator -> load years -> load bills) without changing render logic
+      // reload Bills via unified invoicesInit flow; keep selected year when possible
       try{
         const sel = document.getElementById("billsYear");
-        if(sel){
-          sel.__ku_userSelected = false; // allow default selection for new apartment
-          sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
-        }
+        const requestedYear = sel ? Number(sel.value || 0) : 0;
+        if(sel) sel.__ku_userSelected = !!requestedYear;
+        await loadBillsInitFromApi_(requestedYear);
       }catch(_){}
-      try{ await initBillsPage_(); }catch(_){}
     }, { passive:false });
   });
 
@@ -5925,31 +5992,10 @@ async function initBillsPage_(){
     try{
       const table = document.querySelector("#page_bills .bills-table");
       if(table) table.style.display = "none";
-    }catch(_){}
+    }catch(_){ }
 
-    const years = await populateBillsYearsFromApi_();
-
-    // If user did NOT manually select a year, always default to latest available year
-    // This also fixes "logout -> login -> invoices empty" (selector resets to blank).
-    if(!sel.__ku_userSelected){
-      const ys = (Array.isArray(years) && years.length)
-        ? years.map(Number).filter(Boolean)
-        : [...sel.options].map(o=>Number(o.value)).filter(Boolean);
-
-      if(ys.length){
-        const lastYear = Math.max(...ys);
-        sel.value = String(lastYear);
-        await loadBillsFromApi(lastYear);
-        return;
-      }
-
-      // no data -> keep empty
-      return;
-    }
-
-    // user already selected a year in this session: respect it
-    const y = Number(sel.value || 0);
-    if(y) await loadBillsFromApi(y);
+    const requestedYear = sel.__ku_userSelected ? Number(sel.value || 0) : 0;
+    await loadBillsInitFromApi_(requestedYear);
   } finally {
     window.__ku_bills_tab_loading = false;
     // re-apply visibility based on current busy state
@@ -6228,6 +6274,7 @@ async function adminSaveUsers_(){
     return;
   }
   setAdminMsg_(tr("adminSaved"), false);
+  try{ invalidateHomePublicInfo_(); }catch(e){}
   const rows = Array.isArray(res.users) ? res.users : [];
   __ku_admin_users_cache = rows;
   renderAdminUsers_(rows);
@@ -6500,6 +6547,7 @@ async function adminConfigSave_(){
   }
 
   cfgApply_((res && res.config) ? res.config : payload.config);
+  try{ invalidateHomePublicInfo_(); }catch(e){}
   cfgSetMsg_(tr("cfgSaved"), false);
   setTimeout(()=>cfgSetMsg_("", false), 1200);
 }
@@ -8323,7 +8371,140 @@ document.addEventListener("keydown", (e) => {
 
 </script>
 
-  <div id="resetModal" class="modal" style="display:none">
+  <!-- Invoice PDF action modal (v1.590j) -->
+<div id="invoicePdfChoiceModal" class="modal" style="display:none">
+  <div class="modal-backdrop"></div>
+  <div class="modal-card" style="width:min(360px,92vw);max-width:360px;padding:18px 22px;box-sizing:border-box;position:relative;z-index:1;">
+    <div class="modal-head" style="padding:0 0 10px 0;border-bottom:1px solid var(--stroke);margin-bottom:12px;">
+      <div class="headstack">
+        <div id="invoicePdfChoiceTitle" style="font-size:16px;font-weight:700;">Arve</div>
+      </div>
+      <button type="button" class="iconbtn" id="invoicePdfChoiceClose" aria-label="Close">✕</button>
+    </div>
+    <div id="invoicePdfChoiceMsg" class="muted" style="font-size:12px;margin-bottom:14px;">Vali tegevus.</div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;">
+      <button type="button" class="btn" id="invoicePdfChoicePreview">Preview</button>
+      <button type="button" class="btn" id="invoicePdfChoiceDownload">Download</button>
+      <button type="button" class="btn" id="invoicePdfChoiceCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function __pdfChoiceText_(k, fallback){ try{ return (typeof tr === 'function' ? tr(k) : '') || fallback; }catch(_){ return fallback; } }
+  function __pdfChoiceFilename_(invoiceId, response){
+    try{
+      const cd = response && response.headers ? (response.headers.get('content-disposition') || '') : '';
+      const m = cd.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+      const raw = decodeURIComponent((m && (m[1] || m[2])) || '');
+      if(raw) return raw;
+    }catch(_){ }
+    return String(invoiceId || 'invoice') + '.pdf';
+  }
+  window.__setInvoicePdfChoiceI18n_ = function __setInvoicePdfChoiceI18n_(){
+    try{
+      const t = byId('invoicePdfChoiceTitle'); if(t) t.textContent = __pdfChoiceText_('pdfActionTitle', __pdfChoiceText_('thBillPdf','PDF'));
+      const m = byId('invoicePdfChoiceMsg'); if(m) m.textContent = __pdfChoiceText_('choosePdfAction','Vali tegevus.');
+      const p = byId('invoicePdfChoicePreview'); if(p) p.textContent = __pdfChoiceText_('previewBtn','Preview');
+      const d = byId('invoicePdfChoiceDownload'); if(d) d.textContent = __pdfChoiceText_('downloadBtn','Download');
+      const c = byId('invoicePdfChoiceCancel'); if(c) c.textContent = __pdfChoiceText_('cancel','Cancel');
+    }catch(_){ }
+  }
+  window.openInvoicePdfChoice_ = function(invoiceId, sourceBtn){
+    const modal = byId('invoicePdfChoiceModal');
+    if(!modal || !invoiceId) return;
+    window.__ku_invoice_pdf_choice = { invoiceId: String(invoiceId), sourceBtn: sourceBtn || null };
+    __setInvoicePdfChoiceI18n_();
+    modal.style.display = 'flex';
+  };
+  window.closeInvoicePdfChoice_ = function(){
+    const modal = byId('invoicePdfChoiceModal');
+    if(modal) modal.style.display = 'none';
+    window.__ku_invoice_pdf_choice = null;
+  };
+  async function __fetchInvoicePdfBlob_(invoiceId){
+    const token = getToken();
+    if(!token || !invoiceId) throw new Error('Missing token or invoice id');
+    const r = await fetch(API_BASE + '/invoicePdf', {
+      method: 'POST',
+      headers: { 'content-type':'application/json; charset=utf-8' },
+      body: JSON.stringify((()=>{ const p={ token, invoice_id: invoiceId }; try{ if(__billsIsAdmin_()) p.apartment=__billsGetSelectedApartment_(); }catch(_){ } return p; })())
+    });
+    if(!r.ok){
+      let j = null; try{ j = await r.json(); }catch(_){ }
+      throw new Error((j && j.error) ? String(j.error) : ('HTTP ' + r.status));
+    }
+    const blob = await r.blob();
+    return { blob, filename: __pdfChoiceFilename_(invoiceId, r) };
+  }
+  async function __previewInvoicePdfBrowser_(){
+    const ctx = window.__ku_invoice_pdf_choice || {};
+    const invoiceId = ctx.invoiceId;
+    if(!invoiceId) return;
+    const previewWin = window.open('about:blank', '_blank');
+    if(!previewWin){ alert(__pdfChoiceText_('popupBlocked','Popup blocked')); return; }
+    var loadingTxt = __pdfChoiceText_('openingPdf','Opening PDF…'); previewWin.document.write('<title>'+loadingTxt.replace(/</g,'&lt;')+'</title><body style="font-family:Arial,sans-serif;padding:16px">'+loadingTxt.replace(/</g,'&lt;')+'</body>');
+    closeInvoicePdfChoice_();
+    setProcessPill(__pdfChoiceText_('openingPdf', _uiMsg('openingPdf')));
+    try{
+      const res = await __fetchInvoicePdfBlob_(invoiceId);
+      const url = URL.createObjectURL(res.blob);
+      previewWin.location.replace(url);
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(_){ } }, 60000);
+    }catch(e){
+      try{ previewWin.close(); }catch(_){ }
+      alert((__pdfChoiceText_('pdfOpenFailed','Не удалось открыть PDF: ')) + String(e && e.message ? e.message : e));
+    }finally{
+      setProcessPill('');
+    }
+  }
+  async function __downloadInvoicePdfOnly_(){
+    const ctx = window.__ku_invoice_pdf_choice || {};
+    const invoiceId = ctx.invoiceId;
+    if(!invoiceId) return;
+    closeInvoicePdfChoice_();
+    setProcessPill(__pdfChoiceText_('downloadingPdf', _uiMsg('openingPdf')));
+    try{
+      const res = await __fetchInvoicePdfBlob_(invoiceId);
+      const url = URL.createObjectURL(res.blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = res.filename || (String(invoiceId)+'.pdf');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(_){ } }, 60000);
+    }catch(e){
+      alert((__pdfChoiceText_('pdfDownloadFailed','Не удалось скачать PDF: ')) + String(e && e.message ? e.message : e));
+    }finally{
+      setProcessPill('');
+    }
+  }
+  function __wireInvoicePdfChoiceModal_(){
+    const modal = byId('invoicePdfChoiceModal');
+    if(!modal || modal.__wired) return;
+    modal.__wired = true;
+    const closeBtn = byId('invoicePdfChoiceClose'); if(closeBtn) closeBtn.addEventListener('click', closeInvoicePdfChoice_);
+    const cancelBtn = byId('invoicePdfChoiceCancel'); if(cancelBtn) cancelBtn.addEventListener('click', closeInvoicePdfChoice_);
+    const previewBtn = byId('invoicePdfChoicePreview'); if(previewBtn) previewBtn.addEventListener('click', __previewInvoicePdfBrowser_);
+    const downloadBtn = byId('invoicePdfChoiceDownload'); if(downloadBtn) downloadBtn.addEventListener('click', __downloadInvoicePdfOnly_);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ __wireInvoicePdfChoiceModal_(); __setInvoicePdfChoiceI18n_(); });
+  }else{
+    __wireInvoicePdfChoiceModal_(); __setInvoicePdfChoiceI18n_();
+  }
+  const _origApplyLang = window.applyLang;
+  window.applyLang = function(){
+    const r = _origApplyLang.apply(this, arguments);
+    try{ __setInvoicePdfChoiceI18n_(); }catch(_){ }
+    return r;
+  };
+})();
+</script>
+
+<div id="resetModal" class="modal" style="display:none">
     <div class="modal-backdrop" id="resetClose"></div>
     <div class="modal-card">
       <div class="modal-head">
@@ -8964,6 +9145,83 @@ function updateReadingsTexts_(){
     });
   }
 
+  async function loadReadingsInit_(){
+const sel = $("readingsYearSelect");
+const msg = $("readingsStatusMsg");
+if(!sel) return;
+const token = getToken();
+if(!token){ msg && (msg.textContent="Сначала войдите"); return; }
+
+msg && (msg.textContent="");
+setProcessPill(_uiMsg("loadingYears"));
+const res = await callApi("readingsInit", { token, apartment: getEffectiveApartment_() });
+setProcessPill("");
+if(!res || res.ok===false){
+  msg && (msg.textContent = (res && res.error) ? String(res.error) : "ошибка");
+  return;
+}
+
+try{ window.__ku_admin_config = (res.admin_config || res.admin || {}); }catch(_){ }
+try{ updateScopeToggleUI_(); }catch(_){ }
+
+const yearsRaw = Array.isArray(res.years) ? res.years : [];
+const yearsSet = new Set();
+yearsRaw.forEach(y=>{
+  const n = Number(y);
+  if(Number.isFinite(n) && n>0) yearsSet.add(n);
+});
+
+if(yearsSet.size === 0){
+  sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+  sel.disabled = true;
+  renderRows_([]);
+  try{
+    window.__ku_rd_window = null;
+    window.__ku_rd_permissions = { can_submit:false, can_edit:false };
+    window.__ku_rd_lastRows = [];
+    window.__ku_rd_lastYear = 0;
+    window.__ku_rd_targetYear = 0;
+    window.__ku_rd_targetMonth = 0;
+  }catch(_){ }
+  sel.onchange = null;
+  try{ updateInputPanel_(); }catch(_){ }
+  try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
+  return;
+}
+
+const years = Array.from(yearsSet).sort((a,b)=>a-b);
+const selectedYear = Number(res.selected_year || years[years.length - 1] || 0);
+const __rows = (res.rows || res.readings || []);
+const win = res.window || null;
+const perms = res.permissions || {};
+
+sel.disabled = false;
+sel.innerHTML = '<option value="" disabled selected hidden>—</option>';
+years.forEach(y=>{
+  const opt = document.createElement("option");
+  opt.value = String(y);
+  opt.textContent = String(y);
+  sel.appendChild(opt);
+});
+sel.value = String(selectedYear);
+sel.onchange = ()=> loadYear_(sel.value);
+
+try{
+  window.__ku_rd_window = win;
+  window.__ku_rd_permissions = perms;
+  try{ rebuildRdAction_(); }catch(e){}
+  window.__ku_rd_lastRows = __rows;
+  window.__ku_rd_lastYear = Number(selectedYear)||0;
+  window.__ku_rd_targetYear = (win ? Number(win.target_year||0) : 0);
+  window.__ku_rd_targetMonth = (win && Number(selectedYear)===Number(win.target_year)) ? Number(win.target_month||0) : 0;
+}catch(_){ }
+try{ window.__ku_readings_lastRows = __rows; window.__ku_readings_lastYear = Number(selectedYear)||0; }catch(_){ }
+renderRows_(__rows);
+try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){}
+try{ updateInputPanel_(); try{ if(window.__rdVisUpdate) window.__rdVisUpdate(); }catch(e){} }catch(_){ }
+msg && (msg.textContent="");
+  }
+
   async function loadYears_(){
 const sel = $("readingsYearSelect");
 const msg = $("readingsStatusMsg");
@@ -9226,8 +9484,7 @@ const close = ()=>{ try{ m.style.display='none'; }catch(_){ } try{ m.remove(); }
         close();
 
         
-        // v1.516: stop further processing after close
-        return;
+        // v1.579: continue with unlock + background refresh after close
 // v1.323: re-enable controls after SUCCESS (tabs/menu/year selector)
         try{ m.classList.remove("busy"); }catch(e){}
         try{ (toDisable||[]).forEach(el=>{ try{ el.disabled=false; }catch(e){} }); }catch(e){}
@@ -9258,9 +9515,7 @@ try{
 
             const sel = $("readingsYearSelect");
             if(sel){
-              await loadYears_();
-              sel.value = String(targetYear);
-              await loadYear_(String(targetYear));
+              await loadReadingsInit_();
             }
           }catch(e){}
         })();
@@ -9367,7 +9622,7 @@ try{
       }
     }catch(e){}
 
-    loadYears_().catch(()=>{});
+    loadReadingsInit_().catch(()=>{});
   }
 
   // Hook: run after navigation changes and after login
