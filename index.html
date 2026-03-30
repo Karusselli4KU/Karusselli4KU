@@ -103,7 +103,7 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.590l</title>
+  <title>Karusselli 4 KÜ — v1.590m</title>
   <script>
     // v1.417: keep browser tab title in sync with visible version badge
     document.addEventListener('DOMContentLoaded', function(){
@@ -3007,7 +3007,7 @@ table td:nth-child(5) {
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.590l</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.590m</span>
         <small id="brandSub"></small>
       </div>
 
@@ -6549,7 +6549,6 @@ async function adminConfigSave_(){
 
   cfgApply_((res && res.config) ? res.config : payload.config);
   try{ invalidateHomePublicInfo_(); }catch(e){}
-  try{ clearReadingsViewForReload_(); }catch(e){}
   cfgSetMsg_(tr("cfgSaved"), false);
   await initAdminPage_();
   setTimeout(()=>cfgSetMsg_("", false), 1200);
@@ -6661,7 +6660,7 @@ async function adminRatesSave_(){
 }
 
 
-function initAdminPage_(){
+async function initAdminPage_(){
   // only for visible admin page
   const page = document.getElementById("page_admin");
   if(!page || page.classList.contains("hidden")) return;
@@ -6672,9 +6671,14 @@ function initAdminPage_(){
     return;
   }
 
-  // v1.353a0p139: On every tab click, hide admin table until loading is finished
+  // v1.590m: hide admin sections until all Haldus data is fully loaded
   const tbl = document.getElementById("adminUsersTable");
   if(tbl) tbl.style.display = "none";
+
+  const cfgMini = page.querySelector(".bottom-grid > .mini:nth-child(2)");
+  const statsMini = page.querySelector(".bottom-grid > .mini:nth-child(3)");
+  const ratesMini = page.querySelector(".bottom-grid > .mini:nth-child(4)");
+  [cfgMini, statsMini, ratesMini].forEach(el=>{ try{ if(el) el.style.display = "none"; }catch(e){} });
 
   const btn = document.getElementById("adminUsersSaveBtn");
   try{ if(btn) btn.classList.remove("primary"); }catch(e){}
@@ -6706,12 +6710,16 @@ function initAdminPage_(){
     ratesSetDirty_(false);
   }catch(e){}
 
+  try{
+    await adminLoadUsers_();
+    await Promise.allSettled([
+      Promise.resolve().then(()=>adminConfigLoad_()),
+      Promise.resolve().then(()=>adminRatesLoad_())
+    ]);
 
-  adminLoadUsers_().then(()=>{
-    try{ adminConfigLoad_().catch(()=>{}); }catch(e){}
-    try{ adminRatesLoad_().catch(()=>{}); }catch(e){}
- 
     try{ if(tbl) tbl.style.display = ""; }catch(e){}
+    [cfgMini, statsMini, ratesMini].forEach(el=>{ try{ if(el) el.style.display = ""; }catch(e){} });
+
     // v1.351b0p38: when opening Haldus tab, sync Owner indicator from latest server data (same as login)
     try{
       const me = getUserSafe_();
@@ -6725,9 +6733,10 @@ function initAdminPage_(){
         }
       }
     }catch(e){}
-  }).catch(()=>{ 
+  }catch(e){
     try{ if(tbl) tbl.style.display = ""; }catch(e){}
-  });
+    [cfgMini, statsMini, ratesMini].forEach(el=>{ try{ if(el) el.style.display = ""; }catch(_e){} });
+  }
 }
 
 // re-render header texts on language change (inputs keep values) on language change (inputs keep values)
