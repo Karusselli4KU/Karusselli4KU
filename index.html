@@ -103,7 +103,7 @@ window.addEventListener('load', ()=>{ wirePayModal_(); updatePayI18n_(); });
       }catch(e){}finally{ setProcessPill(""); if(btnEl){ btnEl.disabled=false; btnEl.classList.remove("is-busy"); } }
     })();
   </script>
-  <title>Karusselli 4 KÜ — v1.590m</title>
+  <title>Karusselli 4 KÜ — v1.591</title>
   <script>
     // v1.417: keep browser tab title in sync with visible version badge
     document.addEventListener('DOMContentLoaded', function(){
@@ -699,6 +699,10 @@ ul.ci-body{
 #invEditModal .modal-card{width:min(658px, 98vw); max-width:658px;}
 
 .modal-head{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; border-bottom:1px solid var(--stroke)}
+#invSelModal .modal-head,
+#invEditModal .modal-head{cursor:move;user-select:none;}
+#invSelModal .modal-card,
+#invEditModal .modal-card{position:absolute;touch-action:none;}
 .modal-head .headstack{display:flex; flex-direction:column; gap:4px;}
 #invEditInvoiceNoLine{font-size:16px; font-weight:600; color:var(--text);}
 .invEditInvoiceNoRow{display:flex; align-items:baseline; gap:8px; padding:6px 0 10px;}
@@ -3007,7 +3011,7 @@ table td:nth-child(5) {
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.590m</span>
+        <h1 id="brandTitle">Karusselli 4 KÜ</h1><span id="versionBadge" style="margin-left:10px;font-size:12px;opacity:.75;white-space:nowrap" >v1.591</span>
         <small id="brandSub"></small>
       </div>
 
@@ -6671,7 +6675,7 @@ async function initAdminPage_(){
     return;
   }
 
-  // v1.590m: hide admin sections until all Haldus data is fully loaded
+  // v1.591: hide admin sections until all Haldus data is fully loaded
   const tbl = document.getElementById("adminUsersTable");
   if(tbl) tbl.style.display = "none";
 
@@ -6834,7 +6838,92 @@ function updateLangFlag_() {
 
 const __invCtx = { apt:0, month:0, year:0, exists:false, drive_file_id:"", sendOnly:false, invoice_id:"", data:null, dirty:false };
 
-function __modalShow_(id){ const el=byId(id); if(!el) return; el.style.display = (el.classList && el.classList.contains("modal")) ? "flex" : "block"; }
+function __modalIsDraggable_(id){ return id === "invSelModal" || id === "invEditModal"; }
+
+function __modalCenterCard_(modal){
+  try{
+    if(!modal) return;
+    const card = modal.querySelector(".modal-card");
+    if(!card) return;
+    const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+    const cw = card.offsetWidth || 0;
+    const ch = card.offsetHeight || 0;
+    const left = Math.max(8, Math.round((vw - cw) / 2));
+    const top = Math.max(8, Math.round((vh - ch) / 2));
+    card.style.left = left + "px";
+    card.style.top = top + "px";
+  }catch(_e){}
+}
+
+function __modalEnableDrag_(id){
+  try{
+    const modal = byId(id);
+    if(!modal || !__modalIsDraggable_(id)) return;
+    if(modal.dataset && modal.dataset.dragReady === "1") return;
+
+    const card = modal.querySelector(".modal-card");
+    const head = modal.querySelector(".modal-head");
+    if(!card || !head) return;
+
+    let dragging = false;
+    let startX = 0, startY = 0, baseLeft = 0, baseTop = 0;
+
+    const onMove = (e)=>{
+      if(!dragging) return;
+      const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+      const maxLeft = Math.max(8, (window.innerWidth || document.documentElement.clientWidth || 0) - (card.offsetWidth || 0) - 8);
+      const maxTop = Math.max(8, (window.innerHeight || document.documentElement.clientHeight || 0) - (card.offsetHeight || 0) - 8);
+      let nextLeft = Math.round(baseLeft + (clientX - startX));
+      let nextTop = Math.round(baseTop + (clientY - startY));
+      nextLeft = Math.min(Math.max(8, nextLeft), maxLeft);
+      nextTop = Math.min(Math.max(8, nextTop), maxTop);
+      card.style.left = nextLeft + "px";
+      card.style.top = nextTop + "px";
+      if(e.cancelable) e.preventDefault();
+    };
+
+    const stopDrag = ()=>{
+      dragging = false;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", stopDrag);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", stopDrag);
+    };
+
+    const startDrag = (e)=>{
+      if(e.target && (e.target.closest("button") || e.target.closest("input") || e.target.closest("select") || e.target.closest("textarea"))) return;
+      dragging = true;
+      const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+      const rect = card.getBoundingClientRect();
+      startX = clientX;
+      startY = clientY;
+      baseLeft = rect.left;
+      baseTop = rect.top;
+      document.addEventListener("mousemove", onMove, { passive:false });
+      document.addEventListener("mouseup", stopDrag);
+      document.addEventListener("touchmove", onMove, { passive:false });
+      document.addEventListener("touchend", stopDrag);
+      if(e.cancelable) e.preventDefault();
+    };
+
+    head.addEventListener("mousedown", startDrag);
+    head.addEventListener("touchstart", startDrag, { passive:false });
+    if(modal.dataset) modal.dataset.dragReady = "1";
+  }catch(_e){}
+}
+
+function __modalShow_(id){
+  const el=byId(id);
+  if(!el) return;
+  el.style.display = (el.classList && el.classList.contains("modal")) ? "flex" : "block";
+  if(__modalIsDraggable_(id)){
+    __modalEnableDrag_(id);
+    requestAnimationFrame(()=>{ __modalCenterCard_(el); });
+  }
+}
 function __modalHide_(id){ const el=byId(id); if(el) el.style.display="none"; }
 
 // v1.427a: invoice modals - when status message is shown, lock ALL controls to prevent extra clicks.
